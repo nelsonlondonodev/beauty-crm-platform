@@ -7,10 +7,11 @@ import { Search, Plus, Loader2 } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 const Clients = () => {
-  const { clients, loading, addClient, deleteClient } = useClients();
+  const { clients, loading, addClient, updateClient, deleteClient } = useClients();
   const [searchTerm, setSearchTerm] = useState('');
-  const [filter, setFilter] = useState<'all' | 'Activo' | 'Vencido'>('all'); // Adjusted filter values for UI
+  const [filter, setFilter] = useState<'all' | 'Activo' | 'Vencido'>('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingClient, setEditingClient] = useState<any>(null);
 
   // Filter Logic
   const filteredClients = clients.filter(client => {
@@ -24,7 +25,6 @@ const Clients = () => {
 
       if (filter === 'all') return matchesSearch;
       
-      // Map UI filter to DB status
       const dbStatus = statusMap[filter];
       if (dbStatus === 'pendiente') {
            return matchesSearch && (client.bono_estado === 'pendiente' || client.bono_estado === 'alerta_5_meses');
@@ -32,14 +32,26 @@ const Clients = () => {
       return matchesSearch && client.bono_estado === dbStatus;
   });
 
-  const handleAddClient = async (clientData: any) => {
-      const result = await addClient(clientData);
-      if (result.success) {
-          // Success notification could go here
+  const handleSaveClient = async (clientData: any) => {
+      if (editingClient) {
+          const result = await updateClient(editingClient.id, clientData);
+          if (!result.success) alert('Error al actualizar: ' + result.error);
       } else {
-          alert('Error al guardar cliente: ' + result.error);
+          const result = await addClient(clientData);
+          if (!result.success) alert('Error al guardar: ' + result.error);
       }
+      setEditingClient(null);
   };
+
+  const openNewClientModal = () => {
+      setEditingClient(null);
+      setIsModalOpen(true);
+  }
+
+  const openEditClientModal = (client: any) => {
+      setEditingClient(client);
+      setIsModalOpen(true);
+  }
 
   const handleDeleteClient = async (id: string) => {
       if (window.confirm('¿Estás seguro de eliminar este cliente?')) {
@@ -54,7 +66,7 @@ const Clients = () => {
         subtitle="Administra tu base de datos de clientes y sus fidelizaciones."
         actions={
           <button 
-            onClick={() => setIsModalOpen(true)}
+            onClick={openNewClientModal}
             className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary/90 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
           >
             <Plus className="mr-2 h-4 w-4" />
@@ -102,7 +114,7 @@ const Clients = () => {
       ) : (
         <ClientTable 
             clients={filteredClients} 
-            onEdit={(client) => console.log('Edit', client)} 
+            onEdit={openEditClientModal} 
             onDelete={handleDeleteClient} 
         />
       )}
@@ -110,7 +122,8 @@ const Clients = () => {
       <NewClientModal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
-        onSave={handleAddClient}
+        onSave={handleSaveClient}
+        initialData={editingClient}
       />
     </div>
   );

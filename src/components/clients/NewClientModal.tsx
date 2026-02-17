@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Save } from 'lucide-react';
 
 interface NewClientModalProps {
@@ -7,7 +7,7 @@ interface NewClientModalProps {
   onSave: (clientData: any) => Promise<void>;
 }
 
-const NewClientModal = ({ isOpen, onClose, onSave }: NewClientModalProps) => {
+const NewClientModal = ({ isOpen, onClose, onSave, initialData }: NewClientModalProps & { initialData?: any }) => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     nombre: '',
@@ -16,6 +16,20 @@ const NewClientModal = ({ isOpen, onClose, onSave }: NewClientModalProps) => {
     fecha_nacimiento: '',
     bono_fecha_vencimiento: '',
   });
+
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        nombre: initialData.nombre || '',
+        email: initialData.email || '',
+        telefono: initialData.telefono || '',
+        fecha_nacimiento: initialData.fecha_nacimiento || '',
+        bono_fecha_vencimiento: initialData.bono_fecha_vencimiento || '',
+      });
+    } else {
+      setFormData({ nombre: '', email: '', telefono: '', fecha_nacimiento: '', bono_fecha_vencimiento: '' });
+    }
+  }, [initialData, isOpen]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -27,7 +41,6 @@ const NewClientModal = ({ isOpen, onClose, onSave }: NewClientModalProps) => {
     setLoading(true);
     await onSave(formData);
     setLoading(false);
-    setFormData({ nombre: '', email: '', telefono: '', fecha_nacimiento: '', bono_fecha_vencimiento: '' }); // Reset
     onClose();
   };
 
@@ -37,7 +50,7 @@ const NewClientModal = ({ isOpen, onClose, onSave }: NewClientModalProps) => {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
       <div className="relative w-full max-w-lg rounded-xl bg-white shadow-2xl animate-in zoom-in-95 duration-200">
         <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
-          <h2 className="text-lg font-semibold text-gray-900">Nuevo Cliente</h2>
+          <h2 className="text-lg font-semibold text-gray-900">{initialData ? 'Editar Cliente' : 'Nuevo Cliente'}</h2>
           <button onClick={onClose} className="rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-500">
             <X className="h-5 w-5" />
           </button>
@@ -102,7 +115,7 @@ const NewClientModal = ({ isOpen, onClose, onSave }: NewClientModalProps) => {
               type="submit" disabled={loading}
               className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50"
             >
-              {loading ? 'Guardando...' : <><Save className="mr-2 h-4 w-4" /> Guardar Cliente</>}
+              {loading ? 'Guardando...' : <><Save className="mr-2 h-4 w-4" /> {initialData ? 'Actualizar Cliente' : 'Guardar Cliente'}</>}
             </button>
           </div>
         </form>

@@ -21,8 +21,6 @@ export const useClients = () => {
 
       if (error) throw error;
 
-      // Transform data to match our type if necessary
-      // For now, assuming the DB columns match our Client interface
       setClients(data as Client[]);
     } catch (err: any) {
       console.error('Error fetching clients:', err);
@@ -38,7 +36,7 @@ export const useClients = () => {
             .from('clients')
             .insert([{
                 ...newClient,
-                bono_estado: 'pendiente' // Default status
+                bono_estado: 'pendiente' 
             }])
             .select()
             .single();
@@ -49,6 +47,25 @@ export const useClients = () => {
           return { success: true, data };
       } catch (err: any) {
           console.error('Error adding client:', err);
+          return { success: false, error: err.message };
+      }
+  };
+
+  const updateClient = async (id: string, updates: Partial<Client>) => {
+      try {
+          const { data, error } = await supabase
+            .from('clients')
+            .update(updates)
+            .eq('id', id)
+            .select()
+            .single();
+
+          if (error) throw error;
+
+          setClients(prev => prev.map(c => c.id === id ? (data as Client) : c));
+          return { success: true, data };
+      } catch (err: any) {
+          console.error('Error updating client:', err);
           return { success: false, error: err.message };
       }
   };
@@ -70,5 +87,5 @@ export const useClients = () => {
       }
   }
 
-  return { clients, loading, error, fetchClients, addClient, deleteClient };
+  return { clients, loading, error, fetchClients, addClient, updateClient, deleteClient };
 };
