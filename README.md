@@ -33,10 +33,27 @@ src/
 5.  **Configuración:** Módulo base para ajustes del sistema.
 6.  **Tipado Estricto:** Uso de interfaces TypeScript para todos los modelos de datos.
 
-## Integraciones
+## Módulos e Integraciones Completadas
 
--   **Supabase (Producción):** Base de datos real conectada (Proyecto: `Fidelizacion Narbo's Pro`).
--   **Adaptadores:** Servicios personalizados para transformar datos de n8n/Supabase al frontend.
+### 1. Gestión de Clientes (Supabase)
+-   **Conexión Real:** Integrada con la tabla `clientes_fidelizacion` del proyecto de producción `Fidelizacion Narbo's Pro`.
+-   **Adaptadores:** Lógica de negocio personalizada para transformar datos (`whatsapp` -> `telefono`, cálculo de vencimiento de bonos).
+-   **Funcionalidad:** CRUD completo (Crear, Leer, Actualizar, Eliminar) con soporte para IDs numéricos.
+
+### 2. Agenda (Calendario)
+-   **Tabla:** Nueva tabla `appointments` creada y vinculada mediante `client_id` (BigInt) a `clientes_fidelizacion`.
+-   **Interfaz:** Calendario interactivo con vistas mensuales y gestión de citas por día.
+-   **Características:**
+    -   Visualización de citas programadas/completadas/canceladas.
+    -   Creación de nuevas citas seleccionando clientes existentes.
+
+### 3. Configuración
+-   Módulo base para futuros ajustes del sistema (placeholder).
+
+## Próximos Pasos (Futuro)
+
+-   Implementar autenticación de usuarios (Login).
+-   Conectar la creación de citas con n8n para notificaciones automáticas.
 
 ## Comandos
 
