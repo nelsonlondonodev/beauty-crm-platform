@@ -5,13 +5,14 @@ import NewClientModal from '../components/clients/NewClientModal';
 import { useClients } from '../hooks/useClients';
 import { Search, Plus, Loader2 } from 'lucide-react';
 import { cn } from '../lib/utils';
+import type { Client } from '../types';
 
 const Clients = () => {
   const { clients, loading, addClient, updateClient, deleteClient } = useClients();
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState<'all' | 'Activo' | 'Vencido'>('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingClient, setEditingClient] = useState<any>(null);
+  const [editingClient, setEditingClient] = useState<Client | null>(null);
 
   // Filter Logic
   const filteredClients = clients.filter(client => {
@@ -32,7 +33,7 @@ const Clients = () => {
       return matchesSearch && client.bono_estado === dbStatus;
   });
 
-  const handleSaveClient = async (clientData: any) => {
+  const handleSaveClient = async (clientData: Omit<Client, 'id' | 'bono_estado'>) => {
       if (editingClient) {
           const result = await updateClient(editingClient.id, clientData);
           if (!result.success) alert('Error al actualizar: ' + result.error);
@@ -48,7 +49,7 @@ const Clients = () => {
       setIsModalOpen(true);
   }
 
-  const openEditClientModal = (client: any) => {
+  const openEditClientModal = (client: Client) => {
       setEditingClient(client);
       setIsModalOpen(true);
   }

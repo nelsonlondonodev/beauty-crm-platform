@@ -1,15 +1,17 @@
 import { useState, useEffect } from 'react';
 import { X, Save } from 'lucide-react';
+import type { Client } from '../../types';
 
 interface NewClientModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (clientData: any) => Promise<void>;
+  onSave: (clientData: Omit<Client, 'id' | 'bono_estado'>) => Promise<void>;
+  initialData?: Client | null;
 }
 
-const NewClientModal = ({ isOpen, onClose, onSave, initialData }: NewClientModalProps & { initialData?: any }) => {
+const NewClientModal = ({ isOpen, onClose, onSave, initialData }: NewClientModalProps) => {
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<Omit<Client, 'id' | 'bono_estado'>>({
     nombre: '',
     email: '',
     telefono: '',
@@ -20,11 +22,11 @@ const NewClientModal = ({ isOpen, onClose, onSave, initialData }: NewClientModal
   useEffect(() => {
     if (initialData) {
       setFormData({
-        nombre: initialData.nombre || '',
-        email: initialData.email || '',
-        telefono: initialData.telefono || '',
-        fecha_nacimiento: initialData.fecha_nacimiento || '',
-        bono_fecha_vencimiento: initialData.bono_fecha_vencimiento || '',
+        nombre: initialData.nombre,
+        email: initialData.email,
+        telefono: initialData.telefono,
+        fecha_nacimiento: initialData.fecha_nacimiento,
+        bono_fecha_vencimiento: initialData.bono_fecha_vencimiento,
       });
     } else {
       setFormData({ nombre: '', email: '', telefono: '', fecha_nacimiento: '', bono_fecha_vencimiento: '' });
