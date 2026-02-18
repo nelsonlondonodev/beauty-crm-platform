@@ -3,6 +3,7 @@ import Layout from './components/layout/Layout';
 import Dashboard from './pages/Dashboard';
 import Clients from './pages/Clients';
 import Calendar from './pages/Calendar';
+import Settings from './pages/Settings';
 
 function App() {
   return (
@@ -12,7 +13,7 @@ function App() {
           <Route path="/" element={<Dashboard />} />
           <Route path="/clients" element={<Clients />} />
           <Route path="/calendar" element={<Calendar />} />
-          <Route path="/settings" element={<div className="p-4">Configuración (Próximamente)</div>} />
+          <Route path="/settings" element={<Settings />} />
         </Routes>
       </Layout>
     </Router>
