@@ -11,13 +11,13 @@ export interface User {
 export type BonusStatus = 'pendiente' | 'reclamado' | 'vencido' | 'alerta_5_meses';
 
 export interface Client {
-  id: string;
+  id: string | number; // Adaptado para soportar UUID (viejos mocks) o Int8 (clientes_fidelizacion)
   nombre: string;
   email: string;
-  telefono: string;
-  fecha_nacimiento: string;
-  bono_estado: BonusStatus;
-  bono_fecha_vencimiento: string;
+  telefono: string; // Mapeado desde 'whatsapp' en la DB
+  fecha_nacimiento: string; // Mapeado desde 'birthday' en la DB
+  bono_estado: BonusStatus; // Calculado en el frontend basado en fechas/canjeado
+  bono_fecha_vencimiento: string; // Calculado en el frontend
 }
 
 export interface Appointment {

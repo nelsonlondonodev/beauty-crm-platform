@@ -7,7 +7,7 @@ import { cn } from '../../lib/utils';
 interface ClientTableProps {
   clients: Client[];
   onEdit: (client: Client) => void;
-  onDelete: (clientId: string) => void;
+  onDelete: (clientId: string | number) => void;
 }
 
 const ClientTable: React.FC<ClientTableProps> = ({ clients, onEdit, onDelete }) => {
@@ -34,7 +34,7 @@ const ClientTable: React.FC<ClientTableProps> = ({ clients, onEdit, onDelete }) 
                     </div>
                     <div>
                       <div className="font-semibold text-gray-900">{client.nombre}</div>
-                      <div className="text-xs text-gray-400">ID: {client.id.slice(0, 8)}</div>
+                      <div className="text-xs text-gray-400">ID: {String(client.id).slice(0, 8)}</div>
                     </div>
                   </div>
                 </td>

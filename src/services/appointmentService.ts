@@ -4,7 +4,7 @@ import type { Appointment } from '../types';
 export const getAppointments = async (startDate: string, endDate: string): Promise<Appointment[]> => {
   const { data, error } = await supabase
     .from('appointments')
-    .select('*, client:clients(nombre, email, telefono)') // Join with clients table
+    .select('*, client:clientes_fidelizacion(nombre, email, whatsapp)') // Join with real table
     .gte('fecha_cita', startDate)
     .lte('fecha_cita', endDate)
     .order('fecha_cita', { ascending: true });

@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase';
-import { startOfMonth, endOfMonth, addDays } from 'date-fns';
+import { startOfMonth, endOfMonth, addDays, addMonths } from 'date-fns';
 
 export interface DashboardStats {
   totalClients: number;
@@ -12,7 +12,7 @@ export interface DashboardStats {
 export const getDashboardStats = async (): Promise<DashboardStats> => {
     // 1. Total Clients
     const { count: totalClients, error: totalError } = await supabase
-      .from('clients')
+      .from('clientes_fidelizacion') // Tabla real
       .select('*', { count: 'exact', head: true });
 
     if (totalError) throw new Error(`Error fetching total clients: ${totalError.message}`);
@@ -22,26 +22,25 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
     const end = endOfMonth(new Date()).toISOString();
     
     const { count: newClients, error: newClientsError } = await supabase
-      .from('clients')
+      .from('clientes_fidelizacion')
       .select('*', { count: 'exact', head: true })
       .gte('created_at', start)
       .lte('created_at', end);
 
     if (newClientsError) throw new Error(`Error fetching new clients: ${newClientsError.message}`);
 
-    // 3. Active Bonuses (Assuming 'pendiente' means active)
+    // 3. Active Bonuses (In DB: canjeado = false)
     const { count: activeBonuses, error: activeBonusesError } = await supabase
-      .from('clients')
+      .from('clientes_fidelizacion')
       .select('*', { count: 'exact', head: true })
-      .eq('bono_estado', 'pendiente');
+      .eq('canjeado', false); // "pendiente" equivalent
 
     if (activeBonusesError) throw new Error(`Error fetching active bonuses: ${activeBonusesError.message}`);
 
     // 4. Upcoming Birthdays & Expiring Bonuses (Next 7 days)
-    // Optimization: Fetch only necessary fields, not all columns
     const { data: allClients, error: clientsError } = await supabase
-      .from('clients')
-      .select('fecha_nacimiento, bono_fecha_vencimiento, bono_estado');
+      .from('clientes_fidelizacion')
+      .select('birthday, created_at, canjeado'); // Usamos birthday y created_at para calcular vencimiento
       
     if (clientsError) throw new Error(`Error fetching clients for dates: ${clientsError.message}`);
     
@@ -53,24 +52,21 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
       const nextWeek = addDays(today, 7);
 
       upcomingBirthdaysCount = allClients.filter(c => {
-        if (!c.fecha_nacimiento) return false;
-        // Parse date carefully to handle string format YYYY-MM-DD
-        // We need to compare Month and Day regardless of Year
-        const [year, month, day] = c.fecha_nacimiento.split('-').map(Number);
-        const dob = new Date(year, month - 1, day); 
+        if (!c.birthday) return false;
+        // Parse date carefully
+        const dob = new Date(c.birthday);
         
         // Create date for this year
         const thisYearBirthday = new Date(today.getFullYear(), dob.getMonth(), dob.getDate());
         
-        // Handle year wrap for end of year birthdays if needed (simplified for next 7 days logic)
         return thisYearBirthday >= today && thisYearBirthday <= nextWeek;
       }).length;
 
       expiringBonusesCount = allClients.filter(c => {
-           if (!c.bono_fecha_vencimiento || c.bono_estado !== 'pendiente') return false;
-           // Parse expiry date
-           const [year, month, day] = c.bono_fecha_vencimiento.split('-').map(Number);
-           const expiry = new Date(year, month - 1, day);
+           if (!c.created_at || c.canjeado) return false;
+           // Calcular Vencimiento: created_at + 6 meses
+           const createdAt = new Date(c.created_at);
+           const expiry = addDays(addMonths(createdAt, 6), 0); // Vence a los 6 meses
            
            return expiry >= today && expiry <= nextWeek;
       }).length;

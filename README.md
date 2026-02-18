@@ -28,16 +28,18 @@ src/
 
 1.  **Layout Principal:** Sidebar de navegación y Topbar con diseño moderno.
 2.  **Dashboard:** Vista principal con tarjetas de estadísticas y listas de actividad reciente.
-3.  **Tipado Estricto:** Uso de interfaces TypeScript para todos los modelos de datos.
+3.  **Gestión de Clientes:** CRUD completo conectado a Supabase (`clientes_fidelizacion`).
+4.  **Agenda:** Calendario interactivo para gestión de citas (`appointments`).
+5.  **Configuración:** Módulo base para ajustes del sistema.
+6.  **Tipado Estricto:** Uso de interfaces TypeScript para todos los modelos de datos.
 
-## Próximos Pasos
+## Integraciones
 
-- Integrar Supabase para autenticación y base de datos.
-- Conectar con n8n para flujos de automatización (bonos, cumpleaños).
-- Implementar gestión completa de clientes y citas.
+-   **Supabase (Producción):** Base de datos real conectada (Proyecto: `Fidelizacion Narbo's Pro`).
+-   **Adaptadores:** Servicios personalizados para transformar datos de n8n/Supabase al frontend.
 
 ## Comandos
 
-- `npm install`: Instalar dependencias
-- `npm run dev`: Iniciar servidor de desarrollo
-- `npm run build`: Construir para producción
+-   `npm install`: Instalar dependencias
+-   `npm run dev`: Iniciar servidor de desarrollo
+-   `npm run build`: Construir para producción

@@ -54,7 +54,7 @@ const Clients = () => {
       setIsModalOpen(true);
   }
 
-  const handleDeleteClient = async (id: string) => {
+  const handleDeleteClient = async (id: string | number) => {
       if (window.confirm('¿Estás seguro de eliminar este cliente?')) {
           await deleteClient(id);
       }

@@ -36,7 +36,7 @@ export const useClients = () => {
       }
   };
 
-  const updateClient = async (id: string, updates: Partial<Client>) => {
+  const updateClient = async (id: string | number, updates: Partial<Client>) => {
       try {
           const data = await updateClientService(id, updates);
           setClients(prev => prev.map(c => c.id === id ? data : c));
@@ -47,7 +47,7 @@ export const useClients = () => {
       }
   };
 
-  const deleteClient = async (id: string) => {
+  const deleteClient = async (id: string | number) => {
       try {
           await deleteClientService(id);
           setClients(prev => prev.filter(c => c.id !== id));
