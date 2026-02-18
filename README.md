@@ -32,6 +32,11 @@ src/
 4.  **Agenda:** Calendario interactivo para gestión de citas (`appointments`).
 5.  **Configuración:** Módulo base para ajustes del sistema.
 6.  **Tipado Estricto:** Uso de interfaces TypeScript para todos los modelos de datos.
+7.  **Autenticación**:
+    - Login con Correo y Contraseña.
+    - Login con Google (OAuth).
+    - Protección de Rutas (Middleware en Frontend).
+    - Lista Blanca de Correos (Whitelist) para seguridad.
 
 ## Módulos e Integraciones Completadas
 
@@ -46,14 +51,17 @@ src/
 -   **Características:**
     -   Visualización de citas programadas/completadas/canceladas.
     -   Creación de nuevas citas seleccionando clientes existentes.
+    -   **Integración con n8n**: Webhook automático al crear cita para notificaciones.
 
-### 3. Configuración
--   Módulo base para futuros ajustes del sistema (placeholder).
+### 3. Autenticación y Seguridad
+-   Implementación de `AuthContext` con Supabase Auth.
+-   Página de Login con diseño "Glassmorphism".
+-   Restricción de acceso mediante `ALLOWED_EMAILS` (Lista Blanca).
 
-## Próximos Pasos (Futuro)
+## Pendientes (WIP)
 
--   Implementar autenticación de usuarios (Login).
--   Conectar la creación de citas con n8n para notificaciones automáticas.
+-   [ ] Ajustar configuración del nodo HTML en n8n para renderizar correctamente las variables del correo de confirmación.
+-   [ ] Implementar sistema de roles (RBAC) más robusto en el futuro.
 
 ## Comandos
 
