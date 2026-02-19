@@ -12,16 +12,18 @@ CRM B2B moderno para el sector de la belleza (Peluquerías, Barberías, Spas).
 ## Estructura del Proyecto
 
 ```
-src/
-├── components/       # Componentes reutilizables
-│   ├── dashboard/    # Componentes específicos del dashboard
-│   └── layout/       # Componentes de estructura (Sidebar, Topbar)
-├── hooks/            # Custom React Hooks
-├── lib/              # Utilidades y funciones helper
-├── pages/            # Vistas principales de la aplicación
-├── services/         # Servicios de API (Supabase, etc.)
-├── types/            # Definiciones de tipos TypeScript
-└── utils/            # Utilidades generales
+.
+├── n8n_workflows/    # Flujos de automatización JSON (Marca Blanca)
+└── src/
+    ├── components/   # Componentes reutilizables
+    │   ├── dashboard/# Componentes específicos del dashboard
+    │   └── layout/   # Componentes de estructura (Sidebar, Topbar)
+    ├── hooks/        # Custom React Hooks
+    ├── lib/          # Utilidades y funciones helper
+    ├── pages/        # Vistas principales de la aplicación
+    ├── services/     # Servicios de API (Supabase, etc.)
+    ├── types/        # Definiciones de tipos TypeScript
+    └── utils/        # Utilidades generales
 ```
 
 ## Características Implementadas
@@ -57,6 +59,13 @@ src/
 -   Implementación de `AuthContext` con Supabase Auth.
 -   Página de Login con diseño "Glassmorphism".
 -   Restricción de acceso mediante `ALLOWED_EMAILS` (Lista Blanca).
+
+### 4. Automatizaciones con n8n
+-   **Repositorio Local**: Carpeta `n8n_workflows/` con flujos JSON para replicabilidad.
+-   **Confirmación de Cita**: Webhook para enviar email al cliente.
+-   **Fidelización**: Registro, QR de descuento, y bienvenida.
+-   **Retención**: Cron jobs para cumpleaños y vencimiento de bonos.
+-   **Canje QR**: Validación en tiempo real de cupones.
 
 ## Pendientes (WIP)
 

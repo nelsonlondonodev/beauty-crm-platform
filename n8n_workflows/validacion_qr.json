@@ -1,0 +1,247 @@
+[
+  {
+    "description": "Workflow empty structure"
+  }
+]
+{
+  "name": "Fidelización Narbo's - Canje QR",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "canje-QR",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "14ae5a94-d1bc-428e-84f9-2f5550a24c0f",
+      "name": "Webhook (Canje QR)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -688,
+        -336
+      ],
+      "webhookId": "25fb3331-953c-4bd9-816b-8fc4aad84456"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "clientes_fidelizacion",
+        "returnAll": true,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "codigo_descuento",
+              "condition": "eq",
+              "keyValue": "={{ $json.query.code.trim() }}"
+            }
+          ]
+        }
+      },
+      "id": "1fac542d-215f-4998-97bb-f860bf180a3c",
+      "name": "Supabase: Buscar Cupón",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        -336
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "5hkYuZVAhznvx7lf",
+          "name": "Supabase Fidelizacion Narbo's Pro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "1",
+              "leftValue": "={{ $node[\"Supabase: Buscar Cupón\"].json[\"canjeado\"] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "c8fd0979-a001-4855-975f-83ec13189256",
+      "name": "Verificar Estado",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -272,
+        -336
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "clientes_fidelizacion",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $node[\"Supabase: Buscar Cupón\"].json[\"id\"] }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "canjeado",
+              "fieldValue": "={{ true }}"
+            },
+            {
+              "fieldId": "fecha_canje",
+              "fieldValue": "={{ $now.toISO() }}"
+            }
+          ]
+        }
+      },
+      "id": "059efff3-399d-4266-ac39-7944617b8f51",
+      "name": "Supabase: Marcar Uso",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        -432
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "5hkYuZVAhznvx7lf",
+          "name": "Supabase Fidelizacion Narbo's Pro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "=<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Canje Exitoso</title><style>body{font-family:'Montserrat',sans-serif;text-align:center;padding:20px;background:#f0fdf4;color:#166534;display:flex;align-items:center;justify-content:center;height:100vh;margin:0}.card{background:white;padding:40px;border-radius:20px;box-shadow:0 10px 25px rgba(0,0,0,0.1);max-width:400px;width:100%}.icon{font-size:60px;margin-bottom:20px}h1{margin:0 0 10px;font-size:24px}p{margin:5px 0;color:#666}.code{font-size:28px;font-weight:bold;color:#166534;margin:20px 0;padding:15px;background:#f0fdf4;border:2px dashed #166534;border-radius:10px}</style></head><body><div class=\"card\"><div class=\"icon\">✅</div><h1>¡Descuento Aplicado!</h1><p>Cupón válido y redimido.</p><div class=\"code\">{{ $node[\"Webhook (Canje QR)\"].json.query.code }}</div><p>Cliente: <strong>{{ $node[\"Supabase: Buscar Cupón\"].json.nombre }}</strong></p></div></body></html>",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "text/html"
+              }
+            ]
+          }
+        }
+      },
+      "id": "0451d6e5-6932-448c-953e-c32474b05a4d",
+      "name": "HTML: Exito",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        224,
+        -432
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "=<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Error de Canje</title><style>body{font-family:'Montserrat',sans-serif;text-align:center;padding:20px;background:#fef2f2;color:#991b1b;display:flex;align-items:center;justify-content:center;height:100vh;margin:0}.card{background:white;padding:40px;border-radius:20px;box-shadow:0 10px 25px rgba(0,0,0,0.1);max-width:400px;width:100%}.icon{font-size:60px;margin-bottom:20px}h1{margin:0 0 10px;font-size:24px}p{margin:5px 0}</style></head><body><div class=\"card\"><div class=\"icon\">❌</div><h1>Cupón Inválido</h1><p>El código <strong>{{ $node[\"Webhook (Canje QR)\"].json.query.code }}</strong> no existe o ya fue usado. Verifica en el sistema.</p></div></body></html>",
+        "options": {
+          "responseCode": 400,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "text/html"
+              }
+            ]
+          }
+        }
+      },
+      "id": "b029f2aa-4ff8-4c25-8628-bcac1e306441",
+      "name": "HTML: Error",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        -176
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook (Canje QR)": {
+      "main": [
+        [
+          {
+            "node": "Supabase: Buscar Cupón",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase: Buscar Cupón": {
+      "main": [
+        [
+          {
+            "node": "Verificar Estado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar Estado": {
+      "main": [
+        [
+          {
+            "node": "Supabase: Marcar Uso",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTML: Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase: Marcar Uso": {
+      "main": [
+        [
+          {
+            "node": "HTML: Exito",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "b28c67b0-4662-4339-bd25-0abcf24f4fbf",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "fdffcaf648a7aa062da0ec843fff869b930e75adc5303a6a19e86b840cf683f2"
+  },
+  "id": "phGikpAzQ970dllA",
+  "tags": []
+}

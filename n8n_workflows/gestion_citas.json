@@ -1,0 +1,100 @@
+[
+  {
+    "description": "Workflow empty structure"
+  }
+]
+{
+  "name": "Confirmación de Cita - Beauty CRM",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "nueva-cita",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        160,
+        48
+      ],
+      "id": "4d6bcba4-9ff4-4d08-afcc-72332a418b6b",
+      "webhookId": "9d2ca426-cef4-493a-8653-673355f9285b"
+    },
+    {
+      "parameters": {
+        "fromEmail": "Beauty CRM <tu-email-verificado@dominio.com>",
+        "toEmail": "={{ $json.cliente_email }}",
+        "subject": "Confirmación de Cita - Beauty CRM",
+        "html": "=Hola {{ $json.cliente_nombre }},<br><br>\nTu cita ha sido confirmada con éxito.<br><br>\n<b>Fecha:</b> {{ $json.fecha_legible }}<br>\n<b>Servicio:</b> {{ $json.servicio }}<br><br>\n¡Te esperamos!",
+        "options": {}
+      },
+      "name": "Enviar Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [
+        608,
+        48
+      ],
+      "id": "8e481e6a-813a-45c1-b1d2-f83e81e17177",
+      "credentials": {
+        "smtp": {
+          "id": "lHxckxi50jQr6fuv",
+          "name": "Correo: contacto@narbossalon.com"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "// Obtener la fecha original\nconst fechaOriginal = $input.item.json.fecha_cita;\nconst fecha = new Date(fechaOriginal);\n\n// Opciones de formato\nconst opciones = { \n  weekday: 'long', \n  year: 'numeric', \n  month: 'long', \n  day: 'numeric', \n  hour: '2-digit', \n  minute: '2-digit',\n  hour12: true \n};\n\n// Crear nueva propiedad\n$input.item.json.fecha_legible = fecha.toLocaleDateString('es-ES', opciones);\n\n// Retornar TODO el item (incluyendo email, nombre, etc.)\nreturn $input.item;"
+      },
+      "name": "Formatear Fecha",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        384,
+        48
+      ],
+      "id": "9e5701ec-115e-4e45-bb43-c02d574a013c"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Formatear Fecha",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatear Fecha": {
+      "main": [
+        [
+          {
+            "node": "Enviar Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "54353c01-77bf-4562-9151-ba3703416f53",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "fdffcaf648a7aa062da0ec843fff869b930e75adc5303a6a19e86b840cf683f2"
+  },
+  "id": "zHSQvBtwW8l7gYZt",
+  "tags": []
+}

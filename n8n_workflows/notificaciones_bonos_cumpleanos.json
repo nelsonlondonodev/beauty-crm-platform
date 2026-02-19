@@ -1,0 +1,299 @@
+[
+  {
+    "description": "Workflow empty structure"
+  }
+]
+{
+  "name": "Narbo's: Automatizaciones de Retención",
+  "nodes": [
+    {
+      "parameters": {
+        "fromEmail": "contacto@narbossalon.com",
+        "toEmail": "={{ $node[\"Supabase: Buscar Cumpleaños1\"].json[\"email\"] }}",
+        "subject": "¡Feliz Cumpleaños! Un regalo especial de Narbo's 🎂",
+        "text": "={{ $node[\"Fetch Template Birthday\"].json[\"text\"] }}",
+        "options": {}
+      },
+      "id": "df0cfd35-22f2-4889-a080-b77b14f68df2",
+      "name": "Email: Enviar Regalo Cumple",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [
+        2224,
+        192
+      ],
+      "webhookId": "cf036a87-e453-40c9-9c77-a0af663ce681",
+      "credentials": {
+        "smtp": {
+          "id": "lHxckxi50jQr6fuv",
+          "name": "Correo: contacto@narbossalon.com"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "contacto@narbossalon.com",
+        "toEmail": "={{ $node[\"Supabase: Buscar Vencimientos1\"].json[\"email\"] }}",
+        "subject": "¡Tu beneficio de Narbo's expira pronto! ⏳",
+        "text": "={{ $node[\"Fetch Template Birthday\"].json[\"text\"] }}",
+        "options": {}
+      },
+      "id": "38c79adf-9bf3-4b2a-b802-63a85380b12c",
+      "name": "Email: Enviar Recordatorio",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [
+        2224,
+        448
+      ],
+      "webhookId": "fc2df3b6-3e3b-4369-850a-ce87c4d9cd22",
+      "credentials": {
+        "smtp": {
+          "id": "lHxckxi50jQr6fuv",
+          "name": "Correo: contacto@narbossalon.com"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "id": "58f41622-7dbf-406d-985c-ee58e1b581e2",
+      "name": "Cron Diario (8 AM)1",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [
+        1360,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "clientes_fidelizacion",
+        "returnAll": true,
+        "filterType": "none"
+      },
+      "id": "5f85b8f3-a051-462a-80ae-f178b8efd120",
+      "name": "Supabase: Buscar Cumpleaños1",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1616,
+        192
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "5hkYuZVAhznvx7lf",
+          "name": "Supabase Fidelizacion Narbo's Pro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "clientes_fidelizacion",
+        "returnAll": true,
+        "filterType": "none"
+      },
+      "id": "519f2c79-085e-422e-934c-634b3d094e10",
+      "name": "Supabase: Buscar Vencimientos1",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1616,
+        448
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "5hkYuZVAhznvx7lf",
+          "name": "Supabase Fidelizacion Narbo's Pro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://narbossalon.com/fidelizacion/birthday_email_template.html",
+        "options": {}
+      },
+      "id": "e026db44-b5fa-4018-937d-5ff16fd27ea1",
+      "name": "Fetch Template Birthday1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        2032,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://narbossalon.com/fidelizacion/reminder_email_template.html",
+        "options": {}
+      },
+      "id": "21445e4b-01e0-4ea0-81f6-5641309e5c1a",
+      "name": "Fetch Template Reminder1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        2032,
+        448
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "1d5ad801-21b7-4782-9990-fff88102745e",
+              "leftValue": "={{ $json.created_at }}",
+              "rightValue": "={{ $now.minus({days: 150}) }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "before"
+              }
+            },
+            {
+              "id": "3ce0ce72-3c61-4912-88b3-c28401832b6f",
+              "leftValue": "={{ $json.canjeado }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        1824,
+        448
+      ],
+      "id": "0d9cf67f-07f8-4453-96bf-42cfc53470e0",
+      "name": "Filtrar Vencimiento 5 Meses1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "f7d193ed-587c-49e4-a666-c086798a2eea",
+              "leftValue": "={{ $json.birthday.substring(5) }}",
+              "rightValue": "={{ $now.format('MM-DD') }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        1824,
+        192
+      ],
+      "id": "5db1cf12-7768-4147-ad49-63c5438e8f7b",
+      "name": "Filtrar Cumpleaños Hoy1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Cron Diario (8 AM)1": {
+      "main": [
+        [
+          {
+            "node": "Supabase: Buscar Cumpleaños1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Supabase: Buscar Vencimientos1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase: Buscar Cumpleaños1": {
+      "main": [
+        [
+          {
+            "node": "Filtrar Cumpleaños Hoy1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase: Buscar Vencimientos1": {
+      "main": [
+        [
+          {
+            "node": "Filtrar Vencimiento 5 Meses1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtrar Vencimiento 5 Meses1": {
+      "main": [
+        [
+          {
+            "node": "Fetch Template Reminder1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtrar Cumpleaños Hoy1": {
+      "main": [
+        [
+          {
+            "node": "Fetch Template Birthday1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "f5797c66-14ac-483e-8307-a268db290bc7",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "fdffcaf648a7aa062da0ec843fff869b930e75adc5303a6a19e86b840cf683f2"
+  },
+  "id": "l8GFwqHd5oRJochct6GTT",
+  "tags": []
+}
