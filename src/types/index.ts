@@ -11,7 +11,7 @@ export interface User {
 export type BonusStatus = 'pendiente' | 'reclamado' | 'vencido' | 'alerta_5_meses';
 
 export interface Client {
-  id: string | number; // Adaptado para soportar UUID (viejos mocks) o Int8 (clientes_fidelizacion)
+  id: string; // Adaptado para soportar UUID (v5)
   nombre: string;
   email: string;
   telefono: string; // Mapeado desde 'whatsapp' en la DB

@@ -60,7 +60,7 @@ export const createClient = async (clientData: Omit<Client, 'id' | 'bono_estado'
   return mapDbToClient(data);
 };
 
-export const updateClient = async (id: string | number, updates: Partial<Client>): Promise<Client> => {
+export const updateClient = async (id: string, updates: Partial<Client>): Promise<Client> => {
   // Map updates back to DB columns
   const dbUpdates: any = {};
   if (updates.nombre) dbUpdates.nombre = updates.nombre;
@@ -88,7 +88,7 @@ export const updateClient = async (id: string | number, updates: Partial<Client>
   return mapDbToClient(data);
 };
 
-export const deleteClient = async (id: string | number): Promise<void> => {
+export const deleteClient = async (id: string): Promise<void> => {
   const { error } = await supabase
     .from('clientes_fidelizacion')
     .delete()
