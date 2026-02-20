@@ -29,7 +29,7 @@
         "toEmail": "={{ $json[\"email\"] }}",
         "subject": "¡Tu beneficio de Narbo's expira pronto! ⏳",
         "emailFormat": "html",
-        "html": "={{ $json.data }}",
+        "html": "<!DOCTYPE html>\n<html lang=\"es\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <style>\n        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Playfair+Display:wght@700&display=swap');\n    </style>\n</head>\n<body style=\"margin: 0; padding: 0; font-family: 'Montserrat', sans-serif; background-color: #f7f7f7;\">\n    <div style=\"max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05);\">\n        <div style=\"background-color: #6B755A; padding: 40px 20px; text-align: center;\">\n            <img src=\"https://narbossalon.com/images/brand/logo_narbos.png\" alt=\"Narbo's Salón\" width=\"200\" style=\"height: auto; max-width: 200px; margin-bottom: 20px;\">\n            <h1 style=\"font-family: 'Playfair Display', serif; color: #ffffff; margin: 0; font-size: 24px;\">¡No dejes que expire tu beneficio! ⏳</h1>\n        </div>\n        <div style=\"padding: 40px 30px; text-align: center;\">\n            <p style=\"font-size: 16px; line-height: 1.6; color: #666666; margin-bottom: 30px;\">\n                Hola <b>{{ $json[\"nombre\"] }}</b>,<br><br>\n                Notamos que aún tienes pendiente tu cupón de bienvenida. Te escribimos para recordarte que **le queda poco tiempo de vigencia**.\n            </p>\n            <div style=\"background-color: #FFF9F5; padding: 25px; border-radius: 20px; border: 1px solid #E5D5C6; display: inline-block; margin-bottom: 30px;\">\n                <p style=\"margin: 0; font-size: 14px; color: #888888;\">Tu cupón de 10% OFF vence pronto.</p>\n                <p style=\"margin: 10px 0 0 0; font-size: 18px; font-weight: 600; color: #5B4636;\">Código: {{ $json[\"codigo_descuento\"] }}</p>\n            </div>\n            <p style=\"font-size: 14px; color: #999999; margin-bottom: 30px;\">Visítanos antes de que expire y vive la experiencia que mereces.</p>\n            <a href=\"https://wa.me/573059298379\" style=\"display: inline-block; background-color: #6B755A; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 30px; font-weight: 600;\">Agendar mi cita ahora</a>\n        </div>\n        <div style=\"background-color: #333333; color: #ffffff; padding: 20px; text-align: center; font-size: 11px;\">\n            <p>© 2026 Narbo's Salón Spa &bull; Chía, Cundinamarca.</p>\n        </div>\n    </div>\n</body>\n</html>",
         "options": {}
       },
       "id": "38c79adf-9bf3-4b2a-b802-63a85380b12c",
@@ -168,17 +168,6 @@
       "position": [1824, 448],
       "id": "0d9cf67f-07f8-4453-96bf-42cfc53470e0",
       "name": "Filtrar Vencimiento 5 Meses"
-    },
-    {
-      "parameters": {
-        "url": "https://narbossalon.com/fidelizacion/reminder_email_template.html",
-        "options": {}
-      },
-      "id": "21445e4b-01e0-4ea0-81f6-5641309e5c1a",
-      "name": "Fetch Template Reminder",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4,
-      "position": [2032, 448]
     }
   ],
   "pinData": {},
@@ -233,17 +222,6 @@
       ]
     },
     "Filtrar Vencimiento 5 Meses": {
-      "main": [
-        [
-          {
-            "node": "Fetch Template Reminder",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Fetch Template Reminder": {
       "main": [
         [
           {
