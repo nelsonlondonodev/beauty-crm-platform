@@ -25,12 +25,12 @@
     {
       "parameters": {
         "operation": "getAll",
-        "tableId": "clientes_fidelizacion",
+        "tableId": "bonos",
         "returnAll": true,
         "filters": {
           "conditions": [
             {
-              "keyName": "codigo_descuento",
+              "keyName": "codigo",
               "condition": "eq",
               "keyValue": "={{ $json.query.code.trim() }}"
             }
@@ -64,12 +64,11 @@
           "conditions": [
             {
               "id": "1",
-              "leftValue": "={{ $node[\"Supabase: Buscar Cupón\"].json[\"canjeado\"] }}",
-              "rightValue": "",
+              "leftValue": "={{ $node[\"Supabase: Buscar Cupón\"].json[\"estado\"] }}",
+              "rightValue": "Pendiente",
               "operator": {
-                "type": "boolean",
-                "operation": "false",
-                "singleValue": true
+                "type": "string",
+                "operation": "equals"
               }
             }
           ],
@@ -89,7 +88,7 @@
     {
       "parameters": {
         "operation": "update",
-        "tableId": "clientes_fidelizacion",
+        "tableId": "bonos",
         "filters": {
           "conditions": [
             {
@@ -102,8 +101,8 @@
         "fieldsUi": {
           "fieldValues": [
             {
-              "fieldId": "canjeado",
-              "fieldValue": "={{ true }}"
+              "fieldId": "estado",
+              "fieldValue": "Canjeado"
             },
             {
               "fieldId": "fecha_canje",
@@ -130,7 +129,7 @@
     {
       "parameters": {
         "respondWith": "text",
-        "responseBody": "=<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Canje Exitoso</title><style>body{font-family:'Montserrat',sans-serif;text-align:center;padding:20px;background:#f0fdf4;color:#166534;display:flex;align-items:center;justify-content:center;height:100vh;margin:0}.card{background:white;padding:40px;border-radius:20px;box-shadow:0 10px 25px rgba(0,0,0,0.1);max-width:400px;width:100%}.icon{font-size:60px;margin-bottom:20px}h1{margin:0 0 10px;font-size:24px}p{margin:5px 0;color:#666}.code{font-size:28px;font-weight:bold;color:#166534;margin:20px 0;padding:15px;background:#f0fdf4;border:2px dashed #166534;border-radius:10px}</style></head><body><div class=\"card\"><div class=\"icon\">✅</div><h1>¡Descuento Aplicado!</h1><p>Cupón válido y redimido.</p><div class=\"code\">{{ $node[\"Webhook (Canje QR)\"].json.query.code }}</div><p>Cliente: <strong>{{ $node[\"Supabase: Buscar Cupón\"].json.nombre }}</strong></p></div></body></html>",
+        "responseBody": "=<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Canje Exitoso</title><style>body{font-family:'Montserrat',sans-serif;text-align:center;padding:20px;background:#f0fdf4;color:#166534;display:flex;align-items:center;justify-content:center;height:100vh;margin:0}.card{background:white;padding:40px;border-radius:20px;box-shadow:0 10px 25px rgba(0,0,0,0.1);max-width:400px;width:100%}.icon{font-size:60px;margin-bottom:20px}h1{margin:0 0 10px;font-size:24px}p{margin:5px 0;color:#666}.code{font-size:28px;font-weight:bold;color:#166534;margin:20px 0;padding:15px;background:#f0fdf4;border:2px dashed #166534;border-radius:10px}</style></head><body><div class=\"card\"><div class=\"icon\">✅</div><h1>¡Descuento Aplicado!</h1><p>Cupón <strong>{{ $node[\"Supabase: Buscar Cupón\"].json.tipo }}</strong> válido y redimido exitosamente.</p><div class=\"code\">{{ $node[\"Webhook (Canje QR)\"].json.query.code }}</div></div></body></html>",
         "options": {
           "responseHeaders": {
             "entries": [
