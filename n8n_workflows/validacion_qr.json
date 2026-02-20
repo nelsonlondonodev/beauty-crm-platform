@@ -88,49 +88,8 @@
     },
     {
       "parameters": {
-        "operation": "update",
-        "tableId": "bonos",
-        "filters": {
-          "conditions": [
-            {
-              "keyName": "id",
-              "condition": "eq",
-              "keyValue": "={{ $node[\"Supabase: Buscar Cupón\"].json[\"id\"] }}"
-            }
-          ]
-        },
-        "fieldsUi": {
-          "fieldValues": [
-            {
-              "fieldId": "estado",
-              "fieldValue": "Canjeado"
-            },
-            {
-              "fieldId": "fecha_canje",
-              "fieldValue": "={{ $now.toISO() }}"
-            }
-          ]
-        }
-      },
-      "id": "059efff3-399d-4266-ac39-7944617b8f51",
-      "name": "Supabase: Marcar Uso",
-      "type": "n8n-nodes-base.supabase",
-      "typeVersion": 1,
-      "position": [
-        -32,
-        -432
-      ],
-      "credentials": {
-        "supabaseApi": {
-          "id": "5hkYuZVAhznvx7lf",
-          "name": "Supabase Fidelizacion Narbo's Pro"
-        }
-      }
-    },
-    {
-      "parameters": {
         "respondWith": "text",
-        "responseBody": "=<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Canje Exitoso</title><style>body{font-family:'Montserrat',sans-serif;text-align:center;padding:20px;background:#f0fdf4;color:#166534;display:flex;align-items:center;justify-content:center;height:100vh;margin:0}.card{background:white;padding:40px;border-radius:20px;box-shadow:0 10px 25px rgba(0,0,0,0.1);max-width:400px;width:100%}.icon{font-size:60px;margin-bottom:20px}h1{margin:0 0 10px;font-size:24px}p{margin:5px 0;color:#666}.code{font-size:28px;font-weight:bold;color:#166534;margin:20px 0;padding:15px;background:#f0fdf4;border:2px dashed #166534;border-radius:10px}</style></head><body><div class=\"card\"><div class=\"icon\">✅</div><h1>¡Descuento Aplicado!</h1><p>Cupón <strong>{{ $node[\"Supabase: Buscar Cupón\"].json.tipo }}</strong> válido y redimido exitosamente.</p><div class=\"code\">{{ $node[\"Webhook (Canje QR)\"].json.query.code }}</div></div></body></html>",
+        "responseBody": "=<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Confirmar Canje</title><style>body{font-family:'Montserrat',sans-serif;text-align:center;padding:20px;background:#f8fafc;color:#334155;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;flex-direction:column}.card{background:white;padding:40px;border-radius:20px;box-shadow:0 10px 25px rgba(0,0,0,0.05);max-width:400px;width:100%}.icon{font-size:50px;margin-bottom:15px}h1{margin:0 0 10px;font-size:22px}p{margin:5px 0;color:#64748b;font-size:15px}.code{font-size:24px;font-weight:bold;color:#0f172a;margin:20px 0;padding:15px;background:#f1f5f9;border:2px dashed #cbd5e1;border-radius:10px}.btn-confirm{display:inline-block;background-color:#16a34a;color:white;text-decoration:none;padding:16px 32px;border-radius:30px;font-weight:600;font-size:16px;margin-top:20px;width:100%;box-sizing:border-box;border:none;cursor:pointer;transition:background 0.3s}.btn-confirm:hover{background-color:#15803d}.btn-cancel{display:inline-block;background-color:transparent;color:#ef4444;text-decoration:none;padding:12px;font-weight:600;font-size:14px;margin-top:10px;border:none;cursor:pointer}</style></head><body><div class=\"card\"><div class=\"icon\">👋</div><h1>Validar Cupón</h1><p>Cupón <strong>{{ $node[\"Supabase: Buscar Cupón\"].json.tipo }}</strong> encontrado y listo para usar.</p><div class=\"code\">{{ $node[\"Webhook (Canje QR)\"].json.query.code }}</div><form method=\"POST\" action=\"https://n8n.srv1033442.hstgr.cloud/webhook/confirmar-canje\"><input type=\"hidden\" name=\"id\" value=\"{{ $node['Supabase: Buscar Cupón'].json.id }}\"><input type=\"hidden\" name=\"codigo\" value=\"{{ $node['Webhook (Canje QR)'].json.query.code }}\"><button type=\"submit\" class=\"btn-confirm\">✔ Confirmar y Canjear</button></form><a href=\"#\" onclick=\"window.close();\" class=\"btn-cancel\">Cancelar</a></div></body></html>",
         "options": {
           "responseHeaders": {
             "entries": [
@@ -142,12 +101,12 @@
           }
         }
       },
-      "id": "0451d6e5-6932-448c-953e-c32474b05a4d",
-      "name": "HTML: Exito",
+      "id": "1a34b678-75c1-4b11-a8ca-2d3b4a2f8c5c",
+      "name": "HTML: Confirmar",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
       "position": [
-        224,
+        -32,
         -432
       ]
     },
@@ -174,6 +133,88 @@
       "position": [
         -32,
         -176
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "confirmar-canje",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "2d8f9a2b-1a5c-4d3e-b8d9-3f5c9a7b2e1d",
+      "name": "Webhook (Confirmar Canje)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        224,
+        -688
+      ],
+      "webhookId": "7e8f9a2b-1a5c-4d3e-b8d9-3f5c9a7b2e1d"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "bonos",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $json.body.id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "estado",
+              "fieldValue": "Canjeado"
+            },
+            {
+              "fieldId": "fecha_canje",
+              "fieldValue": "={{ $now.toISO() }}"
+            }
+          ]
+        }
+      },
+      "id": "059efff3-399d-4266-ac39-7944617b8f51",
+      "name": "Supabase: Marcar Uso",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        432,
+        -688
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "5hkYuZVAhznvx7lf",
+          "name": "Supabase Fidelizacion Narbo's Pro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "=<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Canje Exitoso</title><style>body{font-family:'Montserrat',sans-serif;text-align:center;padding:20px;background:#f0fdf4;color:#166534;display:flex;align-items:center;justify-content:center;height:100vh;margin:0}.card{background:white;padding:40px;border-radius:20px;box-shadow:0 10px 25px rgba(0,0,0,0.1);max-width:400px;width:100%}.icon{font-size:60px;margin-bottom:20px}h1{margin:0 0 10px;font-size:24px}p{margin:5px 0;color:#666}.code{font-size:28px;font-weight:bold;color:#166534;margin:20px 0;padding:15px;background:#f0fdf4;border:2px dashed #166534;border-radius:10px}</style></head><body><div class=\"card\"><div class=\"icon\">✅</div><h1>¡Descuento Aplicado!</h1><p>El cupón ha sido redimido exitosamente en el sistema.</p><div class=\"code\">{{ $node[\"Webhook (Confirmar Canje)\"].json.body.codigo }}</div></div></body></html>",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "text/html"
+              }
+            ]
+          }
+        }
+      },
+      "id": "0451d6e5-6932-448c-953e-c32474b05a4d",
+      "name": "HTML: Exito",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        688,
+        -688
       ]
     }
   ],
@@ -205,7 +246,7 @@
       "main": [
         [
           {
-            "node": "Supabase: Marcar Uso",
+            "node": "HTML: Confirmar",
             "type": "main",
             "index": 0
           }
@@ -213,6 +254,17 @@
         [
           {
             "node": "HTML: Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook (Confirmar Canje)": {
+      "main": [
+        [
+          {
+            "node": "Supabase: Marcar Uso",
             "type": "main",
             "index": 0
           }
