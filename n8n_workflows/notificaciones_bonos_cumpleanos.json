@@ -141,11 +141,11 @@
           "conditions": [
             {
               "id": "1d5ad801-21b7-4782-9990-fff88102745e",
-              "leftValue": "={{ $json.created_at }}",
-              "rightValue": "={{ $now.minus({days: 150}) }}",
+              "leftValue": "={{ $json.created_at.substring(0, 10) }}",
+              "rightValue": "={{ $now.minus({days: 150}).toFormat('yyyy-MM-dd') }}",
               "operator": {
-                "type": "dateTime",
-                "operation": "before"
+                "type": "string",
+                "operation": "equals"
               }
             },
             {
