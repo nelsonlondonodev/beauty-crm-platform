@@ -32,7 +32,7 @@
             {
               "keyName": "codigo",
               "condition": "eq",
-              "keyValue": "={{ $json.query.code.trim() }}"
+              "keyValue": "={{ $json.query.code || '' }}"
             }
           ]
         }
@@ -40,6 +40,7 @@
       "id": "1fac542d-215f-4998-97bb-f860bf180a3c",
       "name": "Supabase: Buscar Cupón",
       "type": "n8n-nodes-base.supabase",
+      "alwaysOutputData": true,
       "typeVersion": 1,
       "position": [
         -480,
