@@ -64,11 +64,15 @@ CRM B2B moderno para el sector de la belleza (Peluquerías, Barberías, Spas).
 -   **Repositorio Local**: Carpeta `n8n_workflows/` con flujos JSON para replicabilidad.
 -   **Confirmación de Cita**: Webhook para enviar email al cliente.
 -   **Fidelización**: Registro, QR de descuento, y bienvenida.
+    -   *Generador de Cupones robusto*, sanitizando nombres con espacios y tildes para código exacto.
+    -   *Botón de Re-reserva* directo en WhatsApp precargado con variable en email.
 -   **Retención Avanzada**: Cron jobs diarios para cumpleaños y vencimiento de bonos a 5 meses.
     -   *Inyección HTML directa* con variables dinámicas de Supabase.
-    -   *Generación de códigos QR en tiempo real* (quickchart.io) sin necesidad de adjuntos.
+    -   *Generación de códigos QR en tiempo real* (quickchart.io) sin necesidad de adjuntos (incluyendo `encodeURIComponent` para URIs seguras).
     -   *Filtros precisos de fecha* usando validaciones estrictas y formato Luxon (`toFormat('yyyy-MM-dd')` y comparaciones de Strings exactas para no enviar Spam).
--   **Canje QR**: Validación en tiempo real de cupones.
+-   **Canje QR**: Validación en tiempo real de cupones interactiva.
+    -   *Pantalla Intermedia de Confirmación:* Flujo con Webhooks divididos para prevenir canjes accidentales por el escáner (Botón "Confirmar y Canjear" vs "Cancelar").
+    -   *Manejo de Respuestas Limpias:* `alwaysOutputData` integrado al nodo de lectura Supabase y cierres JS puros para evitar bloqueos del móvil.
 
 ### 5. Arquitectura de Base de Datos (Escalabilidad de Bonos)
 -   **Estructura Relacional Pro**: Se refactorizó la base de datos dividiendo `clientes_fidelizacion` y creando una tabla independiente `bonos`.
