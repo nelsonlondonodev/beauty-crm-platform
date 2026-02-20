@@ -75,11 +75,11 @@ CRM B2B moderno para el sector de la belleza (Peluquerías, Barberías, Spas).
 -   **Tabla `bonos`**: 
     - Guarda múltiples cupones por persona (Ej: `Bienvenida`, `Cumpleaños`, `Reactivacion`, `Especial`).
     - Rastrea estados individuales (`Pendiente`, `Canjeado`, `Expirado`) para evitar colisiones y mala experiencia de usuario.
--   **Migración Segura**: Uso de un script SQL (`supabase_migracion_bonos.sql`) para transferir cupones activos sin pérdida de datos.
+-   **Migración Segura**: Uso de script SQL (`supabase_migracion_bonos.sql`) para transferir historial y limpiar tabla matriz.
+-   **Integración n8n Actualizada**: Todos los flujos conectados a la DB (`registro_cliente.json`, `notificaciones_bonos_cumpleanos.json`, `validacion_qr.json`) ahora apuntan a la arquitectura desacoplada. Tests *End-to-End* aprobados exitosamente.
 
 ## Pendientes (WIP)
 
--   [ ] Ajustar configuración del nodo HTML en n8n para renderizar correctamente las variables del correo de confirmación.
 -   [ ] Implementar sistema de roles (RBAC) más robusto en el futuro.
 
 ## Comandos
