@@ -17,7 +17,8 @@ const Clients = () => {
   // Filter Logic
   const filteredClients = clients.filter(client => {
       const matchesSearch = client.nombre.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                            (client.email && client.email.toLowerCase().includes(searchTerm.toLowerCase()));
+                            (client.email && client.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                            (client.bonos_historial && client.bonos_historial.some(b => b.codigo?.toLowerCase().includes(searchTerm.toLowerCase())));
       
       const statusMap: Record<string, string> = {
           'Activo': 'pendiente',

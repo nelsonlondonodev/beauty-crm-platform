@@ -34,6 +34,7 @@ const mapDbToClient = (row: any): Client => {
              return {
                  id: b.id,
                  tipo: b.tipo || 'Bienvenida',
+                 codigo: b.codigo || '',
                  estado: st,
                  fecha_vencimiento: venc.toISOString().split('T')[0]
              }

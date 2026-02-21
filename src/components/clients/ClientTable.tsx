@@ -54,13 +54,18 @@ const ClientTable: React.FC<ClientTableProps> = ({ clients, onEdit, onDelete }) 
                   <div className="flex flex-col gap-2">
                     {client.bonos_historial && client.bonos_historial.length > 0 ? (
                        client.bonos_historial.map((bono, idx) => (
-                         <div key={bono.id || idx} className="flex h-6 items-center">
+                         <div key={bono.id || idx} className="flex h-6 items-center gap-2">
                            <span className={cn(
                              "inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset w-fit whitespace-nowrap",
                              getStatusColor(bono.estado)
                            )}>
                              {`Bono ${bono.tipo}: `}{getStatusLabel(bono.estado)}
                            </span>
+                           {bono.codigo && (
+                             <span className="text-xs font-mono text-gray-500 bg-gray-50 px-1.5 py-0.5 rounded border border-gray-100 select-all">
+                               {bono.codigo}
+                             </span>
+                           )}
                          </div>
                        ))
                     ) : (

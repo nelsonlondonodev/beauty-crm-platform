@@ -13,6 +13,7 @@ export type BonusStatus = 'pendiente' | 'reclamado' | 'vencido' | 'alerta_5_mese
 export interface ClientBonusDisplay {
   id: string;
   tipo: string;
+  codigo?: string;
   estado: BonusStatus;
   fecha_vencimiento: string;
 }
