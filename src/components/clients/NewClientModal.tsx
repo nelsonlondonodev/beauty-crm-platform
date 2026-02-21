@@ -21,6 +21,7 @@ const NewClientModal = ({ isOpen, onClose, onSave, initialData }: NewClientModal
 
   useEffect(() => {
     if (initialData) {
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       setFormData({
         nombre: initialData.nombre,
         email: initialData.email,

@@ -30,6 +30,27 @@ export interface Client {
   bonos_historial?: ClientBonusDisplay[]; // Para mostrar múltiples bonos si existen
 }
 
+export interface BonoDbRow {
+  id: string;
+  client_id: string;
+  estado: string;
+  tipo: string;
+  codigo?: string;
+  fecha_vencimiento: string | null;
+  fecha_canje: string | null;
+  created_at: string;
+}
+
+export interface ClientDbRow {
+  id: string;
+  nombre: string;
+  email: string | null;
+  whatsapp: string | null;
+  birthday: string | null;
+  created_at: string;
+  bonos?: BonoDbRow[];
+}
+
 export interface Appointment {
   id: string;
   cliente_id: string;
@@ -44,4 +65,11 @@ export interface DashboardStats {
   activeBonuses: number;
   todayAppointments: number;
   upcomingBirthdays: number;
+}
+
+export interface InvoiceItem {
+  id: string;
+  description: string;
+  quantity: number;
+  price: number;
 }

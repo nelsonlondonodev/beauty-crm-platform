@@ -2,15 +2,24 @@ import { useState } from 'react';
 import DashboardHeader from '../components/layout/DashboardHeader';
 import { Users, DollarSign, UserPlus, Scissors, TrendingUp } from 'lucide-react';
 
+interface StaffMember {
+  id: string;
+  name: string;
+  role: string;
+  commissionRate: number;
+  sales: number;
+  tips: number;
+}
+
 // Mock data for the MVP
-const initialStaff = [
+const initialStaff: StaffMember[] = [
   { id: '1', name: 'Ana Estilista', role: 'Estilista', commissionRate: 50, sales: 1200000, tips: 50000 },
   { id: '2', name: 'Carlos Barbero', role: 'Barbero', commissionRate: 60, sales: 850000, tips: 35000 },
   { id: '3', name: 'Laura Colorista', role: 'Colorista', commissionRate: 40, sales: 2100000, tips: 120000 },
 ];
 
 const Staff = () => {
-  const [staff] = useState(initialStaff);
+  const [staff] = useState<StaffMember[]>(initialStaff);
 
   const totalSales = staff.reduce((acc, emp) => acc + emp.sales, 0);
   const totalCommissions = staff.reduce((acc, emp) => acc + (emp.sales * (emp.commissionRate / 100)), 0);

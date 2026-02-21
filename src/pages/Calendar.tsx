@@ -4,6 +4,7 @@ import CalendarView from '../components/calendar/CalendarView';
 import NewAppointmentModal from '../components/calendar/NewAppointmentModal';
 import { useAppointments } from '../hooks/useAppointments';
 import { Plus } from 'lucide-react';
+import type { Appointment } from '../types';
 
 const Calendar = () => {
     const [currentDate, setCurrentDate] = useState(new Date());
@@ -20,7 +21,7 @@ const Calendar = () => {
         setIsModalOpen(true);
     };
 
-    const handleSaveAppointment = async (appointmentData: any) => {
+    const handleSaveAppointment = async (appointmentData: Omit<Appointment, 'id'>) => {
         await addAppointment(appointmentData);
         // Refresh appointments logic is handled by state update in hook, but we might want to ensure date range match 
         // For simple UX, adding to state in hook is enough if date matches current view.

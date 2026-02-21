@@ -1,22 +1,22 @@
 import { supabase } from '../lib/supabase';
-import type { Client, BonusStatus, ClientBonusDisplay } from '../types';
+import type { Client, BonusStatus, ClientBonusDisplay, ClientDbRow, BonoDbRow } from '../types';
 import { addMonths, isPast } from 'date-fns';
 
-// Helper to map DB row to Client type
-const mapDbToClient = (row: any): Client => {
-    let activeBonus = null;
-    let fallbackBonus = null;
+// Helper to process bones
+const processClientBonuses = (bonosRow?: BonoDbRow[]) => {
+    let activeBonus: BonoDbRow | undefined = undefined;
+    let fallbackBonus: BonoDbRow | undefined = undefined;
     let allProcessedBonuses: ClientBonusDisplay[] = [];
 
-    if (row.bonos && Array.isArray(row.bonos) && row.bonos.length > 0) {
+    if (bonosRow && Array.isArray(bonosRow) && bonosRow.length > 0) {
         // Sort newest first
-        const sortedBonos = row.bonos.sort((a: any, b: any) => 
+        const sortedBonos = [...bonosRow].sort((a, b) => 
             new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         );
         fallbackBonus = sortedBonos[0]; // the latest one
-        activeBonus = sortedBonos.find((b: any) => b.estado === 'Pendiente') || fallbackBonus;
+        activeBonus = sortedBonos.find(b => b.estado === 'Pendiente') || fallbackBonus;
         
-        allProcessedBonuses = sortedBonos.map((b: any) => {
+        allProcessedBonuses = sortedBonos.map(b => {
              const createdAt = new Date(b.created_at);
              const venc = b.fecha_vencimiento ? new Date(b.fecha_vencimiento) : addMonths(createdAt, 6);
              let st: BonusStatus = 'pendiente';
@@ -47,8 +47,15 @@ const mapDbToClient = (row: any): Client => {
          displayBonuses = [allProcessedBonuses[0]]; // Latest historical
     }
 
+    return { activeBonus, displayBonuses };
+};
+
+// Helper to map DB row to Client type
+const mapDbToClient = (row: ClientDbRow): Client => {
+    const { activeBonus, displayBonuses } = processClientBonuses(row.bonos);
+
     let estado: BonusStatus = 'vencido';
-    let vencimientoDate = null;
+    let vencimientoDate: Date | null = null;
 
     if (activeBonus) {
         const createdAt = new Date(activeBonus.created_at);
@@ -119,7 +126,7 @@ export const createClient = async (clientData: Omit<Client, 'id' | 'bono_estado'
 };
 
 export const updateClient = async (id: string, updates: Partial<Client>): Promise<Client> => {
-  const dbUpdates: any = {};
+  const dbUpdates: Partial<ClientDbRow> = {};
   if (updates.nombre) dbUpdates.nombre = updates.nombre;
   if (updates.email) dbUpdates.email = updates.email;
   if (updates.telefono) dbUpdates.whatsapp = updates.telefono;

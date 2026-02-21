@@ -7,7 +7,7 @@ import { cn } from '../../lib/utils';
 interface ClientTableProps {
   clients: Client[];
   onEdit: (client: Client) => void;
-  onDelete: (clientId: string | number) => void;
+  onDelete: (clientId: string) => void;
 }
 
 const ClientTable: React.FC<ClientTableProps> = ({ clients, onEdit, onDelete }) => {

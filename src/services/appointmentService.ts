@@ -37,7 +37,7 @@ export const createAppointment = async (appointment: Omit<Appointment, 'id'>): P
   return data as Appointment;
 };
 
-const notifyN8n = async (appointmentData: any) => {
+const notifyN8n = async (appointmentData: Appointment & { client?: { nombre: string; email: string; whatsapp: string } }) => {
   if (!appointmentData.client) return;
 
   const payload = {

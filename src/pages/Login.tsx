@@ -51,7 +51,8 @@ const Login = () => {
       });
 
       if (error) throw error;
-    } catch (err: any) {
+    } catch (error) {
+      const err = error as Error;
       setError(err.message === 'Invalid login credentials' 
         ? 'Credenciales inválidas. Por favor verifica tu correo y contraseña.' 
         : err.message || 'Error al iniciar sesión');
@@ -71,7 +72,8 @@ const Login = () => {
         },
       });
       if (error) throw error;
-    } catch (err: any) {
+    } catch (error) {
+      const err = error as Error;
       setError(err.message || 'Error al iniciar sesión con Google');
       setLoading(false);
     }
