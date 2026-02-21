@@ -4,6 +4,7 @@ import Dashboard from './pages/Dashboard';
 import Clients from './pages/Clients';
 import Calendar from './pages/Calendar';
 import Settings from './pages/Settings';
+import Staff from './pages/Staff';
 import Billing from './pages/Billing';
 import Login from './pages/Login';
 import { AuthProvider } from './contexts/AuthContext';
@@ -26,6 +27,7 @@ function App() {
                     <Route path="/clients" element={<Clients />} />
                     <Route path="/calendar" element={<Calendar />} />
                     <Route path="/settings" element={<Settings />} />
+                    <Route path="/staff" element={<Staff />} />
                     <Route path="/billing" element={<Billing />} />
                   </Routes>
                 </Layout>
