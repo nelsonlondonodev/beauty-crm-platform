@@ -29,46 +29,65 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
 
     if (newClientsError) throw new Error(`Error fetching new clients: ${newClientsError.message}`);
 
-    // 3. Active Bonuses (In DB: canjeado = false)
+    // 3. Active Bonuses (In DB: estado = 'Pendiente' on bonos table)
     const { count: activeBonuses, error: activeBonusesError } = await supabase
-      .from('clientes_fidelizacion')
+      .from('bonos')
       .select('*', { count: 'exact', head: true })
-      .eq('canjeado', false); // "pendiente" equivalent
+      .eq('estado', 'Pendiente');
 
     if (activeBonusesError) throw new Error(`Error fetching active bonuses: ${activeBonusesError.message}`);
 
-    // 4. Upcoming Birthdays & Expiring Bonuses (Next 7 days)
+    // 4. Upcoming Birthdays (Next 7 days)
     const { data: allClients, error: clientsError } = await supabase
       .from('clientes_fidelizacion')
-      .select('birthday, created_at, canjeado'); // Usamos birthday y created_at para calcular vencimiento
+      .select('birthday');
       
     if (clientsError) throw new Error(`Error fetching clients for dates: ${clientsError.message}`);
+
+    // 5. Expiring Bonuses (Next 7 days)
+    const { data: allBonuses, error: bonusesError } = await supabase
+      .from('bonos')
+      .select('created_at, fecha_vencimiento')
+      .eq('estado', 'Pendiente');
+
+    if (bonusesError) throw new Error(`Error fetching bonuses for dates: ${bonusesError.message}`);
     
     let upcomingBirthdaysCount = 0;
     let expiringBonusesCount = 0;
 
-    if (allClients) {
-      const today = new Date();
-      const nextWeek = addDays(today, 7);
+    const today = new Date();
+    // Normalize today to start of day for exact comparison
+    today.setHours(0, 0, 0, 0);
+    const nextWeek = addDays(today, 7);
 
+    if (allClients) {
       upcomingBirthdaysCount = allClients.filter(c => {
         if (!c.birthday) return false;
         // Parse date carefully
-        const dob = new Date(c.birthday);
+        // Append time to prevent UTC offset shifting the day
+        const dob = new Date(`${c.birthday}T12:00:00Z`);
         
         // Create date for this year
         const thisYearBirthday = new Date(today.getFullYear(), dob.getMonth(), dob.getDate());
         
         return thisYearBirthday >= today && thisYearBirthday <= nextWeek;
       }).length;
+    }
+    
+    if (allBonuses) {
+      expiringBonusesCount = allBonuses.filter(b => {
+        if (!b.created_at && !b.fecha_vencimiento) return false;
 
-      expiringBonusesCount = allClients.filter(c => {
-           if (!c.created_at || c.canjeado) return false;
-           // Calcular Vencimiento: created_at + 6 meses
-           const createdAt = new Date(c.created_at);
-           const expiry = addDays(addMonths(createdAt, 6), 0); // Vence a los 6 meses
-           
-           return expiry >= today && expiry <= nextWeek;
+        let expiry: Date;
+        if (b.fecha_vencimiento) {
+            expiry = new Date(b.fecha_vencimiento);
+        } else {
+            // Calcular Vencimiento: created_at + 6 meses
+            const createdAt = new Date(b.created_at);
+            expiry = addMonths(createdAt, 6); // Vence a los 6 meses
+        }
+        
+        return expiry >= today && expiry <= nextWeek;
       }).length;
     }
 
