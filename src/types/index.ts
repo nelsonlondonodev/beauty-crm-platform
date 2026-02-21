@@ -73,3 +73,42 @@ export interface InvoiceItem {
   quantity: number;
   price: number;
 }
+
+export interface Empleado {
+  id: string;
+  nombre: string;
+  rol: string;
+  comision_porcentaje: number;
+  activo: boolean;
+  created_at?: string;
+}
+
+export interface Factura {
+  id: string;
+  cliente_id?: string | null;
+  subtotal: number;
+  descuento: number;
+  total: number;
+  metodo_pago?: string;
+  fecha_venta?: string;
+}
+
+export interface FacturaItem {
+  id: string;
+  factura_id: string;
+  empleado_id?: string | null;
+  descripcion: string;
+  cantidad: number;
+  precio_unitario: number;
+  precio_total: number;
+  comision_monto: number;
+  created_at?: string;
+}
+
+export interface PagoComision {
+  id: string;
+  empleado_id: string;
+  monto_pagado: number;
+  fecha_pago?: string;
+  notas?: string;
+}
