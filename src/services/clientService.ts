@@ -48,7 +48,8 @@ const mapDbToClient = (row: any): Client => {
         telefono: row.whatsapp || '',
         fecha_nacimiento: row.birthday || '',
         bono_estado: estado,
-        bono_fecha_vencimiento: vencimientoDate ? vencimientoDate.toISOString().split('T')[0] : ''
+        bono_fecha_vencimiento: vencimientoDate ? vencimientoDate.toISOString().split('T')[0] : '',
+        bono_tipo: activeBonus ? activeBonus.tipo : 'Bienvenida'
     };
 };
 

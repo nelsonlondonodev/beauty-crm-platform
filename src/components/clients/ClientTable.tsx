@@ -55,7 +55,7 @@ const ClientTable: React.FC<ClientTableProps> = ({ clients, onEdit, onDelete }) 
                     "inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset",
                     getStatusColor(client.bono_estado)
                   )}>
-                    {getStatusLabel(client.bono_estado)}
+                    {client.bono_tipo ? `Bono ${client.bono_tipo}: ` : ''}{getStatusLabel(client.bono_estado)}
                   </span>
                 </td>
                 <td className="px-6 py-4">

@@ -18,6 +18,7 @@ export interface Client {
   fecha_nacimiento: string; // Mapeado desde 'birthday' en la DB
   bono_estado: BonusStatus; // Calculado en el frontend basado en fechas/canjeado
   bono_fecha_vencimiento: string; // Calculado en el frontend
+  bono_tipo?: string; // Nombre del bono más reciente
 }
 
 export interface Appointment {
