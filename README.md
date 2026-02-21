@@ -82,6 +82,19 @@ CRM B2B moderno para el sector de la belleza (Peluquerías, Barberías, Spas).
 -   **Migración Segura**: Uso de script SQL (`supabase_migracion_bonos.sql`) para transferir historial y limpiar tabla matriz.
 -   **Integración n8n Actualizada**: Todos los flujos conectados a la DB (`registro_cliente.json`, `notificaciones_bonos_cumpleanos.json`, `validacion_qr.json`) ahora apuntan a la arquitectura desacoplada. Tests *End-to-End* aprobados exitosamente.
 
+### 6. Punto de Venta (POS) y Facturación
+-   **Interfaz Atómica**: Refactorización del componente principal `Billing.tsx` en subcomponentes modulares (`BillingClientSearch`, `BillingItemTable`, `BillingCheckoutSummary`).
+-   **Tablas en Supabase**: Creación de la estructura relacional `facturas` y `factura_items`.
+-   **Asignación de Servicios**: Capacidad de seleccionar al colaborador (empleado) que realizó cada servicio directamente en la caja, adaptando automáticamente la interfaz (`flex-grow`).
+-   **Checkout Automático**: Botón interactivo "Liquidar y Cobrar" que calcula los totales, procesa y asigna las comisiones correspondientes a cada empleado, guardando todo de forma segura en la base de datos mediante `billingService.ts`.
+
+### 7. Gestión de Personal (Staff) y Comisiones
+-   **Administración en Tiempo Real**: Vista conectada a Supabase para gestionar al equipo y sus ganancias (`staffService.ts` / `useStaff.ts`).
+-   **Tablas en Supabase**: Estructura sólida con tablas para `empleados` y el historial de `pagos_comisiones`.
+-   **Cálculo Exacto de Saldos**: Motor matemático que procesa las "Ventas Acumuladas" y las "Comisiones Históricas" (desde las facturas), restando los pagos realizados para mostrar el "Saldo Pendiente" exacto de cada miembro.
+-   **UX Avanzada**: Modal moderno (`NewStaffModal`) para la creación guiada de nuevos colaboradores y asignación de sus respectivos Porcentajes de Comisión (%).
+-   **Botones de Liquidación**: Acciones de un solo click ("Pagar" individualmente o "Liquidar Todos") que registran los pagos en la base de datos localizando la deuda pendiente a $0.
+
 ## Pendientes (WIP)
 
 -   [ ] Implementar sistema de roles (RBAC) más robusto en el futuro.
