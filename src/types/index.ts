@@ -10,6 +10,13 @@ export interface User {
 
 export type BonusStatus = 'pendiente' | 'reclamado' | 'vencido' | 'alerta_5_meses';
 
+export interface ClientBonusDisplay {
+  id: string;
+  tipo: string;
+  estado: BonusStatus;
+  fecha_vencimiento: string;
+}
+
 export interface Client {
   id: string; // Adaptado para soportar UUID (v5)
   nombre: string;
@@ -19,6 +26,7 @@ export interface Client {
   bono_estado: BonusStatus; // Calculado en el frontend basado en fechas/canjeado
   bono_fecha_vencimiento: string; // Calculado en el frontend
   bono_tipo?: string; // Nombre del bono más reciente
+  bonos_historial?: ClientBonusDisplay[]; // Para mostrar múltiples bonos si existen
 }
 
 export interface Appointment {

@@ -1,11 +1,12 @@
 import { supabase } from '../lib/supabase';
-import type { Client, BonusStatus } from '../types';
+import type { Client, BonusStatus, ClientBonusDisplay } from '../types';
 import { addMonths, isPast } from 'date-fns';
 
 // Helper to map DB row to Client type
 const mapDbToClient = (row: any): Client => {
     let activeBonus = null;
     let fallbackBonus = null;
+    let allProcessedBonuses: ClientBonusDisplay[] = [];
 
     if (row.bonos && Array.isArray(row.bonos) && row.bonos.length > 0) {
         // Sort newest first
@@ -14,6 +15,35 @@ const mapDbToClient = (row: any): Client => {
         );
         fallbackBonus = sortedBonos[0]; // the latest one
         activeBonus = sortedBonos.find((b: any) => b.estado === 'Pendiente') || fallbackBonus;
+        
+        allProcessedBonuses = sortedBonos.map((b: any) => {
+             const createdAt = new Date(b.created_at);
+             const venc = b.fecha_vencimiento ? new Date(b.fecha_vencimiento) : addMonths(createdAt, 6);
+             let st: BonusStatus = 'pendiente';
+             
+             if (b.estado === 'Canjeado') {
+                  st = 'reclamado';
+             } else if (b.estado === 'Expirado' || isPast(venc)) {
+                  st = 'vencido';
+             } else {
+                  st = 'pendiente';
+                  if (isPast(addMonths(createdAt, 5))) {
+                      st = 'alerta_5_meses';
+                  }
+             }
+             return {
+                 id: b.id,
+                 tipo: b.tipo || 'Bienvenida',
+                 estado: st,
+                 fecha_vencimiento: venc.toISOString().split('T')[0]
+             }
+        });
+    }
+
+    // Keep all active ones (or at least the most recent historical if none are active)
+    let displayBonuses = allProcessedBonuses.filter(b => b.estado === 'pendiente' || b.estado === 'alerta_5_meses');
+    if (displayBonuses.length === 0 && allProcessedBonuses.length > 0) {
+         displayBonuses = [allProcessedBonuses[0]]; // Latest historical
     }
 
     let estado: BonusStatus = 'vencido';
@@ -49,7 +79,8 @@ const mapDbToClient = (row: any): Client => {
         fecha_nacimiento: row.birthday || '',
         bono_estado: estado,
         bono_fecha_vencimiento: vencimientoDate ? vencimientoDate.toISOString().split('T')[0] : '',
-        bono_tipo: activeBonus ? activeBonus.tipo : 'Bienvenida'
+        bono_tipo: activeBonus ? activeBonus.tipo : 'Bienvenida',
+        bonos_historial: displayBonuses
     };
 };
 

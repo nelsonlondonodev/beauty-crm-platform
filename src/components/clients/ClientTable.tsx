@@ -50,18 +50,46 @@ const ClientTable: React.FC<ClientTableProps> = ({ clients, onEdit, onDelete }) 
                     </div>
                   </div>
                 </td>
-                <td className="px-6 py-4">
-                  <span className={cn(
-                    "inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset",
-                    getStatusColor(client.bono_estado)
-                  )}>
-                    {client.bono_tipo ? `Bono ${client.bono_tipo}: ` : ''}{getStatusLabel(client.bono_estado)}
-                  </span>
+                <td className="px-6 py-4 align-top">
+                  <div className="flex flex-col gap-2">
+                    {client.bonos_historial && client.bonos_historial.length > 0 ? (
+                       client.bonos_historial.map((bono, idx) => (
+                         <div key={bono.id || idx} className="flex h-6 items-center">
+                           <span className={cn(
+                             "inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset w-fit whitespace-nowrap",
+                             getStatusColor(bono.estado)
+                           )}>
+                             {`Bono ${bono.tipo}: `}{getStatusLabel(bono.estado)}
+                           </span>
+                         </div>
+                       ))
+                    ) : (
+                       <div className="flex h-6 items-center">
+                         <span className={cn(
+                           "inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset w-fit whitespace-nowrap",
+                           getStatusColor(client.bono_estado)
+                         )}>
+                           {client.bono_tipo ? `Bono ${client.bono_tipo}: ` : ''}{getStatusLabel(client.bono_estado)}
+                         </span>
+                       </div>
+                    )}
+                  </div>
                 </td>
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-2 text-gray-700">
-                     <CalendarIcon className="h-4 w-4 text-gray-400" />
-                     {formatDate(client.bono_fecha_vencimiento)}
+                <td className="px-6 py-4 align-top">
+                  <div className="flex flex-col gap-2 text-gray-700">
+                    {client.bonos_historial && client.bonos_historial.length > 0 ? (
+                       client.bonos_historial.map((bono, idx) => (
+                          <div key={`venc-${bono.id || idx}`} className="flex h-6 items-center gap-2">
+                            <CalendarIcon className="h-4 w-4 text-gray-400" />
+                            <span className="text-sm whitespace-nowrap">{formatDate(bono.fecha_vencimiento)}</span>
+                          </div>
+                       ))
+                    ) : (
+                        <div className="flex h-6 items-center gap-2">
+                           <CalendarIcon className="h-4 w-4 text-gray-400" />
+                           <span className="text-sm whitespace-nowrap">{formatDate(client.bono_fecha_vencimiento)}</span>
+                        </div>
+                    )}
                   </div>
                 </td>
                 <td className="px-6 py-4 text-right">
