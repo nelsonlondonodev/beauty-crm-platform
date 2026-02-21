@@ -6,7 +6,8 @@ import { supabase } from '../lib/supabase';
 // TODO: En el futuro esto podría venir de una tabla 'admin_users' en la base de datos
 const ALLOWED_EMAILS = [
   'nelsonlondonodev@gmail.com',
-  'selonel26@gmail.com'
+  'selonel26@gmail.com',
+  'contacto@narbossalon.com'
 ];
 
 interface AuthContextType {
