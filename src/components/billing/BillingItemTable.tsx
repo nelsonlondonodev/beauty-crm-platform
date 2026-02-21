@@ -19,8 +19,8 @@ const BillingItemTable = ({ items, empleados, newItem, setNewItem, onAddItem, on
       </h2>
 
       {/* Add Item Form */}
-      <div className="flex flex-col md:flex-row gap-3 mb-6 bg-gray-50 p-4 rounded-lg border border-gray-100 items-end">
-        <div className="w-full md:w-48">
+      <div className="flex flex-col lg:flex-row gap-3 mb-6 bg-gray-50 p-4 rounded-lg border border-gray-100 items-end">
+        <div className="w-full lg:w-48 xl:w-56 shrink-0">
           <label className="block text-xs font-medium text-gray-700 mb-1">Colaborador</label>
           <select
             className="w-full px-3 py-2 rounded-md border border-gray-300 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none"
@@ -33,7 +33,7 @@ const BillingItemTable = ({ items, empleados, newItem, setNewItem, onAddItem, on
             ))}
           </select>
         </div>
-        <div className="flex-1">
+        <div className="w-full flex-1 min-w-[200px]">
           <label className="block text-xs font-medium text-gray-700 mb-1">Concepto / Servicio</label>
           <input 
             type="text" 
@@ -43,27 +43,29 @@ const BillingItemTable = ({ items, empleados, newItem, setNewItem, onAddItem, on
             onChange={(e) => setNewItem({...newItem, description: e.target.value})}
           />
         </div>
-        <div className="w-full md:w-24">
-          <label className="block text-xs font-medium text-gray-700 mb-1">Cant.</label>
-          <input 
-            type="number" 
-            min="1"
-            className="w-full px-3 py-2 rounded-md border border-gray-300 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none"
-            value={newItem.quantity}
-            onChange={(e) => setNewItem({...newItem, quantity: Number(e.target.value)})}
-          />
+        <div className="flex w-full lg:w-auto gap-3">
+          <div className="w-20 shrink-0">
+            <label className="block text-xs font-medium text-gray-700 mb-1">Cant.</label>
+            <input 
+              type="number" 
+              min="1"
+              className="w-full px-3 py-2 rounded-md border border-gray-300 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+              value={newItem.quantity}
+              onChange={(e) => setNewItem({...newItem, quantity: Number(e.target.value)})}
+            />
+          </div>
+          <div className="w-32 shrink-0">
+            <label className="block text-xs font-medium text-gray-700 mb-1">Precio Unit.</label>
+            <input 
+              type="number" 
+              placeholder="0.00"
+              className="w-full px-3 py-2 rounded-md border border-gray-300 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+              value={newItem.price}
+              onChange={(e) => setNewItem({...newItem, price: e.target.value})}
+            />
+          </div>
         </div>
-        <div className="w-full md:w-32">
-          <label className="block text-xs font-medium text-gray-700 mb-1">Precio Unit.</label>
-          <input 
-            type="number" 
-            placeholder="0.00"
-            className="w-full px-3 py-2 rounded-md border border-gray-300 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none"
-            value={newItem.price}
-            onChange={(e) => setNewItem({...newItem, price: e.target.value})}
-          />
-        </div>
-        <div className="w-full md:w-auto">
+        <div className="w-full lg:w-auto shrink-0">
           <button 
             onClick={onAddItem}
             className="w-full md:w-auto px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-md hover:bg-gray-800 transition-colors h-[38px]"
