@@ -6,7 +6,8 @@ import {
   Calendar, 
   Settings, 
   LogOut, 
-  Scissors 
+  Scissors,
+  Receipt
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useAuth } from '../../contexts/AuthContext';
@@ -17,6 +18,7 @@ const Sidebar = () => {
   const navItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
     { icon: Users, label: 'Clientes', path: '/clients' },
+    { icon: Receipt, label: 'Facturación / POS', path: '/billing' },
     { icon: Calendar, label: 'Agenda', path: '/calendar', isPro: true },
     { icon: Settings, label: 'Configuración', path: '/settings' },
   ];

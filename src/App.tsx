@@ -4,6 +4,7 @@ import Dashboard from './pages/Dashboard';
 import Clients from './pages/Clients';
 import Calendar from './pages/Calendar';
 import Settings from './pages/Settings';
+import Billing from './pages/Billing';
 import Login from './pages/Login';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -25,6 +26,7 @@ function App() {
                     <Route path="/clients" element={<Clients />} />
                     <Route path="/calendar" element={<Calendar />} />
                     <Route path="/settings" element={<Settings />} />
+                    <Route path="/billing" element={<Billing />} />
                   </Routes>
                 </Layout>
               </ProtectedRoute>
