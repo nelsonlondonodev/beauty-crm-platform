@@ -11,6 +11,22 @@ export const getEmpleados = async (): Promise<Empleado[]> => {
   return data || [];
 };
 
+export const crearEmpleado = async (empleado: Omit<Empleado, 'id' | 'created_at' | 'activo'> & { activo?: boolean }) => {
+  const { data, error } = await supabase
+    .from('empleados')
+    .insert([{
+      nombre: empleado.nombre,
+      rol: empleado.rol,
+      comision_porcentaje: empleado.comision_porcentaje,
+      activo: empleado.activo ?? true
+    }])
+    .select()
+    .single();
+
+  if (error) throw new Error(error.message);
+  return data;
+};
+
 export const getPendientesEmpleados = async () => {
   // To get the pending commission, we need to sum all comision_monto from factura_items
   // and subtract all monto_pagado from pagos_comisiones for each employee.

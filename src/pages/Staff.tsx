@@ -2,10 +2,12 @@ import { useState } from 'react';
 import DashboardHeader from '../components/layout/DashboardHeader';
 import { Users, DollarSign, UserPlus, Scissors, TrendingUp, Loader2 } from 'lucide-react';
 import { useStaff } from '../hooks/useStaff';
+import NewStaffModal from '../components/staff/NewStaffModal';
 
 const Staff = () => {
-  const { staff, loading, error, payEmployee, payAllPending } = useStaff();
+  const { staff, loading, error, payEmployee, payAllPending, addStaff } = useStaff();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const totalSales = staff.reduce((acc, emp) => acc + emp.ventas_totales, 0);
   const totalCommissions = staff.reduce((acc, emp) => acc + emp.saldo_pendiente, 0);
@@ -46,7 +48,10 @@ const Staff = () => {
         title="Gestión de Personal y Comisiones" 
         subtitle="Administra tu equipo, porcentajes de ganancia y liquidación de servicios."
         actions={
-          <button className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary/90 transition-colors">
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary/90 transition-colors"
+          >
             <UserPlus className="mr-2 h-4 w-4" />
             Nuevo Colaborador
           </button>
@@ -162,6 +167,15 @@ const Staff = () => {
             </div>
         )}
       </div>
+
+      <NewStaffModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={async (data) => {
+          const res = await addStaff(data);
+          if (!res.success) throw new Error(res.error);
+        }}
+      />
     </div>
   );
 };

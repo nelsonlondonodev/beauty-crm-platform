@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getEmpleadosConSaldos, registrarPagoComision, liquidarTodos } from '../services/staffService';
+import { getEmpleadosConSaldos, registrarPagoComision, liquidarTodos, crearEmpleado } from '../services/staffService';
 import type { Empleado } from '../types';
 
 export interface EmpleadoConSaldo extends Empleado {
@@ -59,5 +59,15 @@ export const useStaff = () => {
     }
   };
 
-  return { staff, loading, error, fetchStaffData, payEmployee, payAllPending };
+  const addStaff = async (staffData: { nombre: string; rol: string; comision_porcentaje: number }) => {
+    try {
+      await crearEmpleado(staffData);
+      await fetchStaffData();
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err.message };
+    }
+  };
+
+  return { staff, loading, error, fetchStaffData, payEmployee, payAllPending, addStaff };
 };
