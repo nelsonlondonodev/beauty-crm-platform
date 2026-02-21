@@ -9,6 +9,8 @@ interface BillingCheckoutSummaryProps {
   discount: number;
   setDiscount: (discount: number) => void;
   total: number;
+  onCheckout: () => void;
+  isProcessing: boolean;
 }
 
 const BillingCheckoutSummary = ({ 
@@ -17,7 +19,9 @@ const BillingCheckoutSummary = ({
   subtotal, 
   discount, 
   setDiscount, 
-  total 
+  total,
+  onCheckout,
+  isProcessing
 }: BillingCheckoutSummaryProps) => {
   return (
     <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm sticky top-6">
@@ -70,15 +74,17 @@ const BillingCheckoutSummary = ({
       </div>
 
       <button 
-        disabled={items.length === 0}
+        disabled={items.length === 0 || isProcessing}
+        onClick={onCheckout}
         className={cn(
           "w-full py-4 rounded-xl font-bold text-lg shadow-lg transition-all",
           items.length === 0 
             ? "bg-gray-200 text-gray-400 cursor-not-allowed shadow-none" 
-            : "bg-primary text-white hover:bg-primary/90 hover:shadow-primary/30"
+            : "bg-primary text-white hover:bg-primary/90 hover:shadow-primary/30",
+          isProcessing ? "opacity-75 cursor-not-allowed" : ""
         )}
       >
-        Liquidar y Cobrar
+        {isProcessing ? 'Procesando...' : 'Liquidar y Cobrar'}
       </button>
       <p className="text-center text-xs text-gray-400 mt-3 flex items-center justify-center">
         Las facturas se guardan en el historial del CRM.

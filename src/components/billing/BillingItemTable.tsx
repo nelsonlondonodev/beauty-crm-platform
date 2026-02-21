@@ -1,15 +1,16 @@
 import { Receipt, Trash2 } from 'lucide-react';
-import type { InvoiceItem } from '../../types';
+import type { InvoiceItem, Empleado } from '../../types';
 
 interface BillingItemTableProps {
   items: InvoiceItem[];
-  newItem: { description: string; quantity: number; price: string };
-  setNewItem: (item: { description: string; quantity: number; price: string }) => void;
+  empleados: Empleado[];
+  newItem: { description: string; quantity: number; price: string; empleado_id: string };
+  setNewItem: (item: { description: string; quantity: number; price: string; empleado_id: string }) => void;
   onAddItem: () => void;
   onRemoveItem: (id: string) => void;
 }
 
-const BillingItemTable = ({ items, newItem, setNewItem, onAddItem, onRemoveItem }: BillingItemTableProps) => {
+const BillingItemTable = ({ items, empleados, newItem, setNewItem, onAddItem, onRemoveItem }: BillingItemTableProps) => {
   return (
     <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
       <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
@@ -18,7 +19,20 @@ const BillingItemTable = ({ items, newItem, setNewItem, onAddItem, onRemoveItem 
       </h2>
 
       {/* Add Item Form */}
-      <div className="flex flex-col md:flex-row gap-3 mb-6 bg-gray-50 p-4 rounded-lg border border-gray-100">
+      <div className="flex flex-col md:flex-row gap-3 mb-6 bg-gray-50 p-4 rounded-lg border border-gray-100 items-end">
+        <div className="w-full md:w-48">
+          <label className="block text-xs font-medium text-gray-700 mb-1">Colaborador</label>
+          <select
+            className="w-full px-3 py-2 rounded-md border border-gray-300 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+            value={newItem.empleado_id}
+            onChange={(e) => setNewItem({...newItem, empleado_id: e.target.value})}
+          >
+            <option value="">(Ninguno)</option>
+            {empleados.filter(e => e.activo).map(emp => (
+              <option key={emp.id} value={emp.id}>{emp.nombre}</option>
+            ))}
+          </select>
+        </div>
         <div className="flex-1">
           <label className="block text-xs font-medium text-gray-700 mb-1">Concepto / Servicio</label>
           <input 
@@ -49,10 +63,10 @@ const BillingItemTable = ({ items, newItem, setNewItem, onAddItem, onRemoveItem 
             onChange={(e) => setNewItem({...newItem, price: e.target.value})}
           />
         </div>
-        <div className="flex items-end">
+        <div className="w-full md:w-auto">
           <button 
             onClick={onAddItem}
-            className="w-full md:w-auto px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-md hover:bg-gray-800 transition-colors"
+            className="w-full md:w-auto px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-md hover:bg-gray-800 transition-colors h-[38px]"
           >
             Agregar
           </button>
@@ -65,6 +79,7 @@ const BillingItemTable = ({ items, newItem, setNewItem, onAddItem, onRemoveItem 
           <thead className="bg-gray-50 text-gray-600 border-b border-gray-200">
             <tr>
               <th className="px-4 py-3 font-medium">Descripción</th>
+              <th className="px-4 py-3 font-medium">Colaborador</th>
               <th className="px-4 py-3 font-medium text-center">Cant.</th>
               <th className="px-4 py-3 font-medium text-right">Precio</th>
               <th className="px-4 py-3 font-medium text-right">Total</th>
@@ -82,6 +97,7 @@ const BillingItemTable = ({ items, newItem, setNewItem, onAddItem, onRemoveItem 
               items.map(item => (
                 <tr key={item.id} className="hover:bg-gray-50/50">
                   <td className="px-4 py-3 text-gray-900 font-medium">{item.description}</td>
+                  <td className="px-4 py-3 text-gray-500">{empleados.find(e => e.id === item.empleado_id)?.nombre || '-'}</td>
                   <td className="px-4 py-3 text-center text-gray-600">{item.quantity}</td>
                   <td className="px-4 py-3 text-right text-gray-600">${item.price.toLocaleString()}</td>
                   <td className="px-4 py-3 text-right text-gray-900 font-semibold">${(item.price * item.quantity).toLocaleString()}</td>
