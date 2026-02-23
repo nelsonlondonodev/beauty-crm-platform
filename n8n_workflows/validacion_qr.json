@@ -38,7 +38,7 @@
       "alwaysOutputData": true,
       "typeVersion": 1,
       "position": [
-        -480,
+        -308,
         -336
       ],
       "credentials": {
@@ -211,6 +211,39 @@
         688,
         -688
       ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "1",
+              "leftValue": "={{ $json.query.code }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "c1f2e3d4-b5a6-4c7d-8e9f-a0b1c2d3e4f5",
+      "name": "Código Presente?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -498,
+        -336
+      ]
     }
   ],
   "pinData": {},
@@ -219,7 +252,7 @@
       "main": [
         [
           {
-            "node": "Supabase: Buscar Cupón",
+            "node": "Código Presente?",
             "type": "main",
             "index": 0
           }
@@ -271,6 +304,24 @@
         [
           {
             "node": "HTML: Exito",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Código Presente?": {
+      "main": [
+        [
+          {
+            "node": "Supabase: Buscar Cupón",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTML: Error",
             "type": "main",
             "index": 0
           }
