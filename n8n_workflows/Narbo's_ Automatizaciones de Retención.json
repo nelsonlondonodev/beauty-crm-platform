@@ -221,13 +221,45 @@
         192
       ],
       "id": "a300e6a2-cc63-4ff8-845d-6092d858abcd",
-      "name": "Create a row",
+      "name": "Supabase: Guardar Bono (Cumple)",
       "credentials": {
         "supabaseApi": {
           "id": "5hkYuZVAhznvx7lf",
           "name": "Supabase Fidelizacion Narbo's Pro"
         }
       }
+    },
+    {
+      "parameters": {
+        "content": "## 🎁 Cumpleaños\n1. Filtra registros que coinciden en mes y día.\n2. Genera y guarda cupón dinámico.\n3. Envía correo QR de regalo.",
+        "height": 180,
+        "width": 220,
+        "color": 2
+      },
+      "id": "sticky-1",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1800,
+        -10
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## ⏳ Vencimiento a 5 Meses\n1. Busca registros creados justo hace 150 días exactos.\n2. Confirma que bono sigue virgen (`canjeado = false`).\n3. Manda email recordatorio.",
+        "height": 180,
+        "width": 240,
+        "color": 6
+      },
+      "id": "sticky-2",
+      "name": "Sticky Note 2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1800,
+        640
+      ]
     }
   ],
   "pinData": {},
@@ -252,7 +284,7 @@
       "main": [
         [
           {
-            "node": "Create a row",
+            "node": "Supabase: Guardar Bono (Cumple)",
             "type": "main",
             "index": 0
           }
@@ -292,7 +324,7 @@
         ]
       ]
     },
-    "Create a row": {
+    "Supabase: Guardar Bono (Cumple)": {
       "main": [
         [
           {
