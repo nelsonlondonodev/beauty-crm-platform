@@ -13,15 +13,15 @@ const data = [
 
 const RevenueChart: React.FC = () => {
   return (
-    <div className="col-span-full lg:col-span-4 rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
+    <div className="col-span-full lg:col-span-4 rounded-xl border border-gray-100 bg-white p-6 shadow-sm min-w-0 min-h-0">
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h2 className="text-lg font-semibold text-gray-900">Resumen de Ingresos</h2>
           <p className="text-sm text-gray-500">Ingresos mensuales de los últimos 7 meses</p>
         </div>
       </div>
-      <div className="h-[300px] w-full">
-        <ResponsiveContainer width="100%" height="100%">
+      <div className="mt-4 w-full">
+        <ResponsiveContainer width="100%" height={300}>
           <AreaChart
             data={data}
             margin={{ top: 10, right: 10, left: -20, bottom: 0 }}

@@ -54,7 +54,7 @@ const Dashboard = () => {
         ))}
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7 h-[400px]">
+      <div className="grid gap-6 lg:grid-cols-7 lg:h-[400px]">
         <RevenueChart />
         <RecentActivity />
       </div>
