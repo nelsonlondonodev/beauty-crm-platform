@@ -95,6 +95,16 @@ CRM B2B moderno para el sector de la belleza (Peluquerías, Barberías, Spas).
 -   **UX Avanzada**: Modal moderno (`NewStaffModal`) para la creación guiada de nuevos colaboradores y asignación de sus respectivos Porcentajes de Comisión (%).
 -   **Botones de Liquidación**: Acciones de un solo click ("Pagar" individualmente o "Liquidar Todos") que registran los pagos en la base de datos localizando la deuda pendiente a $0.
 
+### 8. Buscador Global Inteligente (Topbar)
+-   **Componente Interactivo (`GlobalSearch.tsx`)**: Reemplazo del placeholder estático por un buscador real integrado en la barra de navegación superior.
+-   **Typeahead en Tiempo Real**: Filtro instantáneo de la base de clientes almacenada en caché local (vía `useClients`), evitando sobrecargas en Supabase.
+-   **Búsqueda Multi-campo**: Capacidad de buscar coincidencias por Nombre, Teléfono o Correo Electrónico.
+-   **Dropdown UI (UX Mejorada)**:
+    -   Muestra visualmente los top 5 resultados con información de contacto.
+    -   Incluye *badges* indicando el estado del bono de fidelización (Bono Activo, Vencido, Canjeado, etc.).
+    -   Cerrado automático inteligente al hacer click fuera del componente (`onClickOutside`).
+-   **Redirección Fluida**: Los resultados y el botón de "Ver todos" navegan eficientemente al módulo correspondiente usando React Router (`/clients`).
+
 ## Pendientes (WIP) y Deuda Técnica
 
 -   [ ] Implementar sistema de roles (RBAC) más robusto en el futuro.
