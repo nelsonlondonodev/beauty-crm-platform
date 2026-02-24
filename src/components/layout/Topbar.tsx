@@ -1,19 +1,13 @@
 
-import { Bell, Search } from 'lucide-react';
+import { Bell } from 'lucide-react';
+import GlobalSearch from './GlobalSearch';
 
 const Topbar = () => {
   return (
     <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-gray-200 bg-white/80 backdrop-blur-xl px-6 transition-all">
       <div className="flex items-center gap-4">
         {/* Mobile menu trigger would go here */}
-        <div className="relative hidden md:block">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
-          <input
-            type="search"
-            placeholder="Search..."
-            className="h-9 w-64 rounded-md border border-gray-200 bg-gray-50 pl-9 sm:text-sm focus-visible:ring-1 focus-visible:ring-primary"
-          />
-        </div>
+        <GlobalSearch />
       </div>
 
       <div className="flex items-center gap-4">
