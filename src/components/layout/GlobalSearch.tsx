@@ -47,9 +47,9 @@ const GlobalSearch = () => {
     setIsOpen(false);
     setSearchTerm('');
     // Ideally we would go to a specific client profile page, e.g., /clientes/id
-    // But since the current behavior is a general list in /clientes, we navigate there.
+    // But since the current behavior is a general list in /clients, we navigate there.
     // If you plan to add a detailed client page later, this is the perfect spot.
-    navigate('/clientes');
+    navigate('/clients');
   };
 
   const getStatusColor = (status: string) => {
@@ -131,7 +131,7 @@ const GlobalSearch = () => {
           {filteredClients.length > 0 && (
              <div className="border-t border-gray-100 p-2 bg-gray-50/50">
                <button 
-                 onClick={() => navigate('/clientes')}
+                 onClick={() => navigate('/clients')}
                  className="w-full text-center text-xs text-primary font-medium p-1 hover:underline"
                >
                  Ver todos los clientes
