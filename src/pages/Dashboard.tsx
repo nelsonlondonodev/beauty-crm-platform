@@ -1,6 +1,8 @@
 import { Users, Gift, Award, AlertTriangle } from 'lucide-react';
 import StatCard from '../components/dashboard/StatCard';
 import { useDashboardStats } from '../hooks/useDashboardStats';
+import RevenueChart from '../components/dashboard/RevenueChart';
+import RecentActivity from '../components/dashboard/RecentActivity';
 
 const Dashboard = () => {
   const { stats, loading } = useDashboardStats();
@@ -52,9 +54,9 @@ const Dashboard = () => {
         ))}
       </div>
 
-      {/* Placeholder for future Charts or Recent Activity */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
-        
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7 h-[400px]">
+        <RevenueChart />
+        <RecentActivity />
       </div>
     </div>
   );
