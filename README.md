@@ -95,9 +95,10 @@ CRM B2B moderno para el sector de la belleza (Peluquerías, Barberías, Spas).
 -   **UX Avanzada**: Modal moderno (`NewStaffModal`) para la creación guiada de nuevos colaboradores y asignación de sus respectivos Porcentajes de Comisión (%).
 -   **Botones de Liquidación**: Acciones de un solo click ("Pagar" individualmente o "Liquidar Todos") que registran los pagos en la base de datos localizando la deuda pendiente a $0.
 
-## Pendientes (WIP)
+## Pendientes (WIP) y Deuda Técnica
 
 -   [ ] Implementar sistema de roles (RBAC) más robusto en el futuro.
+-   [ ] **Seguridad de Base de Datos (RLS):** Las políticas actuales en `Supabase` permiten a cualquier usuario con sesión iniciada leer y escribir todas las facturas y empleados (`USING (true)`). Aunque esto está mitigado temporalmente en este MVP mediante restricción por lista blanca (`ALLOWED_EMAILS`), se debe refactorizar próximamente para un SaaS multi-tenant validando que los datos consultados pertenezcan únicamente al usuario actual (e.g., `auth.uid() = owner_id`).
 
 ## Comandos
 

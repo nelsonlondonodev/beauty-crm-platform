@@ -40,8 +40,12 @@ const NewStaffModal: React.FC<NewStaffModalProps> = ({ isOpen, onClose, onSave }
         comision_porcentaje: 30,
       });
       onClose();
-    } catch (err: any) {
-      setError(err.message || 'Error al guardar el colaborador.');
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Error al guardar el colaborador.');
+      }
     } finally {
       setIsSubmitting(false);
     }

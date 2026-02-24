@@ -5,7 +5,13 @@ import { useClients } from '../../hooks/useClients';
 interface NewAppointmentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (appointment: any) => Promise<void>;
+  onSave: (appointment: { 
+    cliente_id: string; 
+    fecha_cita: string; 
+    servicio: string; 
+    estado: 'programada'; 
+    pago_estado: 'pendiente';
+  }) => Promise<void>;
   selectedDate: Date | null;
 }
 
