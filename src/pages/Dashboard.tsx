@@ -54,10 +54,7 @@ const Dashboard = () => {
 
       {/* Placeholder for future Charts or Recent Activity */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
-        <div className="col-span-full rounded-xl border border-gray-100 bg-white p-12 text-center text-gray-500 shadow-sm border-dashed">
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Desbloquea todo el potencial con Agenda PRO 🌟</h3>
-            <p className="text-sm">Gráficos de rendimiento avanzado y Gestión de citas automatizada exclusiva para usuarios Pro.</p>
-        </div>
+        
       </div>
     </div>
   );
