@@ -27,9 +27,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [role, setRole] = useState<AppRole | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Función auxiliar para verificar si el usuario tiene rol y obtenerlo
+  // Función auxiliar para verificar si el usuario tiene rol y obtenerlo con reintentos
   const checkUserAuthorization = async (
-    currentSession: Session | null
+    currentSession: Session | null,
+    retryCount = 0
   ): Promise<AppRole | null> => {
     if (!currentSession?.user?.id) return null;
 
@@ -38,29 +39,33 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         .from('user_roles')
         .select('role')
         .eq('user_id', currentSession.user.id)
-        .single();
+        .maybeSingle();
 
-      if (error || !data) {
+      if (error) {
         console.warn(
-          `Intento de acceso sin rol válido o con error: `,
-          error?.message
+          `Error obteniendo rol (Intento ${retryCount + 1}):`,
+          error.message
         );
+        // Si hay error de red o timeout, intentamos hasta 3 veces
+        if (retryCount < 2) {
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          return checkUserAuthorization(currentSession, retryCount + 1);
+        }
+        // Tras los intentos, cerramos sesión por seguridad para no dejar un estado colgado
         await supabase.auth.signOut();
-        setSession(null);
-        setUser(null);
-        setRole(null);
-        // Usamos setTimeout para no bloquear el hilo o fallar si se llama múltiples veces
-        setTimeout(() => {
-          console.error(
-            'Acceso denegado: Usuario sin rol en la base de datos.'
-          );
-        }, 100);
+        return null;
+      }
+
+      if (!data) {
+        console.error('Acceso denegado: Usuario sin rol en la base de datos.');
+        // Si NO hay registro definitivamente, cerramos la sesión del usuario
+        await supabase.auth.signOut();
         return null;
       }
 
       return data.role as AppRole;
     } catch (err) {
-      console.error('Error catastrófico en la revisión de roles:', err);
+      console.error('Excepción al revisar roles:', err);
       return null;
     }
   };
@@ -68,34 +73,34 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     let mounted = true;
 
-    // Establecemos un "seguro" de tiempo. Si Supabase tarda más de 5 segundos,
-    // forzamos el fin de la carga para no dejar al usuario varado.
-    const failsafeTimeout = setTimeout(() => {
-      if (mounted && loading) {
-        console.warn('Auth timeout: Forzando pantalla de carga a falso.');
-        setLoading(false);
-      }
-    }, 5000);
-
     const init = async () => {
       try {
         const {
           data: { session },
+          error,
         } = await supabase.auth.getSession();
+
+        if (error) throw error;
 
         if (session) {
           const userRole = await checkUserAuthorization(session);
-          if (mounted && userRole) {
-            setSession(session);
-            setUser(session.user);
-            setRole(userRole);
+          if (mounted) {
+            if (userRole) {
+              setSession(session);
+              setUser(session.user);
+              setRole(userRole);
+            } else {
+              // Si no tiene rol asginado, lo disparamos como no autenticado
+              setSession(null);
+              setUser(null);
+              setRole(null);
+            }
           }
         }
       } catch (e) {
         console.error('Initial session fetch error:', e);
       } finally {
         if (mounted) setLoading(false);
-        clearTimeout(failsafeTimeout);
       }
     };
 
@@ -108,25 +113,30 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (currentSession) {
         const userRole = await checkUserAuthorization(currentSession);
-        if (mounted && userRole) {
-          setSession(currentSession);
-          setUser(currentSession.user);
-          setRole(userRole);
+        if (mounted) {
+          if (userRole) {
+            setSession(currentSession);
+            setUser(currentSession.user);
+            setRole(userRole);
+          } else {
+            setSession(null);
+            setUser(null);
+            setRole(null);
+          }
+          setLoading(false);
         }
       } else {
         if (mounted) {
           setSession(null);
           setUser(null);
           setRole(null);
+          setLoading(false);
         }
       }
-
-      if (mounted) setLoading(false);
     });
 
     return () => {
       mounted = false;
-      clearTimeout(failsafeTimeout);
       subscription.unsubscribe();
     };
   }, []);
@@ -137,7 +147,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setSession(null);
       setUser(null);
       setRole(null);
-      
+
       // 2. Cerramos la sesión en el backend
       await supabase.auth.signOut();
     } catch (error) {
