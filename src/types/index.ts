@@ -57,6 +57,7 @@ export interface ClientDbRow {
 
 export interface Appointment {
   id: string;
+  user_id?: string;
   cliente_id: string;
   fecha_cita: string;
   servicio: string;
@@ -81,6 +82,7 @@ export interface InvoiceItem {
 
 export interface Empleado {
   id: string;
+  user_id?: string;
   nombre: string;
   rol: string;
   comision_porcentaje: number;
@@ -90,6 +92,7 @@ export interface Empleado {
 
 export interface Factura {
   id: string;
+  user_id?: string;
   cliente_id?: string | null;
   subtotal: number;
   descuento: number;
@@ -100,6 +103,7 @@ export interface Factura {
 
 export interface FacturaItem {
   id: string;
+  user_id?: string;
   factura_id: string;
   empleado_id?: string | null;
   descripcion: string;
@@ -112,6 +116,7 @@ export interface FacturaItem {
 
 export interface PagoComision {
   id: string;
+  user_id?: string;
   empleado_id: string;
   monto_pagado: number;
   fecha_pago?: string;

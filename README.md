@@ -108,7 +108,7 @@ CRM B2B moderno para el sector de la belleza (Peluquerías, Barberías, Spas).
 ## Pendientes (WIP) y Deuda Técnica
 
 -   [ ] Implementar sistema de roles (RBAC) más robusto en el futuro.
--   [ ] **Seguridad de Base de Datos (RLS):** Las políticas actuales en `Supabase` permiten a cualquier usuario con sesión iniciada leer y escribir todas las facturas y empleados (`USING (true)`). Aunque esto está mitigado temporalmente en este MVP mediante restricción por lista blanca (`ALLOWED_EMAILS`), se debe refactorizar próximamente para un SaaS multi-tenant validando que los datos consultados pertenezcan únicamente al usuario actual (e.g., `auth.uid() = owner_id`).
+-   [x] **Seguridad de Base de Datos (RLS Multi-Tenant):** Se aislaron los datos mediante políticas de fila (`auth.uid() = user_id`) en las tablas transaccionales, preparando la aplicación para escalar a SaaS.
 
 ## Comandos
 
