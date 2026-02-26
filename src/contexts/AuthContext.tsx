@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useRef,
+} from 'react';
 import type { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 
@@ -51,6 +57,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [role, setRole] = useState<AppRole | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Usamos un Ref inmutable en vez de variables locales que sucumben a closures obsoletos
+  const activeUserIdRef = useRef<string | null>(null);
+
   useEffect(() => {
     let mounted = true;
 
@@ -71,12 +80,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               setSession(session);
               setUser(session.user);
               setRole(userRole);
+              activeUserIdRef.current = session.user.id;
             } else {
               // Si falla gravemente el rol, destrozamos por seguridad la sesión inválida
               await supabase.auth.signOut();
               setSession(null);
               setUser(null);
               setRole(null);
+              activeUserIdRef.current = null;
             }
           }
         } else {
@@ -84,6 +95,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setSession(null);
             setUser(null);
             setRole(null);
+            activeUserIdRef.current = null;
           }
         }
       } catch (err) {
@@ -111,24 +123,36 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setSession(null);
         setUser(null);
         setRole(null);
+        activeUserIdRef.current = null;
         setLoading(false);
         return;
       }
 
-      // Si es un log-in natural o un refresh
+      // Si es una sincronización en vivo o un login pasivo:
       if (currentSession?.user) {
+        // ¿Ya lo teníamos cargado en la misma sesión? Entonces es un simple refresh del token de fondo.
+        // No bloqueamos la UI con setLoading(true). Actualizamos sesión invisiblemente.
+        if (activeUserIdRef.current === currentSession.user.id) {
+          setSession(currentSession);
+          return;
+        }
+
+        // ES genuinamente una cuenta distinta intentando entrar a la vista. Aquí SI bloqueamos
         setLoading(true); // Pantalla bloqueada temporal
         const userRole = await fetchRoleFromDB(currentSession.user.id);
+
         if (mounted) {
           if (userRole) {
             setSession(currentSession);
             setUser(currentSession.user);
             setRole(userRole);
+            activeUserIdRef.current = currentSession.user.id;
           } else {
             await supabase.auth.signOut();
             setSession(null);
             setUser(null);
             setRole(null);
+            activeUserIdRef.current = null;
           }
           setLoading(false); // Liberar Interfaz
         }

@@ -43,8 +43,20 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
 
   // Verifica si la ruta requiere roles específicos y el usuario los tiene
   if (allowedRoles && role && !allowedRoles.includes(role)) {
-    // En lugar de enviarlos obligatoriamente a /calendar, los dirige a su ruta principal ideal
     const fallbackRoute = getFallbackRoute(role);
+    // VITAL: Prevenir bucles infinitos de redirección
+    if (window.location.pathname === fallbackRoute) {
+      return (
+        <div className="flex h-screen w-full flex-col items-center justify-center bg-gray-50 px-4 text-center">
+          <h2 className="mb-2 text-2xl font-bold text-gray-900">
+            Acceso Restringido
+          </h2>
+          <p className="text-gray-500">
+            No cuentas con los permisos para ver esta sección.
+          </p>
+        </div>
+      );
+    }
     return <Navigate to={fallbackRoute} replace />;
   }
 
