@@ -34,7 +34,9 @@ function App() {
                     <Route
                       path="/clients"
                       element={
-                        <ProtectedRoute allowedRoles={['owner', 'admin', 'staff']}>
+                        <ProtectedRoute
+                          allowedRoles={['owner', 'admin', 'staff']}
+                        >
                           <Clients />
                         </ProtectedRoute>
                       }
@@ -42,7 +44,9 @@ function App() {
                     <Route
                       path="/calendar"
                       element={
-                        <ProtectedRoute allowedRoles={['owner', 'admin', 'staff']}>
+                        <ProtectedRoute
+                          allowedRoles={['owner', 'admin', 'staff']}
+                        >
                           <Calendar />
                         </ProtectedRoute>
                       }
@@ -66,7 +70,9 @@ function App() {
                     <Route
                       path="/billing"
                       element={
-                        <ProtectedRoute allowedRoles={['owner', 'admin', 'staff']}>
+                        <ProtectedRoute
+                          allowedRoles={['owner', 'admin', 'staff']}
+                        >
                           <Billing />
                         </ProtectedRoute>
                       }

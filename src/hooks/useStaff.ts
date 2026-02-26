@@ -24,8 +24,12 @@ export const useStaff = () => {
       const data = await getEmpleadosConSaldos();
       setStaff(data as EmpleadoConSaldo[]);
       setError(null);
-    } catch (err: any) {
-      setError(err.message || 'Error desconocido al cargar empleados');
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Error desconocido al cargar empleados'
+      );
     } finally {
       setLoading(false);
     }
@@ -40,8 +44,11 @@ export const useStaff = () => {
       await registrarPagoComision(empleadoId, monto);
       await fetchStaffData(); // Refresh data to reset balance
       return { success: true };
-    } catch (err: any) {
-      return { success: false, error: err.message };
+    } catch (err) {
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : 'Error desconocido',
+      };
     }
   };
 
@@ -60,8 +67,11 @@ export const useStaff = () => {
       await liquidarTodos(pendingPayments);
       await fetchStaffData();
       return { success: true };
-    } catch (err: any) {
-      return { success: false, error: err.message };
+    } catch (err) {
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : 'Error desconocido',
+      };
     }
   };
 
@@ -74,8 +84,11 @@ export const useStaff = () => {
       await crearEmpleado(staffData);
       await fetchStaffData();
       return { success: true };
-    } catch (err: any) {
-      return { success: false, error: err.message };
+    } catch (err) {
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : 'Error desconocido',
+      };
     }
   };
 

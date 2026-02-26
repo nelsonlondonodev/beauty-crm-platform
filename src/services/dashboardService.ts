@@ -123,11 +123,26 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
     .gte('fecha_venta', sixMonthsAgo.toISOString());
 
   if (facturasError) {
-    console.error(`Error fetching facturas for revenue: ${facturasError.message}`);
+    console.error(
+      `Error fetching facturas for revenue: ${facturasError.message}`
+    );
   } else if (facturas) {
     // Array con los nombres de los meses en español
-    const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-    
+    const monthNames = [
+      'Ene',
+      'Feb',
+      'Mar',
+      'Abr',
+      'May',
+      'Jun',
+      'Jul',
+      'Ago',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dic',
+    ];
+
     // Inicializar el arreglo de los últimos 7 meses (ordenados del más antiguo al más reciente)
     for (let i = 6; i >= 0; i--) {
       const targetDate = addMonths(today, -i);
@@ -136,25 +151,30 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
         ingresos: 0,
         // guardamos month y year local temporalmente para simplificar la suma
         _month: targetDate.getMonth(),
-        _year: targetDate.getFullYear()
+        _year: targetDate.getFullYear(),
       } as any);
     }
 
     // Sumamos los totales de las facturas en el mes correspondiente
-    facturas.forEach(factura => {
+    facturas.forEach((factura) => {
       if (!factura.fecha_venta) return;
       const fDate = new Date(factura.fecha_venta);
       const fMonth = fDate.getMonth();
       const fYear = fDate.getFullYear();
 
-      const bucket = revenueData.find((b: any) => b._month === fMonth && b._year === fYear);
+      const bucket = revenueData.find(
+        (b: any) => b._month === fMonth && b._year === fYear
+      );
       if (bucket) {
         bucket.ingresos += Number(factura.total) || 0;
       }
     });
 
     // Limpiamos los campos temporales
-    revenueData = revenueData.map(b => ({ name: b.name, ingresos: b.ingresos }));
+    revenueData = revenueData.map((b) => ({
+      name: b.name,
+      ingresos: b.ingresos,
+    }));
   }
 
   return {

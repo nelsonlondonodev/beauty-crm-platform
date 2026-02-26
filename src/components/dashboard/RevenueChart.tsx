@@ -62,7 +62,10 @@ const RevenueChart: React.FC<RevenueChartProps> = ({ data }) => {
                 border: 'none',
                 boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
               }}
-              formatter={(value: any) => [`$${value}`, 'Ingresos']}
+              formatter={(value: number | undefined) => [
+                `$${value || 0}`,
+                'Ingresos',
+              ]}
             />
             <Area
               type="monotone"

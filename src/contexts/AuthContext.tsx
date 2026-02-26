@@ -28,7 +28,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   // Función auxiliar para verificar si el usuario tiene rol y obtenerlo
-  const checkUserAuthorization = async (currentSession: Session | null): Promise<AppRole | null> => {
+  const checkUserAuthorization = async (
+    currentSession: Session | null
+  ): Promise<AppRole | null> => {
     if (!currentSession?.user?.id) return null;
 
     try {
@@ -37,16 +39,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         .select('role')
         .eq('user_id', currentSession.user.id)
         .single();
-      
+
       if (error || !data) {
-        console.warn(`Intento de acceso sin rol válido o con error: `, error?.message);
+        console.warn(
+          `Intento de acceso sin rol válido o con error: `,
+          error?.message
+        );
         await supabase.auth.signOut();
         setSession(null);
         setUser(null);
         setRole(null);
         // Usamos setTimeout para no bloquear el hilo o fallar si se llama múltiples veces
         setTimeout(() => {
-           console.error('Acceso denegado: Usuario sin rol en la base de datos.');
+          console.error(
+            'Acceso denegado: Usuario sin rol en la base de datos.'
+          );
         }, 100);
         return null;
       }
@@ -72,8 +79,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const init = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+
         if (session) {
           const userRole = await checkUserAuthorization(session);
           if (mounted && userRole) {
@@ -92,9 +101,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     init();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
       if (event === 'INITIAL_SESSION') return;
-      
+
       if (currentSession) {
         const userRole = await checkUserAuthorization(currentSession);
         if (mounted && userRole) {
@@ -109,7 +120,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setRole(null);
         }
       }
-      
+
       if (mounted) setLoading(false);
     });
 

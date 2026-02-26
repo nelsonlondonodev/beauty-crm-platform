@@ -8,12 +8,13 @@ import {
   Scissors,
   Receipt,
   Briefcase,
+  type LucideIcon,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useAuth, type AppRole } from '../../contexts/AuthContext';
 
 interface NavItem {
-  icon: any;
+  icon: LucideIcon;
   label: string;
   path: string;
   allowedRoles: AppRole[];
@@ -23,12 +24,42 @@ const Sidebar = () => {
   const { signOut, role } = useAuth();
 
   const navItems: NavItem[] = [
-    { icon: LayoutDashboard, label: 'Dashboard', path: '/', allowedRoles: ['owner', 'admin'] },
-    { icon: Users, label: 'Clientes', path: '/clients', allowedRoles: ['owner', 'admin', 'staff'] },
-    { icon: Briefcase, label: 'Personal', path: '/staff', allowedRoles: ['owner', 'admin'] },
-    { icon: Receipt, label: 'Facturación / POS', path: '/billing', allowedRoles: ['owner', 'admin', 'staff'] },
-    { icon: Calendar, label: 'Agenda', path: '/calendar', allowedRoles: ['owner', 'admin', 'staff'] },
-    { icon: Settings, label: 'Configuración', path: '/settings', allowedRoles: ['owner', 'admin'] },
+    {
+      icon: LayoutDashboard,
+      label: 'Dashboard',
+      path: '/',
+      allowedRoles: ['owner', 'admin'],
+    },
+    {
+      icon: Users,
+      label: 'Clientes',
+      path: '/clients',
+      allowedRoles: ['owner', 'admin', 'staff'],
+    },
+    {
+      icon: Briefcase,
+      label: 'Personal',
+      path: '/staff',
+      allowedRoles: ['owner', 'admin'],
+    },
+    {
+      icon: Receipt,
+      label: 'Facturación / POS',
+      path: '/billing',
+      allowedRoles: ['owner', 'admin', 'staff'],
+    },
+    {
+      icon: Calendar,
+      label: 'Agenda',
+      path: '/calendar',
+      allowedRoles: ['owner', 'admin', 'staff'],
+    },
+    {
+      icon: Settings,
+      label: 'Configuración',
+      path: '/settings',
+      allowedRoles: ['owner', 'admin'],
+    },
   ];
 
   // Filtramos los items basándonos en el rol actual del usuario logueado

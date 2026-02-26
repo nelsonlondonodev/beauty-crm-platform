@@ -8,6 +8,24 @@ interface ProtectedRouteProps {
   allowedRoles?: AppRole[];
 }
 
+/**
+ * Función pura que determina la ruta de respaldo según el rol.
+ * Evita la creación de componentes monolíticos y facilita pruebas unitarias.
+ */
+const getFallbackRoute = (role: AppRole | null): string => {
+  if (!role) return '/login';
+
+  switch (role) {
+    case 'staff':
+      return '/calendar'; // Vista ideal para empleados base
+    case 'admin':
+    case 'owner':
+      return '/'; // El dashboard es su base de operaciones
+    default:
+      return '/calendar';
+  }
+};
+
 const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
   const { session, role, loading } = useAuth();
 
@@ -23,14 +41,14 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
     return <Navigate to="/login" replace />;
   }
 
-  // Verifica si la ruta requiere roles específicos y si el usuario los tiene
+  // Verifica si la ruta requiere roles específicos y el usuario los tiene
   if (allowedRoles && role && !allowedRoles.includes(role)) {
-    // Si es un empleado (staff) intentando acceder al Dashboard u otra ruta prohibida,
-    // se le redirige por defecto a su vista principal (Agenda)
-    return <Navigate to="/calendar" replace />;
+    // En lugar de enviarlos obligatoriamente a /calendar, los dirige a su ruta principal ideal
+    const fallbackRoute = getFallbackRoute(role);
+    return <Navigate to={fallbackRoute} replace />;
   }
 
-  return children;
+  return <>{children}</>;
 };
 
 export default ProtectedRoute;
