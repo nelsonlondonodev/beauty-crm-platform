@@ -26,6 +26,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [role, setRole] = useState<AppRole | null>(null);
   const [loading, setLoading] = useState(true);
+  const [initialized, setInitialized] = useState(false); // Para no saltar de golpe al login en el primer render
 
   // Función auxiliar para verificar si el usuario tiene rol y obtenerlo con reintentos
   const checkUserAuthorization = async (
@@ -90,7 +91,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               setUser(session.user);
               setRole(userRole);
             } else {
-              // Si no tiene rol asginado, lo disparamos como no autenticado
               setSession(null);
               setUser(null);
               setRole(null);
@@ -100,11 +100,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       } catch (e) {
         console.error('Initial session fetch error:', e);
       } finally {
-        if (mounted) setLoading(false);
+        if (mounted) {
+          setLoading(false);
+          setInitialized(true);
+        }
       }
     };
 
-    init();
+    if (!initialized) {
+      init();
+    }
 
     const {
       data: { subscription },
@@ -112,6 +117,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (event === 'INITIAL_SESSION') return;
 
       if (currentSession) {
+        // En cada cambio de sesión o recarga forzada por Auth
+        setLoading(true);
         const userRole = await checkUserAuthorization(currentSession);
         if (mounted) {
           if (userRole) {
@@ -139,7 +146,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, []);
+  }, [initialized]);
 
   const signOut = async () => {
     try {
