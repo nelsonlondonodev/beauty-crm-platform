@@ -21,60 +21,41 @@ const AuthContext = createContext<AuthContextType>({
   signOut: async () => {},
 });
 
+/**
+ * Función pura para obtener el rol desde Supabase. Sólo hace de "getter".
+ * Se define fuera del componente para evitar ser recreada en cada render,
+ * mejorando el rendimiento y siguiendo las mejores prácticas (SOLID).
+ */
+const fetchRoleFromDB = async (userId: string): Promise<AppRole | null> => {
+  try {
+    const { data, error } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    if (error || !data) {
+      console.warn('Rol no encontrado o error local fetching:', error?.message);
+      return null;
+    }
+    return data.role as AppRole;
+  } catch (err) {
+    console.error('Excepción resolviendo rol:', err);
+    return null;
+  }
+};
+
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [role, setRole] = useState<AppRole | null>(null);
   const [loading, setLoading] = useState(true);
-  const [initialized, setInitialized] = useState(false); // Para no saltar de golpe al login en el primer render
-
-  // Función auxiliar para verificar si el usuario tiene rol y obtenerlo con reintentos
-  const checkUserAuthorization = async (
-    currentSession: Session | null,
-    retryCount = 0
-  ): Promise<AppRole | null> => {
-    if (!currentSession?.user?.id) return null;
-
-    try {
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', currentSession.user.id)
-        .maybeSingle();
-
-      if (error) {
-        console.warn(
-          `Error obteniendo rol (Intento ${retryCount + 1}):`,
-          error.message
-        );
-        // Si hay error de red o timeout, intentamos hasta 3 veces
-        if (retryCount < 2) {
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-          return checkUserAuthorization(currentSession, retryCount + 1);
-        }
-        // Tras los intentos, cerramos sesión por seguridad para no dejar un estado colgado
-        await supabase.auth.signOut();
-        return null;
-      }
-
-      if (!data) {
-        console.error('Acceso denegado: Usuario sin rol en la base de datos.');
-        // Si NO hay registro definitivamente, cerramos la sesión del usuario
-        await supabase.auth.signOut();
-        return null;
-      }
-
-      return data.role as AppRole;
-    } catch (err) {
-      console.error('Excepción al revisar roles:', err);
-      return null;
-    }
-  };
 
   useEffect(() => {
     let mounted = true;
 
-    const init = async () => {
+    // Al arrancar, verificamos el estado de manera síncrona/directa
+    const initializeAuth = async () => {
       try {
         const {
           data: { session },
@@ -83,74 +64,87 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         if (error) throw error;
 
-        if (session) {
-          const userRole = await checkUserAuthorization(session);
+        if (session && session.user) {
+          const userRole = await fetchRoleFromDB(session.user.id);
           if (mounted) {
             if (userRole) {
               setSession(session);
               setUser(session.user);
               setRole(userRole);
             } else {
+              // Si falla gravemente el rol, destrozamos por seguridad la sesión inválida
+              await supabase.auth.signOut();
               setSession(null);
               setUser(null);
               setRole(null);
             }
           }
+        } else {
+          if (mounted) {
+            setSession(null);
+            setUser(null);
+            setRole(null);
+          }
         }
-      } catch (e) {
-        console.error('Initial session fetch error:', e);
+      } catch (err) {
+        console.error('Error crítico al iniciar sesión de app:', err);
       } finally {
         if (mounted) {
           setLoading(false);
-          setInitialized(true);
         }
       }
     };
 
-    if (!initialized) {
-      init();
-    }
+    // Lanzamos carga inicial INMEDIATA sin flags trampa
+    initializeAuth();
 
+    // Reacción pasiva a eventos directos del SDK (Logins, relogins, logouts)
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
+      if (!mounted) return;
+
+      // ignoramos INITIAL_SESSION para evitar sobre-escrituras o triggers redundantes en local
       if (event === 'INITIAL_SESSION') return;
 
-      if (currentSession) {
-        // En cada cambio de sesión o recarga forzada por Auth
-        setLoading(true);
-        const userRole = await checkUserAuthorization(currentSession);
+      if (event === 'SIGNED_OUT' || !currentSession) {
+        setSession(null);
+        setUser(null);
+        setRole(null);
+        setLoading(false);
+        return;
+      }
+
+      // Si es un log-in natural o un refresh
+      if (currentSession?.user) {
+        setLoading(true); // Pantalla bloqueada temporal
+        const userRole = await fetchRoleFromDB(currentSession.user.id);
         if (mounted) {
           if (userRole) {
             setSession(currentSession);
             setUser(currentSession.user);
             setRole(userRole);
           } else {
+            await supabase.auth.signOut();
             setSession(null);
             setUser(null);
             setRole(null);
           }
-          setLoading(false);
-        }
-      } else {
-        if (mounted) {
-          setSession(null);
-          setUser(null);
-          setRole(null);
-          setLoading(false);
+          setLoading(false); // Liberar Interfaz
         }
       }
     });
 
+    // Cleanup para Strict Mode de React (destruimos el scope si es necesario)
     return () => {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [initialized]);
+  }, []); // Dependencias vacías []. Nunca usar flags locales.
 
   const signOut = async () => {
     try {
-      // 1. Limpiamos estado local de inmedidato para que la UI reaccione más rápido
+      // 1. Limpiamos estado local de inmediato para que la UI reaccione más rápido
       setSession(null);
       setUser(null);
       setRole(null);
