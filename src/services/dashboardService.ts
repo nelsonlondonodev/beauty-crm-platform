@@ -6,6 +6,14 @@ export interface RevenueData {
   ingresos: number;
 }
 
+export interface ActivityItem {
+  id: string;
+  type: 'appointment' | 'client' | 'sale' | 'bonus';
+  title: string;
+  description: string;
+  timestamp: string;
+}
+
 export interface DashboardStats {
   totalClients: number;
   newClientsThisMonth: number;
@@ -13,6 +21,7 @@ export interface DashboardStats {
   upcomingBirthdays: number;
   expiringBonuses: number;
   revenueData: RevenueData[];
+  recentActivity: ActivityItem[];
 }
 
 export const getDashboardStats = async (): Promise<DashboardStats> => {
@@ -177,6 +186,114 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
     }));
   }
 
+  // 7. Actividad Reciente (Combinada de varias tablas)
+  let recentActivity: ActivityItem[] = [];
+
+  try {
+    const [appointmentsRes, clientsRes, ventasRes, bonosRes] =
+      await Promise.all([
+        supabase
+          .from('appointments')
+          .select(
+            'id, created_at, servicio, client:clientes_fidelizacion(nombre)'
+          )
+          .order('created_at', { ascending: false })
+          .limit(5),
+        supabase
+          .from('clientes_fidelizacion')
+          .select('id, created_at, nombre')
+          .order('created_at', { ascending: false })
+          .limit(5),
+        supabase
+          .from('facturas')
+          .select('id, fecha_venta')
+          .order('fecha_venta', { ascending: false })
+          .limit(5),
+        supabase
+          .from('bonos')
+          .select('id, fecha_canje, tipo, client:clientes_fidelizacion(nombre)')
+          .not('fecha_canje', 'is', null)
+          .order('fecha_canje', { ascending: false })
+          .limit(5),
+      ]);
+
+    if (appointmentsRes.data) {
+      appointmentsRes.data.forEach((a: any) => {
+        let nombre = 'Cliente desconocido';
+        // Handle nested client representation from supabase join
+        if (a.client) {
+          if (Array.isArray(a.client)) {
+            nombre = a.client[0]?.nombre || nombre;
+          } else {
+            nombre = a.client.nombre || nombre;
+          }
+        }
+        recentActivity.push({
+          id: `app-${a.id}`,
+          type: 'appointment',
+          title: 'Nueva Cita Programada',
+          description: `${nombre.trim()} reservó para ${a.servicio}`,
+          timestamp: a.created_at,
+        });
+      });
+    }
+
+    if (clientsRes.data) {
+      clientsRes.data.forEach((c: any) => {
+        recentActivity.push({
+          id: `cli-${c.id}`,
+          type: 'client',
+          title: 'Nuevo Cliente',
+          description: `${(c.nombre || '').trim()} se unió al programa`,
+          timestamp: c.created_at,
+        });
+      });
+    }
+
+    if (ventasRes.data) {
+      ventasRes.data.forEach((v: any) => {
+        recentActivity.push({
+          id: `ven-${v.id}`,
+          type: 'sale',
+          title: 'Venta Procesada',
+          description: `Nueva factura generada en el sistema`,
+          timestamp: v.fecha_venta,
+        });
+      });
+    }
+
+    if (bonosRes.data) {
+      bonosRes.data.forEach((b: any) => {
+        let nombre = 'Cliente desconocido';
+        if (b.client) {
+          if (Array.isArray(b.client)) {
+            nombre = b.client[0]?.nombre || nombre;
+          } else {
+            nombre = b.client.nombre || nombre;
+          }
+        }
+        recentActivity.push({
+          id: `bon-${b.id}`,
+          type: 'bonus',
+          title: 'Bono Canjeado',
+          description: `${nombre.trim()} canjeó su bono de ${b.tipo}`,
+          timestamp: b.fecha_canje,
+        });
+      });
+    }
+
+    // Ordenar de más reciente a más antigua
+    recentActivity.sort(
+      (a, b) =>
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
+
+    // Quedarse solo con las últimas 10 actividades en total
+    recentActivity = recentActivity.slice(0, 10);
+  } catch (err) {
+    console.error('Error fetching recent activity:', err);
+  }
+
   return {
     totalClients: totalClients || 0,
     newClientsThisMonth: newClients || 0,
@@ -184,5 +301,6 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
     upcomingBirthdays: upcomingBirthdaysCount,
     expiringBonuses: expiringBonusesCount,
     revenueData,
+    recentActivity,
   };
 };

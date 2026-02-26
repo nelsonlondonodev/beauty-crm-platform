@@ -14,6 +14,7 @@ export const useDashboardStats = () => {
     upcomingBirthdays: 0,
     expiringBonuses: 0,
     revenueData: [],
+    recentActivity: [],
   });
   const [loading, setLoading] = useState(true);
 
