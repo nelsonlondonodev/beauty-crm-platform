@@ -9,17 +9,11 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
-const data = [
-  { name: 'Ene', ingresos: 4000 },
-  { name: 'Feb', ingresos: 3000 },
-  { name: 'Mar', ingresos: 2000 },
-  { name: 'Abr', ingresos: 2780 },
-  { name: 'May', ingresos: 1890 },
-  { name: 'Jun', ingresos: 2390 },
-  { name: 'Jul', ingresos: 3490 },
-];
+interface RevenueChartProps {
+  data: { name: string; ingresos: number }[];
+}
 
-const RevenueChart: React.FC = () => {
+const RevenueChart: React.FC<RevenueChartProps> = ({ data }) => {
   return (
     <div className="col-span-full min-h-0 min-w-0 rounded-xl border border-gray-100 bg-white p-6 shadow-sm lg:col-span-4">
       <div className="mb-6 flex items-center justify-between">

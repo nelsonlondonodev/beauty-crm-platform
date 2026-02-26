@@ -60,7 +60,7 @@ const Dashboard = () => {
       </div>
 
       <div className="grid gap-6 lg:h-[400px] lg:grid-cols-7">
-        <RevenueChart />
+        <RevenueChart data={stats.revenueData} />
         <RecentActivity />
       </div>
     </div>

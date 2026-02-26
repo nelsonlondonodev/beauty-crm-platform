@@ -1,12 +1,18 @@
 import { supabase } from '../lib/supabase';
 import { startOfMonth, endOfMonth, addDays, addMonths } from 'date-fns';
 
+export interface RevenueData {
+  name: string;
+  ingresos: number;
+}
+
 export interface DashboardStats {
   totalClients: number;
   newClientsThisMonth: number;
   activeBonuses: number;
   upcomingBirthdays: number;
   expiringBonuses: number;
+  revenueData: RevenueData[];
 }
 
 export const getDashboardStats = async (): Promise<DashboardStats> => {
@@ -106,11 +112,57 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
     }).length;
   }
 
+  let revenueData: RevenueData[] = [];
+
+  // 6. Ingresos de los últimos 7 meses
+  // Calculamos la fecha de corte (hace 6 meses + el mes actual)
+  const sixMonthsAgo = startOfMonth(addMonths(today, -6));
+  const { data: facturas, error: facturasError } = await supabase
+    .from('facturas')
+    .select('fecha_venta, total')
+    .gte('fecha_venta', sixMonthsAgo.toISOString());
+
+  if (facturasError) {
+    console.error(`Error fetching facturas for revenue: ${facturasError.message}`);
+  } else if (facturas) {
+    // Array con los nombres de los meses en español
+    const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    
+    // Inicializar el arreglo de los últimos 7 meses (ordenados del más antiguo al más reciente)
+    for (let i = 6; i >= 0; i--) {
+      const targetDate = addMonths(today, -i);
+      revenueData.push({
+        name: monthNames[targetDate.getMonth()],
+        ingresos: 0,
+        // guardamos month y year local temporalmente para simplificar la suma
+        _month: targetDate.getMonth(),
+        _year: targetDate.getFullYear()
+      } as any);
+    }
+
+    // Sumamos los totales de las facturas en el mes correspondiente
+    facturas.forEach(factura => {
+      if (!factura.fecha_venta) return;
+      const fDate = new Date(factura.fecha_venta);
+      const fMonth = fDate.getMonth();
+      const fYear = fDate.getFullYear();
+
+      const bucket = revenueData.find((b: any) => b._month === fMonth && b._year === fYear);
+      if (bucket) {
+        bucket.ingresos += Number(factura.total) || 0;
+      }
+    });
+
+    // Limpiamos los campos temporales
+    revenueData = revenueData.map(b => ({ name: b.name, ingresos: b.ingresos }));
+  }
+
   return {
     totalClients: totalClients || 0,
     newClientsThisMonth: newClients || 0,
     activeBonuses: activeBonuses || 0,
     upcomingBirthdays: upcomingBirthdaysCount,
     expiringBonuses: expiringBonusesCount,
+    revenueData,
   };
 };
