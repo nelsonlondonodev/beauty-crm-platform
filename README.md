@@ -106,9 +106,13 @@ CRM B2B moderno para el sector de la belleza (Peluquerías, Barberías, Spas).
     -   Cerrado automático inteligente al hacer click fuera del componente (`onClickOutside`).
 -   **Redirección Fluida**: Los resultados y el botón de "Ver todos" navegan eficientemente al módulo correspondiente usando React Router (`/clients`).
 
-### 9. Dashboard Dinámico y Reportes Financieros
--   **Gráfico Evolutivo de Ingresos**: Componente `RevenueChart` refactorizado para consumir información generada activamente en tiempo real en lugar de datos estáticos falsos.
--   **Motor de Backend Integrado**: Servicio (`dashboardService.ts`) que consulta directamente la tabla de `facturas`, agregando y sumando totales dinámicamente mes a mes para los últimos 7 periodos, reaccionando automáticamente a los nuevos ingresos y transacciones procesadas por el POS.
+### 9. Dashboard Dinámico y Reportes
+-   **Gráfico Evolutivo de Ingresos**: Componente `RevenueChart` refactorizado para consumir la información generada activamente en tiempo real en lugar de datos estáticos falsos. Motor relacional que consulta la tabla de `facturas` para graficar los últimos 7 periodos, reaccionando automáticamente a los nuevos ingresos y transacciones procesadas por el POS.
+-   **Timeline Real de Actividades**: El feed de `Actividad Reciente` consolidado desde 4 tablas distintas (`appointments`, `clientes_fidelizacion`, `facturas`, `bonos`). Usa `date-fns` para cálculo de fechas relativas ("Hace 5 minutos") y ordena históricamente asegurando que todos los eventos del ecosistema beauty se reflejen de último momento sin estancamientos.
+
+### 10. Estabilidad Estructural y Patrones Limpios (Strict Mode)
+-   **Anti-Spaghetti AuthProvider**: Refactorización profunda y asíncrona del puente SDK para eliminar por completo cierres silenciosos o recargas en bucle de la aplicación.
+-   **Seguridad de Scope y Closures**: Se introdujo a `useRef` para trackear el UserId en línea sin bloquear pantallas (`loading=true`) falsamente, manteniendo blindada la Protección de Rutas sin sobreescribir sesiones en el "Background". Se acopló el esquema **SOLID** abstrayendo peticiones a una función de extracción pura e inmutable `fetchRoleFromDB`.
 
 ## Pendientes (WIP) y Deuda Técnica
 
