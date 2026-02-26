@@ -132,7 +132,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      // 1. Limpiamos estado local de inmedidato para que la UI reaccione más rápido
+      setSession(null);
+      setUser(null);
+      setRole(null);
+      
+      // 2. Cerramos la sesión en el backend
+      await supabase.auth.signOut();
+    } catch (error) {
+      console.error('Error durante el cierre de sesión:', error);
+    }
   };
 
   return (
