@@ -23,12 +23,54 @@ function App() {
               <ProtectedRoute>
                 <Layout>
                   <Routes>
-                    <Route path="/" element={<Dashboard />} />
-                    <Route path="/clients" element={<Clients />} />
-                    <Route path="/calendar" element={<Calendar />} />
-                    <Route path="/settings" element={<Settings />} />
-                    <Route path="/staff" element={<Staff />} />
-                    <Route path="/billing" element={<Billing />} />
+                    <Route
+                      path="/"
+                      element={
+                        <ProtectedRoute allowedRoles={['owner', 'admin']}>
+                          <Dashboard />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/clients"
+                      element={
+                        <ProtectedRoute allowedRoles={['owner', 'admin', 'staff']}>
+                          <Clients />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/calendar"
+                      element={
+                        <ProtectedRoute allowedRoles={['owner', 'admin', 'staff']}>
+                          <Calendar />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/settings"
+                      element={
+                        <ProtectedRoute allowedRoles={['owner', 'admin']}>
+                          <Settings />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/staff"
+                      element={
+                        <ProtectedRoute allowedRoles={['owner', 'admin']}>
+                          <Staff />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/billing"
+                      element={
+                        <ProtectedRoute allowedRoles={['owner', 'admin', 'staff']}>
+                          <Billing />
+                        </ProtectedRoute>
+                      }
+                    />
                   </Routes>
                 </Layout>
               </ProtectedRoute>

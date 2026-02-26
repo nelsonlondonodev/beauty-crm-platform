@@ -2,17 +2,13 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 
-// Lista de correos autorizados
-// TODO: En el futuro esto podría venir de una tabla 'admin_users' en la base de datos
-const ALLOWED_EMAILS = [
-  'nelsonlondonodev@gmail.com',
-  'selonel26@gmail.com',
-  'contacto@narbossalon.com',
-];
+// Tipos de roles soportados
+export type AppRole = 'owner' | 'admin' | 'staff';
 
 interface AuthContextType {
   session: Session | null;
   user: User | null;
+  role: AppRole | null;
   loading: boolean;
   signOut: () => Promise<void>;
 }
@@ -20,6 +16,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType>({
   session: null,
   user: null,
+  role: null,
   loading: true,
   signOut: async () => {},
 });
@@ -27,62 +24,100 @@ const AuthContext = createContext<AuthContextType>({
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
+  const [role, setRole] = useState<AppRole | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Función auxiliar para verificar si el usuario está autorizado
-  const checkUserAuthorization = async (currentSession: Session | null) => {
-    if (currentSession?.user?.email) {
-      if (!ALLOWED_EMAILS.includes(currentSession.user.email)) {
-        console.warn(
-          `Intento de acceso no autorizado: ${currentSession.user.email}`
-        );
+  // Función auxiliar para verificar si el usuario tiene rol y obtenerlo
+  const checkUserAuthorization = async (currentSession: Session | null): Promise<AppRole | null> => {
+    if (!currentSession?.user?.id) return null;
+
+    try {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', currentSession.user.id)
+        .single();
+      
+      if (error || !data) {
+        console.warn(`Intento de acceso sin rol válido o con error: `, error?.message);
         await supabase.auth.signOut();
         setSession(null);
         setUser(null);
-        alert(
-          'Acceso denegado. Tu correo no está autorizado para acceder a este sistema.'
-        );
-        return false;
+        setRole(null);
+        // Usamos setTimeout para no bloquear el hilo o fallar si se llama múltiples veces
+        setTimeout(() => {
+           console.error('Acceso denegado: Usuario sin rol en la base de datos.');
+        }, 100);
+        return null;
       }
+
+      return data.role as AppRole;
+    } catch (err) {
+      console.error('Error catastrófico en la revisión de roles:', err);
+      return null;
     }
-    return true;
   };
 
   useEffect(() => {
-    // Verificar sesión inicial
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      const isAuthorized = await checkUserAuthorization(session);
-      if (isAuthorized) {
-        setSession(session);
-        setUser(session?.user ?? null);
-      }
-      setLoading(false);
-    });
+    let mounted = true;
 
-    // Escuchar cambios en la sesión
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      // Solo actualizamos el estado si el usuario pasa la verificación o si es null (logout)
-      if (!session) {
-        setSession(null);
-        setUser(null);
+    // Establecemos un "seguro" de tiempo. Si Supabase tarda más de 5 segundos,
+    // forzamos el fin de la carga para no dejar al usuario varado.
+    const failsafeTimeout = setTimeout(() => {
+      if (mounted && loading) {
+        console.warn('Auth timeout: Forzando pantalla de carga a falso.');
         setLoading(false);
+      }
+    }, 5000);
+
+    const init = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session) {
+          const userRole = await checkUserAuthorization(session);
+          if (mounted && userRole) {
+            setSession(session);
+            setUser(session.user);
+            setRole(userRole);
+          }
+        }
+      } catch (e) {
+        console.error('Initial session fetch error:', e);
+      } finally {
+        if (mounted) setLoading(false);
+        clearTimeout(failsafeTimeout);
+      }
+    };
+
+    init();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
+      if (event === 'INITIAL_SESSION') return;
+      
+      if (currentSession) {
+        const userRole = await checkUserAuthorization(currentSession);
+        if (mounted && userRole) {
+          setSession(currentSession);
+          setUser(currentSession.user);
+          setRole(userRole);
+        }
       } else {
-        const isAuthorized = await checkUserAuthorization(session);
-        if (isAuthorized) {
-          setSession(session);
-          setUser(session?.user ?? null);
-          setLoading(false);
-        } else {
-          // Si no está autorizado, la función checkUserAuthorization ya hizo el signOut
-          // Solo nos aseguramos que el estado local refleje eso
-          setLoading(false);
+        if (mounted) {
+          setSession(null);
+          setUser(null);
+          setRole(null);
         }
       }
+      
+      if (mounted) setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      clearTimeout(failsafeTimeout);
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signOut = async () => {
@@ -90,7 +125,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ session, user, loading, signOut }}>
+    <AuthContext.Provider value={{ session, user, role, loading, signOut }}>
       {children}
     </AuthContext.Provider>
   );

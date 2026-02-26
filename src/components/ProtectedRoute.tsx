@@ -1,14 +1,15 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth, type AppRole } from '../contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
+  allowedRoles?: AppRole[];
 }
 
-const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { session, loading } = useAuth();
+const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
+  const { session, role, loading } = useAuth();
 
   if (loading) {
     return (
@@ -20,6 +21,13 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
   if (!session) {
     return <Navigate to="/login" replace />;
+  }
+
+  // Verifica si la ruta requiere roles específicos y si el usuario los tiene
+  if (allowedRoles && role && !allowedRoles.includes(role)) {
+    // Si es un empleado (staff) intentando acceder al Dashboard u otra ruta prohibida,
+    // se le redirige por defecto a su vista principal (Agenda)
+    return <Navigate to="/calendar" replace />;
   }
 
   return children;

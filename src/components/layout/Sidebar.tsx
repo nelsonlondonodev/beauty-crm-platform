@@ -10,19 +10,31 @@ import {
   Briefcase,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth, type AppRole } from '../../contexts/AuthContext';
+
+interface NavItem {
+  icon: any;
+  label: string;
+  path: string;
+  allowedRoles: AppRole[];
+}
 
 const Sidebar = () => {
-  const { signOut } = useAuth();
+  const { signOut, role } = useAuth();
 
-  const navItems = [
-    { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
-    { icon: Users, label: 'Clientes', path: '/clients' },
-    { icon: Briefcase, label: 'Personal', path: '/staff' },
-    { icon: Receipt, label: 'Facturación / POS', path: '/billing' },
-    { icon: Calendar, label: 'Agenda', path: '/calendar' },
-    { icon: Settings, label: 'Configuración', path: '/settings' },
+  const navItems: NavItem[] = [
+    { icon: LayoutDashboard, label: 'Dashboard', path: '/', allowedRoles: ['owner', 'admin'] },
+    { icon: Users, label: 'Clientes', path: '/clients', allowedRoles: ['owner', 'admin', 'staff'] },
+    { icon: Briefcase, label: 'Personal', path: '/staff', allowedRoles: ['owner', 'admin'] },
+    { icon: Receipt, label: 'Facturación / POS', path: '/billing', allowedRoles: ['owner', 'admin', 'staff'] },
+    { icon: Calendar, label: 'Agenda', path: '/calendar', allowedRoles: ['owner', 'admin', 'staff'] },
+    { icon: Settings, label: 'Configuración', path: '/settings', allowedRoles: ['owner', 'admin'] },
   ];
+
+  // Filtramos los items basándonos en el rol actual del usuario logueado
+  const filteredNavItems = navItems.filter((item) =>
+    item.allowedRoles.includes(role || 'staff')
+  );
 
   return (
     <aside className="fixed top-0 left-0 z-40 h-screen w-64 -translate-x-full border-r border-gray-200 bg-white/80 backdrop-blur-xl transition-transform md:translate-x-0">
@@ -37,7 +49,7 @@ const Sidebar = () => {
         </div>
 
         <nav className="flex-1 space-y-1">
-          {navItems.map((item) => (
+          {filteredNavItems.map((item) => (
             <NavLink
               key={item.path}
               to={item.path}
