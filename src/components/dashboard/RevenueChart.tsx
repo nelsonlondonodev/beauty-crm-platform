@@ -1,5 +1,13 @@
 import React from 'react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts';
 
 const data = [
   { name: 'Ene', ingresos: 4000 },
@@ -13,11 +21,15 @@ const data = [
 
 const RevenueChart: React.FC = () => {
   return (
-    <div className="col-span-full lg:col-span-4 rounded-xl border border-gray-100 bg-white p-6 shadow-sm min-w-0 min-h-0">
+    <div className="col-span-full min-h-0 min-w-0 rounded-xl border border-gray-100 bg-white p-6 shadow-sm lg:col-span-4">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900">Resumen de Ingresos</h2>
-          <p className="text-sm text-gray-500">Ingresos mensuales de los últimos 7 meses</p>
+          <h2 className="text-lg font-semibold text-gray-900">
+            Resumen de Ingresos
+          </h2>
+          <p className="text-sm text-gray-500">
+            Ingresos mensuales de los últimos 7 meses
+          </p>
         </div>
       </div>
       <div className="mt-4 w-full">
@@ -32,22 +44,30 @@ const RevenueChart: React.FC = () => {
                 <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
-            <XAxis 
-              dataKey="name" 
-              axisLine={false} 
-              tickLine={false} 
-              tick={{ fill: '#6b7280', fontSize: 12 }} 
+            <CartesianGrid
+              strokeDasharray="3 3"
+              vertical={false}
+              stroke="#f3f4f6"
+            />
+            <XAxis
+              dataKey="name"
+              axisLine={false}
+              tickLine={false}
+              tick={{ fill: '#6b7280', fontSize: 12 }}
               dy={10}
             />
-            <YAxis 
-              axisLine={false} 
-              tickLine={false} 
+            <YAxis
+              axisLine={false}
+              tickLine={false}
               tick={{ fill: '#6b7280', fontSize: 12 }}
               tickFormatter={(value) => `$${value}`}
             />
             <Tooltip
-              contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+              contentStyle={{
+                borderRadius: '8px',
+                border: 'none',
+                boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+              }}
               formatter={(value: any) => [`$${value}`, 'Ingresos']}
             />
             <Area

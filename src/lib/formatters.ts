@@ -21,11 +21,16 @@ export const getStatusColor = (status: string): string => {
 };
 
 export const getStatusLabel = (status: string): string => {
-   switch (status) {
-    case 'reclamado': return 'Reclamado';
-    case 'pendiente': return 'Activo';
-    case 'vencido': return 'Vencido';
-    case 'alerta_5_meses': return 'Por Vencer';
-    default: return status;
+  switch (status) {
+    case 'reclamado':
+      return 'Reclamado';
+    case 'pendiente':
+      return 'Activo';
+    case 'vencido':
+      return 'Vencido';
+    case 'alerta_5_meses':
+      return 'Por Vencer';
+    default:
+      return status;
   }
-}
+};

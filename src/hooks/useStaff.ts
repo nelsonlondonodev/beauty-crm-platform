@@ -1,5 +1,10 @@
 import { useState, useEffect } from 'react';
-import { getEmpleadosConSaldos, registrarPagoComision, liquidarTodos, crearEmpleado } from '../services/staffService';
+import {
+  getEmpleadosConSaldos,
+  registrarPagoComision,
+  liquidarTodos,
+  crearEmpleado,
+} from '../services/staffService';
 import type { Empleado } from '../types';
 
 export interface EmpleadoConSaldo extends Empleado {
@@ -42,13 +47,14 @@ export const useStaff = () => {
 
   const payAllPending = async () => {
     const pendingPayments = staff
-      .filter(emp => emp.saldo_pendiente > 0)
-      .map(emp => ({
+      .filter((emp) => emp.saldo_pendiente > 0)
+      .map((emp) => ({
         empleado_id: emp.id,
-        monto: emp.saldo_pendiente
+        monto: emp.saldo_pendiente,
       }));
 
-    if (pendingPayments.length === 0) return { success: true, message: 'No hay pagos pendientes' };
+    if (pendingPayments.length === 0)
+      return { success: true, message: 'No hay pagos pendientes' };
 
     try {
       await liquidarTodos(pendingPayments);
@@ -59,7 +65,11 @@ export const useStaff = () => {
     }
   };
 
-  const addStaff = async (staffData: { nombre: string; rol: string; comision_porcentaje: number }) => {
+  const addStaff = async (staffData: {
+    nombre: string;
+    rol: string;
+    comision_porcentaje: number;
+  }) => {
     try {
       await crearEmpleado(staffData);
       await fetchStaffData();
@@ -69,5 +79,13 @@ export const useStaff = () => {
     }
   };
 
-  return { staff, loading, error, fetchStaffData, payEmployee, payAllPending, addStaff };
+  return {
+    staff,
+    loading,
+    error,
+    fetchStaffData,
+    payEmployee,
+    payAllPending,
+    addStaff,
+  };
 };

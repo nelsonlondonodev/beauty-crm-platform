@@ -29,19 +29,24 @@ const Dashboard = () => {
       icon: Gift,
     },
     {
-       label: 'Bonos por Vencer',
-       value: loading ? '...' : stats.expiringBonuses.toString(),
-       color: 'text-red-500',
-       icon: AlertTriangle,
-    }
+      label: 'Bonos por Vencer',
+      value: loading ? '...' : stats.expiringBonuses.toString(),
+      color: 'text-red-500',
+      icon: AlertTriangle,
+    },
   ];
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">Dashboard</h1>
-          <p className="text-gray-500">Bienvenido de nuevo, Nelson. Aquí está lo que sucede hoy en tu negocio.</p>
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+            Dashboard
+          </h1>
+          <p className="text-gray-500">
+            Bienvenido de nuevo, Nelson. Aquí está lo que sucede hoy en tu
+            negocio.
+          </p>
         </div>
         <div className="flex items-center gap-2">
           {/* Calendar/Appointment buttons can go here later */}
@@ -54,7 +59,7 @@ const Dashboard = () => {
         ))}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-7 lg:h-[400px]">
+      <div className="grid gap-6 lg:h-[400px] lg:grid-cols-7">
         <RevenueChart />
         <RecentActivity />
       </div>

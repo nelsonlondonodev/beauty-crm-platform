@@ -7,7 +7,7 @@ import { supabase } from '../lib/supabase';
 const ALLOWED_EMAILS = [
   'nelsonlondonodev@gmail.com',
   'selonel26@gmail.com',
-  'contacto@narbossalon.com'
+  'contacto@narbossalon.com',
 ];
 
 interface AuthContextType {
@@ -33,11 +33,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const checkUserAuthorization = async (currentSession: Session | null) => {
     if (currentSession?.user?.email) {
       if (!ALLOWED_EMAILS.includes(currentSession.user.email)) {
-        console.warn(`Intento de acceso no autorizado: ${currentSession.user.email}`);
+        console.warn(
+          `Intento de acceso no autorizado: ${currentSession.user.email}`
+        );
         await supabase.auth.signOut();
         setSession(null);
         setUser(null);
-        alert('Acceso denegado. Tu correo no está autorizado para acceder a este sistema.');
+        alert(
+          'Acceso denegado. Tu correo no está autorizado para acceder a este sistema.'
+        );
         return false;
       }
     }
@@ -71,9 +75,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setUser(session?.user ?? null);
           setLoading(false);
         } else {
-            // Si no está autorizado, la función checkUserAuthorization ya hizo el signOut
-            // Solo nos aseguramos que el estado local refleje eso
-             setLoading(false);
+          // Si no está autorizado, la función checkUserAuthorization ya hizo el signOut
+          // Solo nos aseguramos que el estado local refleje eso
+          setLoading(false);
         }
       }
     });

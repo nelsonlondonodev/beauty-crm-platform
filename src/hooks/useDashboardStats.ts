@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
-import { getDashboardStats, type DashboardStats } from '../services/dashboardService';
+import {
+  getDashboardStats,
+  type DashboardStats,
+} from '../services/dashboardService';
 
 export type { DashboardStats };
 
@@ -9,7 +12,7 @@ export const useDashboardStats = () => {
     newClientsThisMonth: 0,
     activeBonuses: 0,
     upcomingBirthdays: 0,
-    expiringBonuses: 0
+    expiringBonuses: 0,
   });
   const [loading, setLoading] = useState(true);
 

@@ -46,40 +46,46 @@ const activities = [
 
 const RecentActivity: React.FC = () => {
   return (
-    <div className="col-span-full lg:col-span-3 rounded-xl border border-gray-100 bg-white shadow-sm flex flex-col">
+    <div className="col-span-full flex flex-col rounded-xl border border-gray-100 bg-white shadow-sm lg:col-span-3">
       <div className="border-b border-gray-100 p-6">
-        <h2 className="text-lg font-semibold text-gray-900">Actividad Reciente</h2>
+        <h2 className="text-lg font-semibold text-gray-900">
+          Actividad Reciente
+        </h2>
       </div>
-      <div className="p-6 flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto p-6">
         <div className="space-y-6">
           {activities.map((activity, index) => (
             <div key={activity.id} className="relative flex gap-4">
               {/* Timeline Connector */}
               {index !== activities.length - 1 && (
-                <div className="absolute left-[1.125rem] top-10 bottom-[-1.5rem] w-px bg-gray-200"></div>
+                <div className="absolute top-10 bottom-[-1.5rem] left-[1.125rem] w-px bg-gray-200"></div>
               )}
-              
+
               <div
                 className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${activity.bg} ring-8 ring-white`}
               >
                 <activity.icon className={`h-4 w-4 ${activity.color}`} />
               </div>
-              
+
               <div className="flex flex-1 flex-col pt-1.5 pb-2">
                 <div className="flex items-start justify-between">
-                  <p className="text-sm font-medium text-gray-900">{activity.title}</p>
-                  <span className="whitespace-nowrap text-xs text-gray-500 ml-4 font-medium px-2.5 py-0.5 rounded-full bg-gray-50 border border-gray-100 shrink-0">
+                  <p className="text-sm font-medium text-gray-900">
+                    {activity.title}
+                  </p>
+                  <span className="ml-4 shrink-0 rounded-full border border-gray-100 bg-gray-50 px-2.5 py-0.5 text-xs font-medium whitespace-nowrap text-gray-500">
                     {activity.time}
                   </span>
                 </div>
-                <p className="mt-1 text-sm text-gray-500 leading-relaxed">{activity.description}</p>
+                <p className="mt-1 text-sm leading-relaxed text-gray-500">
+                  {activity.description}
+                </p>
               </div>
             </div>
           ))}
         </div>
       </div>
       <div className="border-t border-gray-100 p-4">
-        <button className="w-full text-center text-sm font-medium text-primary hover:text-primary/80 transition-colors py-2 rounded-lg hover:bg-primary/5">
+        <button className="text-primary hover:text-primary/80 hover:bg-primary/5 w-full rounded-lg py-2 text-center text-sm font-medium transition-colors">
           Ver toda la actividad
         </button>
       </div>

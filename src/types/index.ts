@@ -8,7 +8,11 @@ export interface User {
   avatar_url?: string;
 }
 
-export type BonusStatus = 'pendiente' | 'reclamado' | 'vencido' | 'alerta_5_meses';
+export type BonusStatus =
+  | 'pendiente'
+  | 'reclamado'
+  | 'vencido'
+  | 'alerta_5_meses';
 
 export interface ClientBonusDisplay {
   id: string;

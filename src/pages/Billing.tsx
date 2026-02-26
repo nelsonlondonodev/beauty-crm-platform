@@ -26,18 +26,18 @@ const Billing = () => {
     setDiscount,
     total,
     isProcessing,
-    handleCheckout
+    handleCheckout,
   } = useBilling();
 
   return (
     <div className="space-y-6 pb-20">
-      <DashboardHeader 
-        title="Facturación (Punto de Venta)" 
+      <DashboardHeader
+        title="Facturación (Punto de Venta)"
         subtitle="Crea facturas, registra servicios y aplica los bonos de tus clientes."
         actions={
-          <button 
+          <button
             onClick={() => window.print()}
-            className="inline-flex items-center justify-center rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-gray-800 transition-colors"
+            className="inline-flex items-center justify-center rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-gray-800"
           >
             <Printer className="mr-2 h-4 w-4" />
             Imprimir Recibo
@@ -45,43 +45,43 @@ const Billing = () => {
         }
       />
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          {/* Left Column: Form & Items */}
-          <div className="xl:col-span-2 space-y-6">
-              <BillingClientSearch
-                searchTerm={searchTerm}
-                setSearchTerm={setSearchTerm}
-                isSearching={isSearching}
-                setIsSearching={setIsSearching}
-                loading={clientsLoading}
-                filteredClients={filteredClients}
-                selectedClient={selectedClient}
-                onSelectClient={handleSelectClient}
-              />
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+        {/* Left Column: Form & Items */}
+        <div className="space-y-6 xl:col-span-2">
+          <BillingClientSearch
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            isSearching={isSearching}
+            setIsSearching={setIsSearching}
+            loading={clientsLoading}
+            filteredClients={filteredClients}
+            selectedClient={selectedClient}
+            onSelectClient={handleSelectClient}
+          />
 
-              <BillingItemTable
-                items={items}
-                empleados={staff}
-                newItem={newItem}
-                setNewItem={setNewItem}
-                onAddItem={handleAddItem}
-                onRemoveItem={removeItem}
-              />
-          </div>
+          <BillingItemTable
+            items={items}
+            empleados={staff}
+            newItem={newItem}
+            setNewItem={setNewItem}
+            onAddItem={handleAddItem}
+            onRemoveItem={removeItem}
+          />
+        </div>
 
-          {/* Right Column: Checkout Summary */}
-          <div className="xl:col-span-1 space-y-6">
-              <BillingCheckoutSummary
-                selectedClient={selectedClient}
-                items={items}
-                subtotal={subtotal}
-                discount={discount}
-                setDiscount={setDiscount}
-                total={total}
-                onCheckout={handleCheckout}
-                isProcessing={isProcessing}
-              />
-          </div>
+        {/* Right Column: Checkout Summary */}
+        <div className="space-y-6 xl:col-span-1">
+          <BillingCheckoutSummary
+            selectedClient={selectedClient}
+            items={items}
+            subtotal={subtotal}
+            discount={discount}
+            setDiscount={setDiscount}
+            total={total}
+            onCheckout={handleCheckout}
+            isProcessing={isProcessing}
+          />
+        </div>
       </div>
     </div>
   );

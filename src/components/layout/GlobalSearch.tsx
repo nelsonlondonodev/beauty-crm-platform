@@ -14,7 +14,10 @@ const GlobalSearch = () => {
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+      if (
+        searchContainerRef.current &&
+        !searchContainerRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
       }
     };
@@ -35,12 +38,15 @@ const GlobalSearch = () => {
   const filteredClients = React.useMemo(() => {
     if (!searchTerm.trim()) return [];
     const lowerSearch = searchTerm.toLowerCase();
-    
-    return clients.filter(client => 
-      client.nombre.toLowerCase().includes(lowerSearch) || 
-      (client.telefono && client.telefono.includes(lowerSearch)) ||
-      (client.email && client.email.toLowerCase().includes(lowerSearch))
-    ).slice(0, 5); // Render max 5 results for performance and clean UI
+
+    return clients
+      .filter(
+        (client) =>
+          client.nombre.toLowerCase().includes(lowerSearch) ||
+          (client.telefono && client.telefono.includes(lowerSearch)) ||
+          (client.email && client.email.toLowerCase().includes(lowerSearch))
+      )
+      .slice(0, 5); // Render max 5 results for performance and clean UI
   }, [clients, searchTerm]);
 
   const handleResultClick = () => {
@@ -54,42 +60,54 @@ const GlobalSearch = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pendiente': return 'bg-green-100 text-green-800';
-      case 'alerta_5_meses': return 'bg-yellow-100 text-yellow-800';
-      case 'vencido': return 'bg-red-100 text-red-800';
-      case 'reclamado': return 'bg-blue-100 text-blue-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'pendiente':
+        return 'bg-green-100 text-green-800';
+      case 'alerta_5_meses':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'vencido':
+        return 'bg-red-100 text-red-800';
+      case 'reclamado':
+        return 'bg-blue-100 text-blue-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
   const formatStatus = (status: string) => {
     switch (status) {
-      case 'pendiente': return 'Bono Activo';
-      case 'alerta_5_meses': return 'Bono por Vencer';
-      case 'vencido': return 'Inactivo / Vencido';
-      case 'reclamado': return 'Bono Canjeado';
-      default: return 'No definido';
+      case 'pendiente':
+        return 'Bono Activo';
+      case 'alerta_5_meses':
+        return 'Bono por Vencer';
+      case 'vencido':
+        return 'Inactivo / Vencido';
+      case 'reclamado':
+        return 'Bono Canjeado';
+      default:
+        return 'No definido';
     }
   };
 
   return (
     <div className="relative hidden md:block" ref={searchContainerRef}>
-      <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+      <Search className="absolute top-2.5 left-2.5 h-4 w-4 text-gray-500" />
       <input
         type="search"
         placeholder="Buscar cliente, tel, email..."
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
-        onFocus={() => { if (searchTerm.trim()) setIsOpen(true); }}
-        className="h-9 w-64 lg:w-80 rounded-md border border-gray-200 bg-gray-50 pl-9 pr-4 sm:text-sm focus-visible:ring-1 focus-visible:ring-primary focus-visible:outline-none transition-all"
+        onFocus={() => {
+          if (searchTerm.trim()) setIsOpen(true);
+        }}
+        className="focus-visible:ring-primary h-9 w-64 rounded-md border border-gray-200 bg-gray-50 pr-4 pl-9 transition-all focus-visible:ring-1 focus-visible:outline-none sm:text-sm lg:w-80"
       />
 
       {/* Dropdown Results */}
       {isOpen && (
-        <div className="absolute top-full left-0 mt-2 w-full max-w-md bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="animate-in fade-in slide-in-from-top-2 absolute top-full left-0 z-50 mt-2 w-full max-w-md overflow-hidden rounded-xl border border-gray-100 bg-white shadow-xl duration-200">
           <div className="p-2">
             {loading ? (
-              <div className="flex items-center justify-center py-4 space-x-2 text-gray-400">
+              <div className="flex items-center justify-center space-x-2 py-4 text-gray-400">
                 <Loader2 className="h-4 w-4 animate-spin" />
                 <span className="text-sm">Buscando...</span>
               </div>
@@ -99,23 +117,30 @@ const GlobalSearch = () => {
                   <li key={client.id}>
                     <button
                       onClick={() => handleResultClick()}
-                      className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors text-left"
+                      className="flex w-full items-center gap-3 rounded-lg p-3 text-left transition-colors hover:bg-gray-50"
                     >
-                      <div className="flex-shrink-0 h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center text-primary">
+                      <div className="bg-primary/10 text-primary flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full">
                         <User className="h-5 w-5" />
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium text-gray-900">
                           {client.nombre}
                         </p>
-                        <p className="text-xs text-gray-500 truncate">
-                          {client.telefono || client.email || 'Sin datos de contacto'}
+                        <p className="truncate text-xs text-gray-500">
+                          {client.telefono ||
+                            client.email ||
+                            'Sin datos de contacto'}
                         </p>
                       </div>
                       <div className="flex-shrink-0">
-                         <span className={cn("inline-flex items-center px-2 py-0.5 rounded text-xs font-medium", getStatusColor(client.bono_estado))}>
-                            {formatStatus(client.bono_estado)}
-                          </span>
+                        <span
+                          className={cn(
+                            'inline-flex items-center rounded px-2 py-0.5 text-xs font-medium',
+                            getStatusColor(client.bono_estado)
+                          )}
+                        >
+                          {formatStatus(client.bono_estado)}
+                        </span>
                       </div>
                     </button>
                   </li>
@@ -123,20 +148,24 @@ const GlobalSearch = () => {
               </ul>
             ) : (
               <div className="py-6 text-center">
-                <p className="text-sm text-gray-500 font-medium">No se encontraron resultados</p>
-                <p className="text-xs text-gray-400 mt-1">Verifica el nombre o número tel.</p>
+                <p className="text-sm font-medium text-gray-500">
+                  No se encontraron resultados
+                </p>
+                <p className="mt-1 text-xs text-gray-400">
+                  Verifica el nombre o número tel.
+                </p>
               </div>
             )}
           </div>
           {filteredClients.length > 0 && (
-             <div className="border-t border-gray-100 p-2 bg-gray-50/50">
-               <button 
-                 onClick={() => navigate('/clients')}
-                 className="w-full text-center text-xs text-primary font-medium p-1 hover:underline"
-               >
-                 Ver todos los clientes
-               </button>
-             </div>
+            <div className="border-t border-gray-100 bg-gray-50/50 p-2">
+              <button
+                onClick={() => navigate('/clients')}
+                className="text-primary w-full p-1 text-center text-xs font-medium hover:underline"
+              >
+                Ver todos los clientes
+              </button>
+            </div>
           )}
         </div>
       )}
