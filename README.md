@@ -55,10 +55,11 @@ CRM B2B moderno para el sector de la belleza (Peluquerías, Barberías, Spas).
     -   Creación de nuevas citas seleccionando clientes existentes.
     -   **Integración con n8n**: Webhook automático al crear cita para notificaciones.
 
-### 3. Autenticación y Seguridad
--   Implementación de `AuthContext` con Supabase Auth.
--   Página de Login con diseño "Glassmorphism".
--   Restricción de acceso mediante `ALLOWED_EMAILS` (Lista Blanca).
+### 3. Autenticación, Seguridad (RLS) y Roles (RBAC)
+-   **Contexto Robusto**: `AuthContext` optimizado con un *Failsafe* (Timeout de 5s) para prevenir bloqueos de pantalla de carga infinita por condiciones de carrera (`INITIAL_SESSION`).
+-   **Control de Acceso (RBAC)**: Nueva tabla estructural `user_roles` implementada en Supabase para gestionar permisos granulares (`owner`, `admin`, `staff`).
+-   **Protección de Interfaz**: Componente `ProtectedRoute` y barra lateral (`Sidebar`) dinámicos que ocultan módulos sensibles financieros y configuraciones al personal base (`staff`), enviándolos directamente a sus vistas operativas (Agenda).
+-   **Aislamiento de Datos (RLS)**: Integración total hacia un modelo Multi-Tenant mediante Row Level Security (`user_id = auth.uid()`), encapsulando la información a nivel de base de datos por tenante.
 
 ### 4. Automatizaciones con n8n
 -   **Repositorio Local**: Carpeta `n8n_workflows/` con flujos JSON para replicabilidad.
@@ -105,9 +106,13 @@ CRM B2B moderno para el sector de la belleza (Peluquerías, Barberías, Spas).
     -   Cerrado automático inteligente al hacer click fuera del componente (`onClickOutside`).
 -   **Redirección Fluida**: Los resultados y el botón de "Ver todos" navegan eficientemente al módulo correspondiente usando React Router (`/clients`).
 
+### 9. Dashboard Dinámico y Reportes Financieros
+-   **Gráfico Evolutivo de Ingresos**: Componente `RevenueChart` refactorizado para consumir información generada activamente en tiempo real en lugar de datos estáticos falsos.
+-   **Motor de Backend Integrado**: Servicio (`dashboardService.ts`) que consulta directamente la tabla de `facturas`, agregando y sumando totales dinámicamente mes a mes para los últimos 7 periodos, reaccionando automáticamente a los nuevos ingresos y transacciones procesadas por el POS.
+
 ## Pendientes (WIP) y Deuda Técnica
 
--   [ ] Implementar sistema de roles (RBAC) más robusto en el futuro.
+-   [x] **Sistema de Roles (RBAC):** Escalada de los correos "hardcodeados" a base de datos estructurada con tabla `user_roles`, permisos reactivos e interfaz condicionada para SaaS.
 -   [x] **Seguridad de Base de Datos (RLS Multi-Tenant):** Se aislaron los datos mediante políticas de fila (`auth.uid() = user_id`) en las tablas transaccionales, preparando la aplicación para escalar a SaaS.
 
 ## Comandos
