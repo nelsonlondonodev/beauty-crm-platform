@@ -3,7 +3,6 @@ import {
   LayoutDashboard,
   Users,
   Calendar,
-  Settings,
   LogOut,
   Scissors,
   Receipt,
@@ -53,12 +52,6 @@ const Sidebar = () => {
       label: 'Agenda',
       path: '/calendar',
       allowedRoles: ['owner', 'admin', 'staff'],
-    },
-    {
-      icon: Settings,
-      label: 'Configuración',
-      path: '/settings',
-      allowedRoles: ['owner', 'admin'],
     },
   ];
 
