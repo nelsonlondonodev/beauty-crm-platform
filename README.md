@@ -28,8 +28,8 @@ CRM B2B moderno para el sector de la belleza (Peluquerías, Barberías, Spas).
 
 ## Características Implementadas
 
-1.  **Layout Principal:** Sidebar de navegación y Topbar con diseño moderno.
-2.  **Dashboard:** Vista principal con tarjetas de estadísticas y listas de actividad reciente.
+1.  **Layout Principal (Londy):** Sidebar de navegación optimizada y Topbar con búsqueda global, campana de notificaciones interactiva y menú de usuario personalizado.
+2.  **Dashboard Inteligente:** Vista principal con tarjetas de estadísticas en tiempo real, saludo dinámico ("Bienvenido de nuevo, [Nombre]") y filtros de base de datos optimizados para eficiencia.
 3.  **Gestión de Clientes:** CRUD completo conectado a Supabase (`clientes_fidelizacion`).
 4.  **Agenda:** Calendario interactivo para gestión de citas (`appointments`).
 5.  **Configuración:** Módulo base para ajustes del sistema.
@@ -106,9 +106,16 @@ CRM B2B moderno para el sector de la belleza (Peluquerías, Barberías, Spas).
     -   Cerrado automático inteligente al hacer click fuera del componente (`onClickOutside`).
 -   **Redirección Fluida**: Los resultados y el botón de "Ver todos" navegan eficientemente al módulo correspondiente usando React Router (`/clients`).
 
-### 9. Dashboard Dinámico y Reportes
+### 9. Dashboard Dinámico y Reportes (Optimización Londy)
 -   **Gráfico Evolutivo de Ingresos**: Componente `RevenueChart` refactorizado para consumir la información generada activamente en tiempo real en lugar de datos estáticos falsos. Motor relacional que consulta la tabla de `facturas` para graficar los últimos 7 periodos, reaccionando automáticamente a los nuevos ingresos y transacciones procesadas por el POS.
+-   **Filtrado Server-Side**: Refactorización de `dashboardService.ts` para que el cálculo de próximos cumpleaños y bonos por vencer se realice directamente en Supabase (PostgreSQL), reduciendo drásticamente la carga de datos en el cliente.
+-   **Resiliencia con Timeouts**: Implementación de `fetchWithTimeout` en todas las consultas críticas del dashboard para asegurar que la interfaz nunca se bloquee por latencia de red.
 -   **Timeline Real de Actividades**: El feed de `Actividad Reciente` consolidado desde 4 tablas distintas (`appointments`, `clientes_fidelizacion`, `facturas`, `bonos`). Usa `date-fns` para cálculo de fechas relativas ("Hace 5 minutos") y ordena históricamente asegurando que todos los eventos del ecosistema beauty se reflejen de último momento sin estancamientos.
+
+### 11. Interfaz de Usuario e Identidad (UX)
+-   **Londy Branding**: Transición completa a la nueva identidad de marca, incluyendo logotipos, favicons, títulos y un diseño minimalista premium.
+-   **UserMenu Interactivo**: Despliegue de un menú de perfil avanzado en el Topbar que muestra el nombre del usuario, su rol (Badge de seguridad) y opciones rápidas de navegación (Ajustes, Mi Perfil, Logout).
+-   **Notificaciones Vivas**: Campana con efecto de "ping" animado para alertas críticas del negocio.
 
 ### 10. Estabilidad Estructural y Patrones Limpios (Strict Mode)
 -   **Anti-Spaghetti AuthProvider**: Refactorización profunda y asíncrona del puente SDK para eliminar por completo cierres silenciosos o recargas en bucle de la aplicación.
