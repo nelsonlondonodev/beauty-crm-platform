@@ -4,6 +4,7 @@ import React, {
   useEffect,
   useState,
   useRef,
+  useCallback,
 } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
@@ -28,25 +29,52 @@ const AuthContext = createContext<AuthContextType>({
 });
 
 /**
- * Función pura para obtener el rol desde Supabase. Sólo hace de "getter".
- * Se define fuera del componente para evitar ser recreada en cada render,
- * mejorando el rendimiento y siguiendo las mejores prácticas (SOLID).
+ * Función utilitaria para evitar que promesas estancadas (ej. bugs recursivos de RLS) congelen la UI.
  */
-const fetchRoleFromDB = async (userId: string): Promise<AppRole | null> => {
+function fetchWithTimeout<T>(promise: Promise<T>, ms: number = 5000): Promise<T> {
+  let timeoutId: ReturnType<typeof setTimeout>;
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timeoutId = setTimeout(() => reject(new Error('REQUEST_TIMEOUT')), ms);
+  });
+
+  return Promise.race([promise, timeoutPromise]).finally(() => {
+    clearTimeout(timeoutId);
+  });
+}
+
+/**
+ * Función pura para obtener el rol desde Supabase.
+ * Usa fetchWithTimeout para prevenir que un fallo de RLS bloquee la app infinitamente.
+ */
+export const fetchRoleFromDB = async (
+  userId: string
+): Promise<AppRole | null> => {
   try {
-    const { data, error } = await supabase
+    const request = supabase
       .from('user_roles')
       .select('role')
       .eq('user_id', userId)
       .maybeSingle();
 
+    const response = await fetchWithTimeout(request as unknown as Promise<{ data: { role: AppRole } | null; error: any }>, 5000);
+    const { data, error } = response;
+
     if (error || !data) {
-      console.warn('Rol no encontrado o error local fetching:', error?.message);
+      console.warn(
+        'Rol no encontrado o error local fetching:',
+        error?.message || 'Usuario sin rol asignado'
+      );
       return null;
     }
     return data.role as AppRole;
   } catch (err) {
-    console.error('Excepción resolviendo rol:', err);
+    if (err instanceof Error && err.message === 'REQUEST_TIMEOUT') {
+      console.error(
+        'CRÍTICO: Fetching de rol excedió el tiempo límite (5s). Revisa las políticas RLS en Supabase en `user_roles` por bucles infinitos.'
+      );
+    } else {
+      console.error('Excepción resolviendo rol:', err);
+    }
     return null;
   }
 };
@@ -60,46 +88,60 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // Usamos un Ref inmutable en vez de variables locales que sucumben a closures obsoletos
   const activeUserIdRef = useRef<string | null>(null);
 
+  // Helper para asignar la sesión exitosa
+  const assignSession = useCallback(
+    (newSession: Session, userRole: AppRole) => {
+      setSession(newSession);
+      setUser(newSession.user);
+      setRole(userRole);
+      activeUserIdRef.current = newSession.user.id;
+    },
+    []
+  );
+
+  // Helper para limpiar totalmente la sesión actual si es inválida
+  const clearSession = useCallback(async (shouldSignOutFromBackend = true) => {
+    try {
+      if (shouldSignOutFromBackend) {
+        await fetchWithTimeout(supabase.auth.signOut(), 3000).catch(() => {});
+      }
+    } finally {
+      setSession(null);
+      setUser(null);
+      setRole(null);
+      activeUserIdRef.current = null;
+    }
+  }, []);
+
   useEffect(() => {
     let mounted = true;
 
-    // Al arrancar, verificamos el estado de manera síncrona/directa
     const initializeAuth = async () => {
       try {
         const {
-          data: { session },
+          data: { session: initialSession },
           error,
-        } = await supabase.auth.getSession();
+        } = await fetchWithTimeout(supabase.auth.getSession(), 5000);
 
         if (error) throw error;
 
-        if (session && session.user) {
-          const userRole = await fetchRoleFromDB(session.user.id);
+        if (initialSession?.user) {
+          const userRole = await fetchRoleFromDB(initialSession.user.id);
           if (mounted) {
             if (userRole) {
-              setSession(session);
-              setUser(session.user);
-              setRole(userRole);
-              activeUserIdRef.current = session.user.id;
+              assignSession(initialSession, userRole);
             } else {
-              // Si falla gravemente el rol, destrozamos por seguridad la sesión inválida
-              await supabase.auth.signOut();
-              setSession(null);
-              setUser(null);
-              setRole(null);
-              activeUserIdRef.current = null;
+              await clearSession();
             }
           }
         } else {
           if (mounted) {
-            setSession(null);
-            setUser(null);
-            setRole(null);
-            activeUserIdRef.current = null;
+            await clearSession(false);
           }
         }
       } catch (err) {
         console.error('Error crítico al iniciar sesión de app:', err);
+        if (mounted) await clearSession(false);
       } finally {
         if (mounted) {
           setLoading(false);
@@ -107,74 +149,61 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     };
 
-    // Lanzamos carga inicial INMEDIATA sin flags trampa
+    // Lanzamos carga inicial
     initializeAuth();
 
-    // Reacción pasiva a eventos directos del SDK (Logins, relogins, logouts)
+    // Reacción pasiva a eventos directos del SDK
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
       if (!mounted) return;
 
-      // ignoramos INITIAL_SESSION para evitar sobre-escrituras o triggers redundantes en local
       if (event === 'INITIAL_SESSION') return;
 
       if (event === 'SIGNED_OUT' || !currentSession) {
-        setSession(null);
-        setUser(null);
-        setRole(null);
-        activeUserIdRef.current = null;
-        setLoading(false);
+        await clearSession(false);
+        if (mounted) setLoading(false);
         return;
       }
 
-      // Si es una sincronización en vivo o un login pasivo:
       if (currentSession?.user) {
-        // ¿Ya lo teníamos cargado en la misma sesión? Entonces es un simple refresh del token de fondo.
-        // No bloqueamos la UI con setLoading(true). Actualizamos sesión invisiblemente.
+        // ¿Ya lo teníamos cargado en la misma sesión? Token refresh de fondo.
         if (activeUserIdRef.current === currentSession.user.id) {
           setSession(currentSession);
           return;
         }
 
-        // ES genuinamente una cuenta distinta intentando entrar a la vista. Aquí SI bloqueamos
-        setLoading(true); // Pantalla bloqueada temporal
+        // Cuenta distinta intentando entrar a la vista. Aquí SI bloqueamos
+        setLoading(true);
         const userRole = await fetchRoleFromDB(currentSession.user.id);
 
         if (mounted) {
           if (userRole) {
-            setSession(currentSession);
-            setUser(currentSession.user);
-            setRole(userRole);
-            activeUserIdRef.current = currentSession.user.id;
+            assignSession(currentSession, userRole);
           } else {
-            await supabase.auth.signOut();
-            setSession(null);
-            setUser(null);
-            setRole(null);
-            activeUserIdRef.current = null;
+            await clearSession();
           }
-          setLoading(false); // Liberar Interfaz
+          setLoading(false);
         }
       }
     });
 
-    // Cleanup para Strict Mode de React (destruimos el scope si es necesario)
     return () => {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, []); // Dependencias vacías []. Nunca usar flags locales.
+  }, [assignSession, clearSession]);
 
   const signOut = async () => {
     try {
-      // 1. Limpiamos estado local de inmediato para que la UI reaccione más rápido
+      // 1. Limpiamos estado local de inmediato
       setSession(null);
       setUser(null);
       setRole(null);
+      activeUserIdRef.current = null;
 
-      // 2. Cerramos la sesión en el backend
-      await supabase.auth.signOut();
+      // 2. Cerramos la sesión en el backend sin congelar App
+      await fetchWithTimeout(supabase.auth.signOut(), 3000);
     } catch (error) {
       console.error('Error durante el cierre de sesión:', error);
     }
