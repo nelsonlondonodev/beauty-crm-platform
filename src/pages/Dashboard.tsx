@@ -3,9 +3,14 @@ import StatCard from '../components/dashboard/StatCard';
 import { useDashboardStats } from '../hooks/useDashboardStats';
 import RevenueChart from '../components/dashboard/RevenueChart';
 import RecentActivity from '../components/dashboard/RecentActivity';
+import { useAuth } from '../contexts/AuthContext';
 
 const Dashboard = () => {
   const { stats, loading } = useDashboardStats();
+  const { user } = useAuth();
+
+  // Obtener el primer nombre para un saludo más cercano
+  const userName = user?.user_metadata?.full_name?.split(' ')[0] || 'Nelson';
 
   const statCards = [
     {
@@ -44,7 +49,7 @@ const Dashboard = () => {
             Dashboard
           </h1>
           <p className="text-gray-500">
-            Bienvenido de nuevo, Nelson. Aquí está lo que sucede hoy en tu
+            Bienvenido de nuevo, {userName}. Aquí está lo que sucede hoy en tu
             negocio.
           </p>
         </div>

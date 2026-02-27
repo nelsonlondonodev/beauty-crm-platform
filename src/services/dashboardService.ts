@@ -14,6 +14,24 @@ export interface ActivityItem {
   timestamp: string;
 }
 
+/**
+ * Función utilitaria para evitar promesas bloqueantes.
+ * Reutilizamos el patrón establecido en AuthContext.
+ */
+function fetchWithTimeout<T>(
+  promise: Promise<T>,
+  ms: number = 5000
+): Promise<T> {
+  let timeoutId: ReturnType<typeof setTimeout>;
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timeoutId = setTimeout(() => reject(new Error('REQUEST_TIMEOUT')), ms);
+  });
+
+  return Promise.race([promise, timeoutPromise]).finally(() => {
+    clearTimeout(timeoutId);
+  });
+}
+
 export interface DashboardStats {
   totalClients: number;
   newClientsThisMonth: number;
@@ -26,9 +44,11 @@ export interface DashboardStats {
 
 export const getDashboardStats = async (): Promise<DashboardStats> => {
   // 1. Total Clients
-  const { count: totalClients, error: totalError } = await supabase
-    .from('clientes_fidelizacion') // Tabla real
-    .select('*', { count: 'exact', head: true });
+  const { count: totalClients, error: totalError } = await fetchWithTimeout(
+    supabase
+      .from('clientes_fidelizacion')
+      .select('*', { count: 'exact', head: true }) as any
+  );
 
   if (totalError)
     throw new Error(`Error fetching total clients: ${totalError.message}`);
@@ -37,20 +57,25 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
   const start = startOfMonth(new Date()).toISOString();
   const end = endOfMonth(new Date()).toISOString();
 
-  const { count: newClients, error: newClientsError } = await supabase
-    .from('clientes_fidelizacion')
-    .select('*', { count: 'exact', head: true })
-    .gte('created_at', start)
-    .lte('created_at', end);
+  const { count: newClients, error: newClientsError } = await fetchWithTimeout(
+    supabase
+      .from('clientes_fidelizacion')
+      .select('*', { count: 'exact', head: true })
+      .gte('created_at', start)
+      .lte('created_at', end) as any
+  );
 
   if (newClientsError)
     throw new Error(`Error fetching new clients: ${newClientsError.message}`);
 
   // 3. Active Bonuses (In DB: estado = 'Pendiente' on bonos table)
-  const { count: activeBonuses, error: activeBonusesError } = await supabase
-    .from('bonos')
-    .select('*', { count: 'exact', head: true })
-    .eq('estado', 'Pendiente');
+  const { count: activeBonuses, error: activeBonusesError } =
+    await fetchWithTimeout(
+      supabase
+        .from('bonos')
+        .select('*', { count: 'exact', head: true })
+        .eq('estado', 'Pendiente') as any
+    );
 
   if (activeBonusesError)
     throw new Error(
@@ -58,67 +83,68 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
     );
 
   // 4. Upcoming Birthdays (Next 7 days)
-  const { data: allClients, error: clientsError } = await supabase
-    .from('clientes_fidelizacion')
-    .select('birthday');
-
-  if (clientsError)
-    throw new Error(
-      `Error fetching clients for dates: ${clientsError.message}`
-    );
-
-  // 5. Expiring Bonuses (Next 7 days)
-  const { data: allBonuses, error: bonusesError } = await supabase
-    .from('bonos')
-    .select('created_at, fecha_vencimiento')
-    .eq('estado', 'Pendiente');
-
-  if (bonusesError)
-    throw new Error(
-      `Error fetching bonuses for dates: ${bonusesError.message}`
-    );
-
-  let upcomingBirthdaysCount = 0;
-  let expiringBonusesCount = 0;
-
   const today = new Date();
-  // Normalize today to start of day for exact comparison
   today.setHours(0, 0, 0, 0);
   const nextWeek = addDays(today, 7);
 
-  if (allClients) {
-    upcomingBirthdaysCount = allClients.filter((c) => {
-      if (!c.birthday) return false;
-      // Parse date carefully
-      // Append time to prevent UTC offset shifting the day
-      const dob = new Date(`${c.birthday}T12:00:00Z`);
+  // Formateamos para comparación de MM-DD
+  const formatMMDD = (d: Date) => d.toISOString().slice(5, 10);
+  const todayMMDD = formatMMDD(today);
+  const nextWeekMMDD = formatMMDD(nextWeek);
 
-      // Create date for this year
-      const thisYearBirthday = new Date(
-        today.getFullYear(),
-        dob.getMonth(),
-        dob.getDate()
+  let upcomingBirthdaysCount = 0;
+  try {
+    // Manejo de cruce de año (ej: 30 de dic a 5 de ene)
+    if (nextWeekMMDD < todayMMDD) {
+      const { data } = await fetchWithTimeout(
+        supabase
+          .from('clientes_fidelizacion')
+          .select('birthday')
+          .not('birthday', 'is', null)
+          .or(
+            `birthday.ilike.%-${todayMMDD},birthday.ilike.%-${nextWeekMMDD}`
+          ) as any
+      );
+      upcomingBirthdaysCount = data?.length || 0;
+    } else {
+      const { data: bData } = await fetchWithTimeout(
+        supabase
+          .from('clientes_fidelizacion')
+          .select('birthday')
+          .not('birthday', 'is', null) as any
       );
 
-      return thisYearBirthday >= today && thisYearBirthday <= nextWeek;
-    }).length;
+      if (bData) {
+        upcomingBirthdaysCount = bData.filter((c: any) => {
+          const dob = new Date(`${c.birthday}T12:00:00Z`);
+          const thisYearBirthday = new Date(
+            today.getFullYear(),
+            dob.getMonth(),
+            dob.getDate()
+          );
+          return thisYearBirthday >= today && thisYearBirthday <= nextWeek;
+        }).length;
+      }
+    }
+  } catch (err) {
+    console.error('Error fetching birthdays:', err);
   }
 
-  if (allBonuses) {
-    expiringBonusesCount = allBonuses.filter((b) => {
-      if (!b.created_at && !b.fecha_vencimiento) return false;
-
-      let expiry: Date;
-      if (b.fecha_vencimiento) {
-        expiry = new Date(b.fecha_vencimiento);
-      } else {
-        // Calcular Vencimiento: created_at + 6 meses
-        const createdAt = new Date(b.created_at);
-        expiry = addMonths(createdAt, 6); // Vence a los 6 meses
-      }
-
-      return expiry >= today && expiry <= nextWeek;
-    }).length;
+  // 5. Expiring Bonuses (Next 7 days)
+  let expiringBonusesCount = 0;
+  try {
+    const { count: expCount } = await fetchWithTimeout(
+      supabase
+        .from('bonos')
+        .select('*', { count: 'exact', head: true })
+        .eq('estado', 'Pendiente')
+        .gte('fecha_vencimiento', today.toISOString())
+        .lte('fecha_vencimiento', nextWeek.toISOString()) as any,
+      3000
+    );
+    expiringBonusesCount = expCount || 0;
+  } catch (err) {
+    console.error('Error fetching expiring bonuses:', err);
   }
 
   let revenueData: RevenueData[] = [];
