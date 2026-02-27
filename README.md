@@ -1,4 +1,4 @@
-# Beauty CRM Platform
+# Londy - Beauty Industry CRM
 
 CRM B2B moderno para el sector de la belleza (Peluquerías, Barberías, Spas).
 

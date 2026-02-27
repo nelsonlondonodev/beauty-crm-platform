@@ -67,8 +67,8 @@ const Sidebar = () => {
           <div className="bg-primary/10 text-primary flex h-10 w-10 items-center justify-center rounded-xl">
             <Scissors size={24} />
           </div>
-          <span className="ml-3 text-xl font-bold text-gray-900">
-            Beauty CRM
+          <span className="ml-3 text-xl font-bold tracking-tight text-gray-900">
+            Londy
           </span>
         </div>
 
