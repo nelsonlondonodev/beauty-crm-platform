@@ -114,7 +114,8 @@ CRM B2B moderno para el sector de la belleza (Peluquerías, Barberías, Spas).
 
 ### 11. Interfaz de Usuario e Identidad (UX)
 -   **Londy Branding**: Transición completa a la nueva identidad de marca, incluyendo logotipos, favicons, títulos y un diseño minimalista premium.
--   **UserMenu Interactivo**: Despliegue de un menú de perfil avanzado en el Topbar que muestra el nombre del usuario, su rol (Badge de seguridad) y opciones rápidas de navegación (Ajustes, Mi Perfil, Logout).
+-   **UserMenu Interactivo**: Despliegue de un menú de perfil avanzado en el Topbar que muestra el nombre del usuario, su avatar real y su rol (Badge de seguridad), con opciones rápidas de navegación a Ajustes.
+-   **Gestión de Perfil Premium (`ProfileCard`)**: Implementación de una interfaz de perfil elegante con banner dinámico, subida de avatar a Supabase Storage con reemplazo automático (Upsert) y edición de nombre en tiempo real sincronizada con Supabase Auth.
 -   **Notificaciones Vivas**: Campana con efecto de "ping" animado para alertas críticas del negocio.
 
 ### 10. Estabilidad Estructural y Patrones Limpios (Strict Mode)
