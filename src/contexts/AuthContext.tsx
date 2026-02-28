@@ -167,9 +167,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
 
       if (currentSession?.user) {
-        // ¿Ya lo teníamos cargado en la misma sesión? Token refresh de fondo.
+        // ¿Ya lo teníamos cargado en la misma sesión? Token refresh de fondo o actualización de metadata.
         if (activeUserIdRef.current === currentSession.user.id) {
           setSession(currentSession);
+          setUser(currentSession.user); // <-- CRUCIAL: Actualizar objeto user para detectar cambios en metadata (foto)
           return;
         }
 

@@ -27,6 +27,7 @@ const UserMenu = () => {
 
   const fullName = user?.user_metadata?.full_name || 'Usuario';
   const email = user?.email || '';
+  const avatarUrl = user?.user_metadata?.avatar_url || null;
   const initials = fullName
     .split(' ')
     .map((n: string) => n[0])
@@ -38,6 +39,7 @@ const UserMenu = () => {
     <div className="relative" ref={menuRef}>
       <UserMenuTrigger 
         initials={initials} 
+        avatarUrl={avatarUrl}
         isOpen={isOpen} 
         onClick={() => setIsOpen(!isOpen)} 
       />
@@ -47,6 +49,7 @@ const UserMenu = () => {
           fullName={fullName}
           email={email}
           role={role}
+          avatarUrl={avatarUrl}
           initials={initials}
           onNavigate={(path) => {
             setIsOpen(false);

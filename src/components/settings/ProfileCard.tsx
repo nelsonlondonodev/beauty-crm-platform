@@ -1,17 +1,49 @@
-import { Mail, Calendar, LogOut, Edit2, Camera } from 'lucide-react';
+import React, { useRef, useState } from 'react';
+import { Mail, Calendar, LogOut, Edit2, Camera, Loader2 } from 'lucide-react';
 import type { AppRole } from '../../contexts/AuthContext';
 
 interface ProfileCardProps {
   fullName: string;
   email: string;
+  avatarUrl?: string | null;
   role: AppRole | null;
   joinedDate: string;
   onLogout: () => void;
+  onAvatarUpload?: (file: File) => Promise<void>;
 }
 
-const ProfileCard = ({ fullName, email, role, joinedDate, onLogout }: ProfileCardProps) => {
+const ProfileCard = ({ 
+  fullName, 
+  email, 
+  avatarUrl, 
+  role, 
+  joinedDate, 
+  onLogout,
+  onAvatarUpload 
+}: ProfileCardProps) => {
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   // Formatear nombre: primera letra de cada palabra en mayúscula
   const formattedName = fullName.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
+
+  const handleCameraClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file && onAvatarUpload) {
+      try {
+        setIsUploading(true);
+        await onAvatarUpload(file);
+      } catch (error) {
+        console.error('Error uploading avatar:', error);
+      } finally {
+        setIsUploading(false);
+      }
+    }
+  };
 
   return (
     <div className="group overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-xl shadow-purple-500/5 ring-1 ring-black/5 transition-all hover:shadow-purple-500/10">
@@ -27,12 +59,36 @@ const ProfileCard = ({ fullName, email, role, joinedDate, onLogout }: ProfileCar
         {/* Avatar Circular con Glow */}
         <div className="relative inline-block group/avatar">
           <div className="h-32 w-32 rounded-full bg-white p-1.5 shadow-2xl ring-1 ring-black/5">
-            <div className="h-full w-full rounded-full bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center text-4xl font-black text-purple-600">
-              {fullName.substring(0, 1).toUpperCase()}
+            <div className="h-full w-full rounded-full bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center overflow-hidden">
+              {avatarUrl ? (
+                <img src={avatarUrl} alt={fullName} className="h-full w-full object-cover" />
+              ) : (
+                <span className="text-4xl font-black text-purple-600">
+                  {fullName.substring(0, 1).toUpperCase()}
+                </span>
+              )}
+              {isUploading && (
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center backdrop-blur-[2px]">
+                  <Loader2 className="h-8 w-8 text-white animate-spin" />
+                </div>
+              )}
             </div>
           </div>
-          <button className="absolute bottom-1 right-1 h-9 w-9 rounded-full bg-white border border-gray-100 shadow-lg flex items-center justify-center text-gray-600 transition-all hover:scale-110 hover:text-purple-600 active:scale-90">
-            <Camera className="h-4 w-4" />
+          
+          <input 
+            type="file" 
+            ref={fileInputRef}
+            className="hidden" 
+            accept="image/*"
+            onChange={handleFileChange}
+          />
+          
+          <button 
+            onClick={handleCameraClick}
+            disabled={isUploading}
+            className="absolute bottom-1 right-1 h-9 w-9 rounded-full bg-white border border-gray-100 shadow-lg flex items-center justify-center text-gray-600 transition-all hover:scale-110 hover:text-purple-600 active:scale-90 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
           </button>
         </div>
         
@@ -45,7 +101,7 @@ const ProfileCard = ({ fullName, email, role, joinedDate, onLogout }: ProfileCar
                   {role || 'Staff'}
                 </span>
                 <span className="h-1 w-1 rounded-full bg-gray-300" />
-                <span className="text-xs font-medium text-gray-400">ID: USER-8293</span>
+                <span className="text-xs font-medium text-gray-400">ID: USER-{fullName.substring(0, 4).toUpperCase()}</span>
               </div>
             </div>
             <button className="h-10 w-10 flex items-center justify-center rounded-xl border border-gray-100 bg-white text-gray-400 transition-all hover:border-purple-200 hover:text-purple-600 hover:shadow-sm">
@@ -91,3 +147,4 @@ const ProfileCard = ({ fullName, email, role, joinedDate, onLogout }: ProfileCar
 };
 
 export default ProfileCard;
+

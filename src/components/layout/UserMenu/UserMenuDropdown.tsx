@@ -5,6 +5,7 @@ interface UserMenuDropdownProps {
   fullName: string;
   email: string;
   role: AppRole | null;
+  avatarUrl?: string | null;
   initials: string;
   onNavigate: (path: string) => void;
   onLogout: () => void;
@@ -14,6 +15,7 @@ const UserMenuDropdown = ({
   fullName, 
   email, 
   role, 
+  avatarUrl,
   initials, 
   onNavigate, 
   onLogout 
@@ -22,8 +24,12 @@ const UserMenuDropdown = ({
     <div className="absolute right-0 mt-3 w-64 origin-top-right overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-2xl ring-1 ring-black ring-opacity-5 animate-in fade-in zoom-in duration-200 z-50">
       <div className="relative border-b border-gray-50 bg-gray-50/50 px-5 py-4">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-lg bg-white flex items-center justify-center text-sm font-bold text-purple-600 shadow-sm ring-1 ring-gray-100 uppercase">
-            {initials}
+          <div className="h-10 w-10 rounded-lg bg-white flex items-center justify-center text-sm font-bold text-purple-600 shadow-sm ring-1 ring-gray-100 uppercase overflow-hidden">
+            {avatarUrl ? (
+              <img src={avatarUrl} alt={fullName} className="h-full w-full object-cover" />
+            ) : (
+              initials
+            )}
           </div>
           <div className="flex flex-col min-w-0">
             <p className="text-sm font-bold text-gray-900 truncate">

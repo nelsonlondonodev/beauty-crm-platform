@@ -4,6 +4,7 @@ import { Building, User, Shield, Bell } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import ProfileCard from '../components/settings/ProfileCard';
 import SettingsLink from '../components/settings/SettingsLink';
+import { uploadAvatar } from '../services/userService';
 
 const Settings = () => {
   const { user, role, signOut } = useAuth();
@@ -14,8 +15,21 @@ const Settings = () => {
     navigate('/login');
   };
 
+  const handleAvatarUpload = async (file: File) => {
+    if (!user) return;
+    try {
+      await uploadAvatar(user.id, file);
+      // La actualización de metadata disparará el cambio de estado en AuthContext
+      // o el usuario verá el cambio al refrescar/navegar si el SDK no lo hace de inmediato.
+    } catch (error) {
+      console.error('Error in handleAvatarUpload:', error);
+      alert('Error al subir la imagen. Asegúrate de que el bucket "avatars" existe en Supabase Storage con acceso público.');
+    }
+  };
+
   const fullName = user?.user_metadata?.full_name || 'Usuario de Londy';
   const email = user?.email || 'No disponible';
+  const avatarUrl = user?.user_metadata?.avatar_url || null;
   const joinedDate = user?.created_at 
     ? new Date(user.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })
     : 'Recientemente';
@@ -32,9 +46,11 @@ const Settings = () => {
           <ProfileCard
             fullName={fullName}
             email={email}
+            avatarUrl={avatarUrl}
             role={role}
             joinedDate={joinedDate}
             onLogout={handleLogout}
+            onAvatarUpload={handleAvatarUpload}
           />
         </div>
 
@@ -93,5 +109,6 @@ const Settings = () => {
 };
 
 export default Settings;
+
 
 
