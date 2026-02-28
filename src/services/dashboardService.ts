@@ -14,6 +14,16 @@ export interface ActivityItem {
   timestamp: string;
 }
 
+export interface DashboardStats {
+  totalClients: number;
+  newClientsThisMonth: number;
+  activeBonuses: number;
+  upcomingBirthdays: number;
+  expiringBonuses: number;
+  revenueData: RevenueData[];
+  recentActivity: ActivityItem[];
+}
+
 /**
  * Función utilitaria para evitar promesas bloqueantes.
  * Reutilizamos el patrón establecido en AuthContext.
@@ -32,32 +42,23 @@ function fetchWithTimeout<T>(
   });
 }
 
-export interface DashboardStats {
-  totalClients: number;
-  newClientsThisMonth: number;
-  activeBonuses: number;
-  upcomingBirthdays: number;
-  expiringBonuses: number;
-  revenueData: RevenueData[];
-  recentActivity: ActivityItem[];
-}
+// --- Helper Functions mapped to individual responsibilities ---
 
-export const getDashboardStats = async (): Promise<DashboardStats> => {
-  // 1. Total Clients
-  const { count: totalClients, error: totalError } = await fetchWithTimeout(
+async function fetchTotalClients(): Promise<number> {
+  const { count, error } = await fetchWithTimeout<any>(
     supabase
       .from('clientes_fidelizacion')
       .select('*', { count: 'exact', head: true }) as any
   );
+  if (error) throw new Error(`Error fetching total clients: ${error.message}`);
+  return count || 0;
+}
 
-  if (totalError)
-    throw new Error(`Error fetching total clients: ${totalError.message}`);
-
-  // 2. New Clients This Month
+async function fetchNewClientsThisMonth(): Promise<number> {
   const start = startOfMonth(new Date()).toISOString();
   const end = endOfMonth(new Date()).toISOString();
 
-  const { count: newClients, error: newClientsError } = await fetchWithTimeout(
+  const { count, error } = await fetchWithTimeout<any>(
     supabase
       .from('clientes_fidelizacion')
       .select('*', { count: 'exact', head: true })
@@ -65,57 +66,51 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
       .lte('created_at', end) as any
   );
 
-  if (newClientsError)
-    throw new Error(`Error fetching new clients: ${newClientsError.message}`);
+  if (error) throw new Error(`Error fetching new clients: ${error.message}`);
+  return count || 0;
+}
 
-  // 3. Active Bonuses (In DB: estado = 'Pendiente' on bonos table)
-  const { count: activeBonuses, error: activeBonusesError } =
-    await fetchWithTimeout(
-      supabase
-        .from('bonos')
-        .select('*', { count: 'exact', head: true })
-        .eq('estado', 'Pendiente') as any
-    );
+async function fetchActiveBonuses(): Promise<number> {
+  const { count, error } = await fetchWithTimeout<any>(
+    supabase
+      .from('bonos')
+      .select('*', { count: 'exact', head: true })
+      .eq('estado', 'Pendiente') as any
+  );
 
-  if (activeBonusesError)
-    throw new Error(
-      `Error fetching active bonuses: ${activeBonusesError.message}`
-    );
+  if (error) throw new Error(`Error fetching active bonuses: ${error.message}`);
+  return count || 0;
+}
 
-  // 4. Upcoming Birthdays (Next 7 days)
+async function fetchUpcomingBirthdays(): Promise<number> {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const nextWeek = addDays(today, 7);
 
-  // Formateamos para comparación de MM-DD
   const formatMMDD = (d: Date) => d.toISOString().slice(5, 10);
   const todayMMDD = formatMMDD(today);
   const nextWeekMMDD = formatMMDD(nextWeek);
 
-  let upcomingBirthdaysCount = 0;
   try {
-    // Manejo de cruce de año (ej: 30 de dic a 5 de ene)
     if (nextWeekMMDD < todayMMDD) {
-      const { data } = await fetchWithTimeout(
+      const { data } = await fetchWithTimeout<any>(
         supabase
           .from('clientes_fidelizacion')
           .select('birthday')
           .not('birthday', 'is', null)
-          .or(
-            `birthday.ilike.%-${todayMMDD},birthday.ilike.%-${nextWeekMMDD}`
-          ) as any
+          .or(`birthday.ilike.%-${todayMMDD},birthday.ilike.%-${nextWeekMMDD}`) as any
       );
-      upcomingBirthdaysCount = data?.length || 0;
+      return data?.length || 0;
     } else {
-      const { data: bData } = await fetchWithTimeout(
+      const { data } = await fetchWithTimeout<any>(
         supabase
           .from('clientes_fidelizacion')
           .select('birthday')
           .not('birthday', 'is', null) as any
       );
 
-      if (bData) {
-        upcomingBirthdaysCount = bData.filter((c: any) => {
+      if (data) {
+        return data.filter((c: any) => {
           const dob = new Date(`${c.birthday}T12:00:00Z`);
           const thisYearBirthday = new Date(
             today.getFullYear(),
@@ -129,11 +124,16 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
   } catch (err) {
     console.error('Error fetching birthdays:', err);
   }
+  return 0;
+}
 
-  // 5. Expiring Bonuses (Next 7 days)
-  let expiringBonusesCount = 0;
+async function fetchExpiringBonuses(): Promise<number> {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const nextWeek = addDays(today, 7);
+
   try {
-    const { count: expCount } = await fetchWithTimeout(
+    const { count } = await fetchWithTimeout<any>(
       supabase
         .from('bonos')
         .select('*', { count: 'exact', head: true })
@@ -142,55 +142,43 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
         .lte('fecha_vencimiento', nextWeek.toISOString()) as any,
       3000
     );
-    expiringBonusesCount = expCount || 0;
+    return count || 0;
   } catch (err) {
     console.error('Error fetching expiring bonuses:', err);
+    return 0;
   }
+}
 
-  let revenueData: RevenueData[] = [];
-
-  // 6. Ingresos de los últimos 7 meses
-  // Calculamos la fecha de corte (hace 6 meses + el mes actual)
+async function fetchRevenueData(): Promise<RevenueData[]> {
+  const today = new Date();
   const sixMonthsAgo = startOfMonth(addMonths(today, -6));
-  const { data: facturas, error: facturasError } = await supabase
+  const { data: facturas, error } = await supabase
     .from('facturas')
     .select('fecha_venta, total')
     .gte('fecha_venta', sixMonthsAgo.toISOString());
 
-  if (facturasError) {
-    console.error(
-      `Error fetching facturas for revenue: ${facturasError.message}`
-    );
-  } else if (facturas) {
-    // Array con los nombres de los meses en español
+  let revenueData: RevenueData[] = [];
+
+  if (error) {
+    console.error(`Error fetching facturas for revenue: ${error.message}`);
+    return revenueData;
+  }
+
+  if (facturas) {
     const monthNames = [
-      'Ene',
-      'Feb',
-      'Mar',
-      'Abr',
-      'May',
-      'Jun',
-      'Jul',
-      'Ago',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dic',
+      'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
+      'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'
     ];
 
-    // Inicializar el arreglo de los últimos 7 meses (ordenados del más antiguo al más reciente)
     for (let i = 6; i >= 0; i--) {
       const targetDate = addMonths(today, -i);
       revenueData.push({
         name: monthNames[targetDate.getMonth()],
         ingresos: 0,
-        // guardamos month y year local temporalmente para simplificar la suma
-        _month: targetDate.getMonth(),
-        _year: targetDate.getFullYear(),
+        ...{ _month: targetDate.getMonth(), _year: targetDate.getFullYear() } // Temporary
       } as any);
     }
 
-    // Sumamos los totales de las facturas en el mes correspondiente
     facturas.forEach((factura) => {
       if (!factura.fecha_venta) return;
       const fDate = new Date(factura.fecha_venta);
@@ -205,54 +193,48 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
       }
     });
 
-    // Limpiamos los campos temporales
-    revenueData = revenueData.map((b) => ({
+    return revenueData.map((b) => ({
       name: b.name,
       ingresos: b.ingresos,
     }));
   }
 
-  // 7. Actividad Reciente (Combinada de varias tablas)
+  return revenueData;
+}
+
+async function fetchRecentActivity(): Promise<ActivityItem[]> {
   let recentActivity: ActivityItem[] = [];
 
   try {
-    const [appointmentsRes, clientsRes, ventasRes, bonosRes] =
-      await Promise.all([
-        supabase
-          .from('appointments')
-          .select(
-            'id, created_at, servicio, client:clientes_fidelizacion(nombre)'
-          )
-          .order('created_at', { ascending: false })
-          .limit(5),
-        supabase
-          .from('clientes_fidelizacion')
-          .select('id, created_at, nombre')
-          .order('created_at', { ascending: false })
-          .limit(5),
-        supabase
-          .from('facturas')
-          .select('id, fecha_venta')
-          .order('fecha_venta', { ascending: false })
-          .limit(5),
-        supabase
-          .from('bonos')
-          .select('id, fecha_canje, tipo, client:clientes_fidelizacion(nombre)')
-          .not('fecha_canje', 'is', null)
-          .order('fecha_canje', { ascending: false })
-          .limit(5),
-      ]);
+    const [appointmentsRes, clientsRes, ventasRes, bonosRes] = await Promise.all([
+      supabase
+        .from('appointments')
+        .select('id, created_at, servicio, client:clientes_fidelizacion(nombre)')
+        .order('created_at', { ascending: false })
+        .limit(5),
+      supabase
+        .from('clientes_fidelizacion')
+        .select('id, created_at, nombre')
+        .order('created_at', { ascending: false })
+        .limit(5),
+      supabase
+        .from('facturas')
+        .select('id, fecha_venta')
+        .order('fecha_venta', { ascending: false })
+        .limit(5),
+      supabase
+        .from('bonos')
+        .select('id, fecha_canje, tipo, client:clientes_fidelizacion(nombre)')
+        .not('fecha_canje', 'is', null)
+        .order('fecha_canje', { ascending: false })
+        .limit(5),
+    ]);
 
     if (appointmentsRes.data) {
       appointmentsRes.data.forEach((a: any) => {
         let nombre = 'Cliente desconocido';
-        // Handle nested client representation from supabase join
         if (a.client) {
-          if (Array.isArray(a.client)) {
-            nombre = a.client[0]?.nombre || nombre;
-          } else {
-            nombre = a.client.nombre || nombre;
-          }
+          nombre = Array.isArray(a.client) ? a.client[0]?.nombre || nombre : a.client.nombre || nombre;
         }
         recentActivity.push({
           id: `app-${a.id}`,
@@ -292,11 +274,7 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
       bonosRes.data.forEach((b: any) => {
         let nombre = 'Cliente desconocido';
         if (b.client) {
-          if (Array.isArray(b.client)) {
-            nombre = b.client[0]?.nombre || nombre;
-          } else {
-            nombre = b.client.nombre || nombre;
-          }
+          nombre = Array.isArray(b.client) ? b.client[0]?.nombre || nombre : b.client.nombre || nombre;
         }
         recentActivity.push({
           id: `bon-${b.id}`,
@@ -308,24 +286,42 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
       });
     }
 
-    // Ordenar de más reciente a más antigua
-    recentActivity.sort(
-      (a, b) =>
-        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-    );
-
-    // Quedarse solo con las últimas 10 actividades en total
+    recentActivity.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
     recentActivity = recentActivity.slice(0, 10);
   } catch (err) {
     console.error('Error fetching recent activity:', err);
   }
 
+  return recentActivity;
+}
+
+export const getDashboardStats = async (): Promise<DashboardStats> => {
+  // Ejecutamos las promesas de forma concurrente, lo que además de limpiar
+  // el código monolítico, aumenta enormemente la velocidad de carga de la página.
+  const [
+    totalClients,
+    newClientsThisMonth,
+    activeBonuses,
+    upcomingBirthdays,
+    expiringBonuses,
+    revenueData,
+    recentActivity
+  ] = await Promise.all([
+    fetchTotalClients(),
+    fetchNewClientsThisMonth(),
+    fetchActiveBonuses(),
+    fetchUpcomingBirthdays(),
+    fetchExpiringBonuses(),
+    fetchRevenueData(),
+    fetchRecentActivity()
+  ]);
+
   return {
-    totalClients: totalClients || 0,
-    newClientsThisMonth: newClients || 0,
-    activeBonuses: activeBonuses || 0,
-    upcomingBirthdays: upcomingBirthdaysCount,
-    expiringBonuses: expiringBonusesCount,
+    totalClients,
+    newClientsThisMonth,
+    activeBonuses,
+    upcomingBirthdays,
+    expiringBonuses,
     revenueData,
     recentActivity,
   };
