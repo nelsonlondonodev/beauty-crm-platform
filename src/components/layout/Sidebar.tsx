@@ -3,7 +3,6 @@ import {
   LayoutDashboard,
   Users,
   Calendar,
-  LogOut,
   Scissors,
   Receipt,
   Briefcase,
@@ -20,7 +19,7 @@ interface NavItem {
 }
 
 const Sidebar = () => {
-  const { signOut, role } = useAuth();
+  const { role } = useAuth();
 
   const navItems: NavItem[] = [
     {
@@ -94,15 +93,7 @@ const Sidebar = () => {
           ))}
         </nav>
 
-        <div className="border-t border-gray-200 pt-4">
-          <button
-            onClick={() => signOut()}
-            className="flex w-full items-center rounded-lg px-3 py-2.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
-          >
-            <LogOut className="mr-3 h-5 w-5" />
-            Cerrar Sesión
-          </button>
-        </div>
+
       </div>
     </aside>
   );
