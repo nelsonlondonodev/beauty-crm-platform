@@ -45,10 +45,10 @@ function fetchWithTimeout<T>(
 // --- Helper Functions mapped to individual responsibilities ---
 
 async function fetchTotalClients(): Promise<number> {
-  const { count, error } = await fetchWithTimeout<any>(
+  const { count, error } = await fetchWithTimeout(
     supabase
       .from('clientes_fidelizacion')
-      .select('*', { count: 'exact', head: true }) as any
+      .select('*', { count: 'exact', head: true }) as unknown as Promise<{ count: number | null; error: any }>
   );
   if (error) throw new Error(`Error fetching total clients: ${error.message}`);
   return count || 0;
@@ -58,12 +58,12 @@ async function fetchNewClientsThisMonth(): Promise<number> {
   const start = startOfMonth(new Date()).toISOString();
   const end = endOfMonth(new Date()).toISOString();
 
-  const { count, error } = await fetchWithTimeout<any>(
+  const { count, error } = await fetchWithTimeout(
     supabase
       .from('clientes_fidelizacion')
       .select('*', { count: 'exact', head: true })
       .gte('created_at', start)
-      .lte('created_at', end) as any
+      .lte('created_at', end) as unknown as Promise<{ count: number | null; error: any }>
   );
 
   if (error) throw new Error(`Error fetching new clients: ${error.message}`);
@@ -71,11 +71,11 @@ async function fetchNewClientsThisMonth(): Promise<number> {
 }
 
 async function fetchActiveBonuses(): Promise<number> {
-  const { count, error } = await fetchWithTimeout<any>(
+  const { count, error } = await fetchWithTimeout(
     supabase
       .from('bonos')
       .select('*', { count: 'exact', head: true })
-      .eq('estado', 'Pendiente') as any
+      .eq('estado', 'Pendiente') as unknown as Promise<{ count: number | null; error: any }>
   );
 
   if (error) throw new Error(`Error fetching active bonuses: ${error.message}`);
@@ -93,24 +93,25 @@ async function fetchUpcomingBirthdays(): Promise<number> {
 
   try {
     if (nextWeekMMDD < todayMMDD) {
-      const { data } = await fetchWithTimeout<any>(
+      const { data } = await fetchWithTimeout(
         supabase
           .from('clientes_fidelizacion')
           .select('birthday')
           .not('birthday', 'is', null)
-          .or(`birthday.ilike.%-${todayMMDD},birthday.ilike.%-${nextWeekMMDD}`) as any
+          .or(`birthday.ilike.%-${todayMMDD},birthday.ilike.%-${nextWeekMMDD}`) as unknown as Promise<{ data: { birthday: string | null }[] | null }>
       );
       return data?.length || 0;
     } else {
-      const { data } = await fetchWithTimeout<any>(
+      const { data } = await fetchWithTimeout(
         supabase
           .from('clientes_fidelizacion')
           .select('birthday')
-          .not('birthday', 'is', null) as any
+          .not('birthday', 'is', null) as unknown as Promise<{ data: { birthday: string | null }[] | null }>
       );
 
       if (data) {
-        return data.filter((c: any) => {
+        return data.filter((c: { birthday: string | null }) => {
+          if (!c.birthday) return false;
           const dob = new Date(`${c.birthday}T12:00:00Z`);
           const thisYearBirthday = new Date(
             today.getFullYear(),
@@ -133,13 +134,13 @@ async function fetchExpiringBonuses(): Promise<number> {
   const nextWeek = addDays(today, 7);
 
   try {
-    const { count } = await fetchWithTimeout<any>(
+    const { count } = await fetchWithTimeout(
       supabase
         .from('bonos')
         .select('*', { count: 'exact', head: true })
         .eq('estado', 'Pendiente')
         .gte('fecha_vencimiento', today.toISOString())
-        .lte('fecha_vencimiento', nextWeek.toISOString()) as any,
+        .lte('fecha_vencimiento', nextWeek.toISOString()) as unknown as Promise<{ count: number | null; error: any }>,
       3000
     );
     return count || 0;
@@ -147,6 +148,11 @@ async function fetchExpiringBonuses(): Promise<number> {
     console.error('Error fetching expiring bonuses:', err);
     return 0;
   }
+}
+
+interface RevenueBucket extends RevenueData {
+  _month: number;
+  _year: number;
 }
 
 async function fetchRevenueData(): Promise<RevenueData[]> {
@@ -157,11 +163,11 @@ async function fetchRevenueData(): Promise<RevenueData[]> {
     .select('fecha_venta, total')
     .gte('fecha_venta', sixMonthsAgo.toISOString());
 
-  let revenueData: RevenueData[] = [];
+  let revenueData: RevenueBucket[] = [];
 
   if (error) {
     console.error(`Error fetching facturas for revenue: ${error.message}`);
-    return revenueData;
+    return [];
   }
 
   if (facturas) {
@@ -175,8 +181,9 @@ async function fetchRevenueData(): Promise<RevenueData[]> {
       revenueData.push({
         name: monthNames[targetDate.getMonth()],
         ingresos: 0,
-        ...{ _month: targetDate.getMonth(), _year: targetDate.getFullYear() } // Temporary
-      } as any);
+        _month: targetDate.getMonth(),
+        _year: targetDate.getFullYear()
+      });
     }
 
     facturas.forEach((factura) => {
@@ -186,7 +193,7 @@ async function fetchRevenueData(): Promise<RevenueData[]> {
       const fYear = fDate.getFullYear();
 
       const bucket = revenueData.find(
-        (b: any) => b._month === fMonth && b._year === fYear
+        (b) => b._month === fMonth && b._year === fYear
       );
       if (bucket) {
         bucket.ingresos += Number(factura.total) || 0;
@@ -199,7 +206,7 @@ async function fetchRevenueData(): Promise<RevenueData[]> {
     }));
   }
 
-  return revenueData;
+  return [];
 }
 
 async function fetchRecentActivity(): Promise<ActivityItem[]> {
@@ -209,7 +216,12 @@ async function fetchRecentActivity(): Promise<ActivityItem[]> {
     const [appointmentsRes, clientsRes, ventasRes, bonosRes] = await Promise.all([
       supabase
         .from('appointments')
-        .select('id, created_at, servicio, client:clientes_fidelizacion(nombre)')
+        .select(`
+          id, 
+          created_at, 
+          servicio, 
+          client:clientes_fidelizacion(nombre)
+        `)
         .order('created_at', { ascending: false })
         .limit(5),
       supabase
@@ -224,17 +236,33 @@ async function fetchRecentActivity(): Promise<ActivityItem[]> {
         .limit(5),
       supabase
         .from('bonos')
-        .select('id, fecha_canje, tipo, client:clientes_fidelizacion(nombre)')
+        .select(`
+          id, 
+          fecha_canje, 
+          tipo, 
+          client:clientes_fidelizacion(nombre)
+        `)
         .not('fecha_canje', 'is', null)
         .order('fecha_canje', { ascending: false })
         .limit(5),
     ]);
 
     if (appointmentsRes.data) {
-      appointmentsRes.data.forEach((a: any) => {
+      type AppointmentWithClient = {
+        id: string;
+        created_at: string;
+        servicio: string;
+        client: { nombre: string } | { nombre: string }[] | null;
+      };
+
+      (appointmentsRes.data as unknown as AppointmentWithClient[]).forEach((a) => {
         let nombre = 'Cliente desconocido';
         if (a.client) {
-          nombre = Array.isArray(a.client) ? a.client[0]?.nombre || nombre : a.client.nombre || nombre;
+          if (Array.isArray(a.client)) {
+            nombre = a.client[0]?.nombre || nombre;
+          } else {
+            nombre = a.client.nombre || nombre;
+          }
         }
         recentActivity.push({
           id: `app-${a.id}`,
@@ -247,41 +275,52 @@ async function fetchRecentActivity(): Promise<ActivityItem[]> {
     }
 
     if (clientsRes.data) {
-      clientsRes.data.forEach((c: any) => {
+      clientsRes.data.forEach((c) => {
         recentActivity.push({
           id: `cli-${c.id}`,
           type: 'client',
           title: 'Nuevo Cliente',
           description: `${(c.nombre || '').trim()} se unió al programa`,
-          timestamp: c.created_at,
+          timestamp: (c as any).created_at, // created_at exists in DB but maybe not in select
         });
       });
     }
 
     if (ventasRes.data) {
-      ventasRes.data.forEach((v: any) => {
+      ventasRes.data.forEach((v) => {
         recentActivity.push({
           id: `ven-${v.id}`,
           type: 'sale',
           title: 'Venta Procesada',
           description: `Nueva factura generada en el sistema`,
-          timestamp: v.fecha_venta,
+          timestamp: v.fecha_venta || new Date().toISOString(),
         });
       });
     }
 
     if (bonosRes.data) {
-      bonosRes.data.forEach((b: any) => {
+      type BonoWithClient = {
+        id: string;
+        fecha_canje: string | null;
+        tipo: string;
+        client: { nombre: string } | { nombre: string }[] | null;
+      };
+
+      (bonosRes.data as unknown as BonoWithClient[]).forEach((b) => {
         let nombre = 'Cliente desconocido';
         if (b.client) {
-          nombre = Array.isArray(b.client) ? b.client[0]?.nombre || nombre : b.client.nombre || nombre;
+          if (Array.isArray(b.client)) {
+            nombre = b.client[0]?.nombre || nombre;
+          } else {
+            nombre = b.client.nombre || nombre;
+          }
         }
         recentActivity.push({
           id: `bon-${b.id}`,
           type: 'bonus',
           title: 'Bono Canjeado',
           description: `${nombre.trim()} canjeó su bono de ${b.tipo}`,
-          timestamp: b.fecha_canje,
+          timestamp: b.fecha_canje || new Date().toISOString(),
         });
       });
     }
