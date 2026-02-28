@@ -121,7 +121,8 @@ CRM B2B moderno para el sector de la belleza (Peluquerías, Barberías, Spas).
 -   **Anti-Spaghetti AuthProvider**: Refactorización profunda y asíncrona del puente SDK para eliminar por completo cierres silenciosos o recargas en bucle de la aplicación.
 -   **Failsafe Timeout de Seguridad**: Implementación de temporizadores estrictos (`fetchWithTimeout` de 5s) para promesas de Supabase, escudando a la UI de parálisis (`loading: true` infinito) originadas por fallos en red o consultas de bases de datos colgadas.
 -   **Seguridad RLS Anti-Bucles (PostgreSQL)**: Refactorización en la base de datos empleando funciones `SECURITY DEFINER` (`is_admin`, `is_owner`) para romper dependencias de recursividad infinita durante validaciones escalonadas de roles (RBAC), evitando el ahogamiento del servidor de Supabase y de la aplicación concurrente.
--   **Seguridad de Scope y Closures**: Se introdujo a `useRef` para trackear el UserId en línea sin bloquear pantallas (`loading=true`) falsamente, manteniendo blindada la Protección de Rutas sin sobreescribir sesiones en el "Background". Se acopló el esquema **SOLID** abstrayendo peticiones a una función de extracción pura e inmutable `fetchRoleFromDB`.
+-   **Separación de Responsabilidades (Clean Architecture)**: Refactorización del monolítico `dashboardService.ts` en funciones atómicas concurrentes (`Promise.all`) para agilizar tiempos de carga y mejorar mantenibilidad.
+-   **Componentización UI**: Extracción de componentes complejos hacia módulos independientes (e.j., desacople de la tabla de comisiones a `<StaffTable />` e íconos SVG intrusivos a `<GoogleIcon />`).
 
 ## Pendientes (WIP) y Deuda Técnica
 
