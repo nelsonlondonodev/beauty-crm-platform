@@ -4,7 +4,7 @@ import { Building, User, Shield, Bell } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import ProfileCard from '../components/settings/ProfileCard';
 import SettingsLink from '../components/settings/SettingsLink';
-import { uploadAvatar } from '../services/userService';
+import { uploadAvatar, updateUserInfo } from '../services/userService';
 
 const Settings = () => {
   const { user, role, signOut } = useAuth();
@@ -19,11 +19,18 @@ const Settings = () => {
     if (!user) return;
     try {
       await uploadAvatar(user.id, file);
-      // La actualización de metadata disparará el cambio de estado en AuthContext
-      // o el usuario verá el cambio al refrescar/navegar si el SDK no lo hace de inmediato.
     } catch (error) {
       console.error('Error in handleAvatarUpload:', error);
       alert('Error al subir la imagen. Asegúrate de que el bucket "avatars" existe en Supabase Storage con acceso público.');
+    }
+  };
+
+  const handleUpdateName = async (newName: string) => {
+    try {
+      await updateUserInfo({ full_name: newName });
+    } catch (error) {
+      console.error('Error in handleUpdateName:', error);
+      alert('Error al actualizar el nombre.');
     }
   };
 
@@ -51,6 +58,7 @@ const Settings = () => {
             joinedDate={joinedDate}
             onLogout={handleLogout}
             onAvatarUpload={handleAvatarUpload}
+            onUpdateName={handleUpdateName}
           />
         </div>
 

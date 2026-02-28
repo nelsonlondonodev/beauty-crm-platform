@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Mail, Calendar, LogOut, Edit2, Camera, Loader2 } from 'lucide-react';
+import { Mail, Calendar, LogOut, Edit2, Camera, Loader2, Check, X } from 'lucide-react';
 import type { AppRole } from '../../contexts/AuthContext';
 
 interface ProfileCardProps {
@@ -10,6 +10,7 @@ interface ProfileCardProps {
   joinedDate: string;
   onLogout: () => void;
   onAvatarUpload?: (file: File) => Promise<void>;
+  onUpdateName?: (newName: string) => Promise<void>;
 }
 
 const ProfileCard = ({ 
@@ -19,12 +20,16 @@ const ProfileCard = ({
   role, 
   joinedDate, 
   onLogout,
-  onAvatarUpload 
+  onAvatarUpload,
+  onUpdateName
 }: ProfileCardProps) => {
   const [isUploading, setIsUploading] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [editName, setEditName] = useState(fullName);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Formatear nombre: primera letra de cada palabra en mayúscula
+  // Formatear nombre para mostrar (solo cuando no se está editando)
   const formattedName = fullName.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
 
   const handleCameraClick = () => {
@@ -42,6 +47,23 @@ const ProfileCard = ({
       } finally {
         setIsUploading(false);
       }
+    }
+  };
+
+  const handleSaveName = async () => {
+    if (!editName.trim() || editName === fullName) {
+      setIsEditing(false);
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+      if (onUpdateName) await onUpdateName(editName);
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error updating name:', error);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -94,19 +116,53 @@ const ProfileCard = ({
         
         <div className="mt-6">
           <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-2xl font-black tracking-tight text-gray-900">{formattedName}</h3>
-              <div className="flex items-center gap-2 mt-1.5">
-                <span className="px-2.5 py-0.5 rounded-full bg-purple-600 text-[10px] font-bold text-white uppercase tracking-widest shadow-sm shadow-purple-200">
-                  {role || 'Staff'}
-                </span>
-                <span className="h-1 w-1 rounded-full bg-gray-300" />
-                <span className="text-xs font-medium text-gray-400">ID: USER-{fullName.substring(0, 4).toUpperCase()}</span>
-              </div>
+            <div className="w-full mr-4">
+              {isEditing ? (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    className="w-full text-xl font-bold text-gray-900 border-b-2 border-purple-500 focus:outline-none bg-transparent py-1 px-0"
+                    autoFocus
+                    disabled={isSaving}
+                  />
+                  <button 
+                    onClick={handleSaveName}
+                    disabled={isSaving}
+                    className="h-8 w-8 flex items-center justify-center rounded-lg bg-purple-600 text-white shadow-md hover:bg-purple-700 transition-colors disabled:opacity-50"
+                  >
+                    {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+                  </button>
+                  <button 
+                    onClick={() => { setIsEditing(false); setEditName(fullName); }}
+                    disabled={isSaving}
+                    className="h-8 w-8 flex items-center justify-center rounded-lg border border-gray-100 bg-white text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <h3 className="text-2xl font-black tracking-tight text-gray-900">{formattedName}</h3>
+                  <div className="flex items-center gap-2 mt-1.5">
+                    <span className="px-2.5 py-0.5 rounded-full bg-purple-600 text-[10px] font-bold text-white uppercase tracking-widest shadow-sm shadow-purple-200">
+                      {role || 'Staff'}
+                    </span>
+                    <span className="h-1 w-1 rounded-full bg-gray-300" />
+                    <span className="text-xs font-medium text-gray-400">ID: USER-{fullName.substring(0, 4).toUpperCase()}</span>
+                  </div>
+                </>
+              )}
             </div>
-            <button className="h-10 w-10 flex items-center justify-center rounded-xl border border-gray-100 bg-white text-gray-400 transition-all hover:border-purple-200 hover:text-purple-600 hover:shadow-sm">
-              <Edit2 className="h-4 w-4" />
-            </button>
+            {!isEditing && (
+              <button 
+                onClick={() => setIsEditing(true)}
+                className="h-10 w-10 flex items-center justify-center rounded-xl border border-gray-100 bg-white text-gray-400 transition-all hover:border-purple-200 hover:text-purple-600 hover:shadow-sm"
+              >
+                <Edit2 className="h-4 w-4" />
+              </button>
+            )}
           </div>
         </div>
 
@@ -147,4 +203,5 @@ const ProfileCard = ({
 };
 
 export default ProfileCard;
+
 

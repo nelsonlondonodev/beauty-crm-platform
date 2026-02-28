@@ -31,3 +31,11 @@ export const uploadAvatar = async (userId: string, file: File): Promise<string> 
 
   return publicUrl;
 };
+
+export const updateUserInfo = async (data: { full_name?: string }): Promise<void> => {
+  const { error } = await supabase.auth.updateUser({
+    data: data
+  });
+
+  if (error) throw new Error(`Error updating user info: ${error.message}`);
+};
