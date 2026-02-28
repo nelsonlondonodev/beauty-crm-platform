@@ -18,6 +18,7 @@ interface AuthContextType {
   role: AppRole | null;
   loading: boolean;
   signOut: () => Promise<void>;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -26,10 +27,11 @@ const AuthContext = createContext<AuthContextType>({
   role: null,
   loading: true,
   signOut: async () => {},
+  refreshUser: async () => {},
 });
 
 /**
- * Función utilitaria para evitar que promesas estancadas (ej. bugs recursivos de RLS) congelen la UI.
+ * Función utilitaria para evitar que promesas estancadas congelen la UI.
  */
 function fetchWithTimeout<T>(promise: Promise<T>, ms: number = 5000): Promise<T> {
   let timeoutId: ReturnType<typeof setTimeout>;
@@ -44,7 +46,6 @@ function fetchWithTimeout<T>(promise: Promise<T>, ms: number = 5000): Promise<T>
 
 /**
  * Función pura para obtener el rol desde Supabase.
- * Usa fetchWithTimeout para prevenir que un fallo de RLS bloquee la app infinitamente.
  */
 export const fetchRoleFromDB = async (
   userId: string
@@ -60,21 +61,12 @@ export const fetchRoleFromDB = async (
     const { data, error } = response;
 
     if (error || !data) {
-      console.warn(
-        'Rol no encontrado o error local fetching:',
-        error?.message || 'Usuario sin rol asignado'
-      );
+      console.warn('Rol no encontrado o error fetching:', error?.message || 'Sin rol');
       return null;
     }
     return data.role as AppRole;
   } catch (err) {
-    if (err instanceof Error && err.message === 'REQUEST_TIMEOUT') {
-      console.error(
-        'CRÍTICO: Fetching de rol excedió el tiempo límite (5s). Revisa las políticas RLS en Supabase en `user_roles` por bucles infinitos.'
-      );
-    } else {
-      console.error('Excepción resolviendo rol:', err);
-    }
+    console.error('Excepción resolviendo rol:', err);
     return null;
   }
 };
@@ -85,21 +77,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [role, setRole] = useState<AppRole | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Usamos un Ref inmutable en vez de variables locales que sucumben a closures obsoletos
   const activeUserIdRef = useRef<string | null>(null);
 
-  // Helper para asignar la sesión exitosa
-  const assignSession = useCallback(
-    (newSession: Session, userRole: AppRole) => {
-      setSession(newSession);
-      setUser(newSession.user);
-      setRole(userRole);
-      activeUserIdRef.current = newSession.user.id;
-    },
-    []
-  );
-
-  // Helper para limpiar totalmente la sesión actual si es inválida
+  // Helper para limpiar totalmente la sesión actual
   const clearSession = useCallback(async (shouldSignOutFromBackend = true) => {
     try {
       if (shouldSignOutFromBackend) {
@@ -113,49 +93,54 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, []);
 
+  // Helper para refrescar datos del usuario (metadata) desde el servidor
+  const refreshUser = useCallback(async () => {
+    try {
+      const { data: { user: updatedUser }, error } = await supabase.auth.getUser();
+      if (error) throw error;
+      if (updatedUser) {
+        setUser(updatedUser);
+      }
+    } catch (err) {
+      console.error('Error al refrescar usuario:', err);
+    }
+  }, []);
+
   useEffect(() => {
     let mounted = true;
 
     const initializeAuth = async () => {
       try {
-        const {
-          data: { session: initialSession },
-          error,
-        } = await fetchWithTimeout(supabase.auth.getSession(), 5000);
+        // Obtenemos el usuario real del servidor para asegurar metadata fresca
+        const { data: { user: currentUser }, error: userError } = await fetchWithTimeout(supabase.auth.getUser(), 5000);
 
-        if (error) throw error;
+        if (userError || !currentUser) {
+          if (mounted) await clearSession(false);
+          return;
+        }
 
-        if (initialSession?.user) {
-          const userRole = await fetchRoleFromDB(initialSession.user.id);
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
+
+        if (currentUser && currentSession) {
+          const userRole = await fetchRoleFromDB(currentUser.id);
           if (mounted) {
-            if (userRole) {
-              assignSession(initialSession, userRole);
-            } else {
-              await clearSession();
-            }
-          }
-        } else {
-          if (mounted) {
-            await clearSession(false);
+            setSession(currentSession);
+            setUser(currentUser);
+            setRole(userRole);
+            activeUserIdRef.current = currentUser.id;
           }
         }
       } catch (err) {
-        console.error('Error crítico al iniciar sesión de app:', err);
+        console.error('Error al iniciar sesión:', err);
         if (mounted) await clearSession(false);
       } finally {
-        if (mounted) {
-          setLoading(false);
-        }
+        if (mounted) setLoading(false);
       }
     };
 
-    // Lanzamos carga inicial
     initializeAuth();
 
-    // Reacción pasiva a eventos directos del SDK
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
       if (!mounted) return;
 
       if (event === 'INITIAL_SESSION') return;
@@ -167,23 +152,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
 
       if (currentSession?.user) {
-        // ¿Ya lo teníamos cargado en la misma sesión? Token refresh de fondo o actualización de metadata.
-        if (activeUserIdRef.current === currentSession.user.id) {
+        // Actualizamos siempre el usuario para captar cambios de metadata
+        const isSameUser = activeUserIdRef.current === currentSession.user.id;
+        
+        if (isSameUser) {
           setSession(currentSession);
-          setUser(currentSession.user); // <-- CRUCIAL: Actualizar objeto user para detectar cambios en metadata (foto)
+          setUser(currentSession.user);
           return;
         }
 
-        // Cuenta distinta intentando entrar a la vista. Aquí SI bloqueamos
         setLoading(true);
         const userRole = await fetchRoleFromDB(currentSession.user.id);
 
         if (mounted) {
-          if (userRole) {
-            assignSession(currentSession, userRole);
-          } else {
-            await clearSession();
-          }
+          setSession(currentSession);
+          setUser(currentSession.user);
+          setRole(userRole);
+          activeUserIdRef.current = currentSession.user.id;
           setLoading(false);
         }
       }
@@ -193,17 +178,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [assignSession, clearSession]);
+  }, [clearSession]);
 
   const signOut = async () => {
     try {
-      // 1. Limpiamos estado local de inmediato
       setSession(null);
       setUser(null);
       setRole(null);
       activeUserIdRef.current = null;
-
-      // 2. Cerramos la sesión en el backend sin congelar App
       await fetchWithTimeout(supabase.auth.signOut(), 3000);
     } catch (error) {
       console.error('Error durante el cierre de sesión:', error);
@@ -211,13 +193,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ session, user, role, loading, signOut }}>
+    <AuthContext.Provider value={{ session, user, role, loading, signOut, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => {
   return useContext(AuthContext);
 };

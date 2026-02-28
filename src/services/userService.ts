@@ -1,33 +1,36 @@
 import { supabase } from '../lib/supabase';
 
 export const uploadAvatar = async (userId: string, file: File): Promise<string> => {
-  // 1. Subir al Storage (Bucket: avatars)
-  const fileExt = file.name.split('.').pop();
-  const filePath = `${userId}/${Math.random()}.${fileExt}`;
+  // 1. Definir ruta fija: Carpeta del usuario / avatar + extensión real
+  const fileExt = file.name.split('.').pop() || 'png';
+  const filePath = `${userId}/avatar.${fileExt}`;
 
+  // 2. Subir al Storage (Upsert para reemplazar el anterior)
   const { error: uploadError } = await supabase.storage
     .from('avatars')
-    .upload(filePath, file);
+    .upload(filePath, file, { 
+      upsert: true,
+      contentType: file.type 
+    });
 
-  if (uploadError) {
-    // Si el bucket no existe, es probable que no podamos crear uno desde el cliente (depende de los permisos).
-    // Suponemos que ya existe o que el usuario lo creará.
-    throw new Error(`Error uploading image: ${uploadError.message}`);
-  }
+  if (uploadError) throw new Error(`Error en Storage: ${uploadError.message}`);
 
-  // 2. Obtener URL pública
+  // 3. Obtener URL pública con cache-buster para evitar que el navegador muestre la imagen vieja
   const { data: publicUrlData } = supabase.storage
     .from('avatars')
     .getPublicUrl(filePath);
 
-  const publicUrl = publicUrlData.publicUrl;
+  const publicUrl = `${publicUrlData.publicUrl}?t=${Date.now()}`;
 
-  // 3. Actualizar la metadata del usuario en Auth
+  // 4. Actualizar metadata del usuario
   const { error: updateError } = await supabase.auth.updateUser({
     data: { avatar_url: publicUrl }
   });
 
-  if (updateError) throw new Error(`Error updating metadata: ${updateError.message}`);
+  if (updateError) throw new Error(`Error en Auth: ${updateError.message}`);
+
+  // 5. Opcional: Refrescar sesión local para asegurar que la metadata persista
+  await supabase.auth.refreshSession();
 
   return publicUrl;
 };

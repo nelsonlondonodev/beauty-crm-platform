@@ -7,7 +7,7 @@ import SettingsLink from '../components/settings/SettingsLink';
 import { uploadAvatar, updateUserInfo } from '../services/userService';
 
 const Settings = () => {
-  const { user, role, signOut } = useAuth();
+  const { user, role, signOut, refreshUser } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -19,15 +19,17 @@ const Settings = () => {
     if (!user) return;
     try {
       await uploadAvatar(user.id, file);
+      await refreshUser(); // Forzar actualización de metadata en la UI
     } catch (error) {
       console.error('Error in handleAvatarUpload:', error);
-      alert('Error al subir la imagen. Asegúrate de que el bucket "avatars" existe en Supabase Storage con acceso público.');
+      alert('Error al subir la imagen.');
     }
   };
 
   const handleUpdateName = async (newName: string) => {
     try {
       await updateUserInfo({ full_name: newName });
+      await refreshUser(); // Forzar actualización de metadata en la UI
     } catch (error) {
       console.error('Error in handleUpdateName:', error);
       alert('Error al actualizar el nombre.');
