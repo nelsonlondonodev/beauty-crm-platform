@@ -112,6 +112,13 @@ CRM B2B moderno para el sector de la belleza (Peluquerías, Barberías, Spas).
 -   **Resiliencia con Timeouts**: Implementación de `fetchWithTimeout` en todas las consultas críticas del dashboard para asegurar que la interfaz nunca se bloquee por latencia de red.
 -   **Timeline Real de Actividades**: El feed de `Actividad Reciente` consolidado desde 4 tablas distintas (`appointments`, `clientes_fidelizacion`, `facturas`, `bonos`). Usa `date-fns` para cálculo de fechas relativas ("Hace 5 minutos") y ordena históricamente asegurando que todos los eventos del ecosistema beauty se reflejen de último momento sin estancamientos.
 
+### 11. Marca Blanca y Escalabilidad (White-Label Readiness)
+-   **Configuración Centralizada**: Implementación de `src/config/brand.ts` como punto único de verdad para el nombre de la app, textos legales, logos y fallbacks de marca.
+-   **Desacople de Identidad**: Eliminación de referencias hardcodeadas ("Londy", "Nelson") en todo el código fuente, preparándolo para ser renombrado instantáneamente por otros clientes.
+-   **Seguridad de Integración**: Migración de URLs críticas (webhooks de n8n) a variables de entorno (`.env`).
+-   **Logging Centralizado**: Implementación de `src/lib/logger.ts` con soporte para niveles (info, warn, error) y contextos, preparado para conectarse a servicios de monitoreo en producción (Sentry/LogRocket).
+-   **Refactorización de Tipado**: Eliminación total del tipo `any` en servicios críticos y unificación de utilidades como `fetchWithTimeout` en `lib/utils.ts`.
+
 ### 11. Interfaz de Usuario e Identidad (UX)
 -   **Londy Branding**: Transición completa a la nueva identidad de marca, incluyendo logotipos, favicons, títulos y un diseño minimalista premium.
 -   **UserMenu Interactivo**: Despliegue de un menú de perfil avanzado en el Topbar que muestra el nombre del usuario, su avatar real y su rol (Badge de seguridad), con opciones rápidas de navegación a Ajustes.
@@ -125,13 +132,21 @@ CRM B2B moderno para el sector de la belleza (Peluquerías, Barberías, Spas).
 -   **Separación de Responsabilidades (Clean Architecture)**: Refactorización del monolítico `dashboardService.ts` en funciones atómicas concurrentes (`Promise.all`) para agilizar tiempos de carga y mejorar mantenibilidad.
 -   **Componentización UI**: Extracción de componentes complejos hacia módulos independientes (e.j., desacople de la tabla de comisiones a `<StaffTable />` e íconos SVG intrusivos a `<GoogleIcon />`).
 
-## Pendientes (WIP) y Deuda Técnica
+## 🗺️ Roadmap de Desarrollo (Pendientes)
 
--   [x] **Sistema de Roles (RBAC):** Escalada de los correos "hardcodeados" a base de datos estructurada con tabla `user_roles`, permisos reactivos e interfaz condicionada para SaaS.
--   [x] **Seguridad de Base de Datos (RLS Multi-Tenant):** Se aislaron los datos mediante políticas de fila (`auth.uid() = user_id`) en las tablas transaccionales, preparando la aplicación para escalar a SaaS.
+### Fase 3: Calidad y Continuidad (SaaS)
+- [ ] **Tests Automatizados:** Implementar Vitest para servicios críticos (Facturación, Comisiones).
+- [ ] **Monitoreo Real:** Integrar el Logger con un servicio de captura de excepciones en producción.
+- [ ] **Documentación API:** Documentar los endpoints de Supabase y esquemas de tablas.
+
+### Fase 4: SaaS Avanzado
+- [ ] **Panel de Administrador Global:** Interfaz para gestionar todos los tenants desde una sola cuenta maestra.
+- [ ] **Marca Blanca Dinámica:** Mover la configuración de `brand.ts` a la base de datos para personalización sin cambios de código.
+- [ ] **Onboarding Wizard:** Guía interactiva para que nuevos clientes configuren sus servicios y empleados.
 
 ## Comandos
 
 -   `npm install`: Instalar dependencias
 -   `npm run dev`: Iniciar servidor de desarrollo
 -   `npm run build`: Construir para producción
+-   `npx tsc --noEmit`: Verificación de tipos estricta
