@@ -1,7 +1,7 @@
 import type { User } from '@supabase/supabase-js';
 
 // ── Constantes ──────────────────────────────────────────────────────────────
-export const AVATAR_MAX_SIZE_MB = 2;
+export const AVATAR_MAX_SIZE_MB = 5;
 export const AVATAR_MAX_SIZE_BYTES = AVATAR_MAX_SIZE_MB * 1024 * 1024;
 export const AVATAR_ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 export const AVATAR_STORAGE_BUCKET = 'avatars';

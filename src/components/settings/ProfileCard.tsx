@@ -45,8 +45,8 @@ const ProfileCard = ({
       try {
         setIsUploading(true);
         await onAvatarUpload(file);
-      } catch (error) {
-        console.error('Error uploading avatar:', error);
+      } catch {
+        // Error ya manejado por el componente padre (Settings)
       } finally {
         setIsUploading(false);
       }
