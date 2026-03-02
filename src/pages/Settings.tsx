@@ -38,7 +38,8 @@ const Settings = () => {
 
   const fullName = user?.user_metadata?.full_name || 'Usuario de Londy';
   const email = user?.email || 'No disponible';
-  const avatarUrl = user?.user_metadata?.avatar_url || null;
+  // Priorizar avatar personalizado sobre el de Google OAuth
+  const avatarUrl = user?.user_metadata?.custom_avatar_url || user?.user_metadata?.avatar_url || null;
   const joinedDate = user?.created_at 
     ? new Date(user.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })
     : 'Recientemente';

@@ -27,7 +27,8 @@ const UserMenu = () => {
 
   const fullName = user?.user_metadata?.full_name || 'Usuario';
   const email = user?.email || '';
-  const avatarUrl = user?.user_metadata?.avatar_url || null;
+  // Priorizar avatar personalizado sobre el de Google OAuth
+  const avatarUrl = user?.user_metadata?.custom_avatar_url || user?.user_metadata?.avatar_url || null;
   const initials = fullName
     .split(' ')
     .map((n: string) => n[0])

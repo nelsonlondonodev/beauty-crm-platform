@@ -22,9 +22,10 @@ export const uploadAvatar = async (userId: string, file: File): Promise<string> 
 
   const publicUrl = `${publicUrlData.publicUrl}?t=${Date.now()}`;
 
-  // 4. Actualizar metadata del usuario
+  // 4. Actualizar metadata del usuario en un campo propio (custom_avatar_url).
+  //    NO usar 'avatar_url' porque Google OAuth lo sobrescribe en cada login.
   const { error: updateError } = await supabase.auth.updateUser({
-    data: { avatar_url: publicUrl }
+    data: { custom_avatar_url: publicUrl }
   });
 
   if (updateError) throw new Error(`Error en Auth: ${updateError.message}`);
