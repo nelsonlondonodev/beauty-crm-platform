@@ -1,45 +1,79 @@
 import { supabase } from '../lib/supabase';
+import {
+  AVATAR_STORAGE_BUCKET,
+  getAvatarStoragePath,
+  validateAvatarFile,
+} from '../lib/avatar';
 
+// ── Avatar ──────────────────────────────────────────────────────────────────
+
+/**
+ * Sube un avatar al Storage de Supabase y actualiza la metadata del usuario.
+ * Valida tipo y tamaño antes de subir.
+ */
 export const uploadAvatar = async (userId: string, file: File): Promise<string> => {
-  // 1. Ruta fija sin extensión para que el upsert SIEMPRE reemplace el anterior,
-  //    independientemente del formato del archivo (.jpg, .png, .webp, etc.)
-  const filePath = `${userId}/avatar`;
+  // 1. Validar archivo
+  validateAvatarFile(file);
 
-  // 2. Subir al Storage (Upsert para reemplazar el anterior)
+  // 2. Subir al Storage (upsert reemplaza el anterior)
+  const filePath = getAvatarStoragePath(userId);
+
   const { error: uploadError } = await supabase.storage
-    .from('avatars')
-    .upload(filePath, file, { 
+    .from(AVATAR_STORAGE_BUCKET)
+    .upload(filePath, file, {
       upsert: true,
-      contentType: file.type 
+      contentType: file.type,
     });
 
   if (uploadError) throw new Error(`Error en Storage: ${uploadError.message}`);
 
-  // 3. Obtener URL pública con cache-buster para evitar que el navegador muestre la imagen vieja
+  // 3. Obtener URL pública con cache-buster
   const { data: publicUrlData } = supabase.storage
-    .from('avatars')
+    .from(AVATAR_STORAGE_BUCKET)
     .getPublicUrl(filePath);
 
   const publicUrl = `${publicUrlData.publicUrl}?t=${Date.now()}`;
 
-  // 4. Actualizar metadata del usuario en un campo propio (custom_avatar_url).
-  //    NO usar 'avatar_url' porque Google OAuth lo sobrescribe en cada login.
+  // 4. Guardar en custom_avatar_url (Google OAuth no lo sobrescribe)
   const { error: updateError } = await supabase.auth.updateUser({
-    data: { custom_avatar_url: publicUrl }
+    data: { custom_avatar_url: publicUrl },
   });
 
   if (updateError) throw new Error(`Error en Auth: ${updateError.message}`);
 
-  // 5. Opcional: Refrescar sesión local para asegurar que la metadata persista
+  // 5. Refrescar sesión para persistir la metadata
   await supabase.auth.refreshSession();
 
   return publicUrl;
 };
 
-export const updateUserInfo = async (data: { full_name?: string }): Promise<void> => {
+/**
+ * Elimina el avatar personalizado del Storage y limpia la metadata del usuario.
+ * Después de esto, se mostrará el avatar de Google OAuth o las iniciales.
+ */
+export const removeAvatar = async (userId: string): Promise<void> => {
+  const filePath = getAvatarStoragePath(userId);
+
+  // 1. Eliminar archivo del Storage (ignorar error si no existe)
+  await supabase.storage.from(AVATAR_STORAGE_BUCKET).remove([filePath]);
+
+  // 2. Limpiar la metadata
   const { error } = await supabase.auth.updateUser({
-    data: data
+    data: { custom_avatar_url: null },
   });
+
+  if (error) throw new Error(`Error limpiando avatar: ${error.message}`);
+
+  await supabase.auth.refreshSession();
+};
+
+// ── Perfil ──────────────────────────────────────────────────────────────────
+
+/**
+ * Actualiza la información de perfil del usuario (nombre, etc.)
+ */
+export const updateUserInfo = async (data: { full_name?: string }): Promise<void> => {
+  const { error } = await supabase.auth.updateUser({ data });
 
   if (error) throw new Error(`Error updating user info: ${error.message}`);
 };

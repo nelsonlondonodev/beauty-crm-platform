@@ -4,7 +4,8 @@ import { Building, User, Shield, Bell } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import ProfileCard from '../components/settings/ProfileCard';
 import SettingsLink from '../components/settings/SettingsLink';
-import { uploadAvatar, updateUserInfo } from '../services/userService';
+import { uploadAvatar, removeAvatar, updateUserInfo } from '../services/userService';
+import { getAvatarUrl } from '../lib/avatar';
 
 const Settings = () => {
   const { user, role, signOut, refreshUser } = useAuth();
@@ -19,10 +20,22 @@ const Settings = () => {
     if (!user) return;
     try {
       await uploadAvatar(user.id, file);
-      await refreshUser(); // Forzar actualización de metadata en la UI
+      await refreshUser();
     } catch (error) {
       console.error('Error in handleAvatarUpload:', error);
-      alert('Error al subir la imagen.');
+      const message = error instanceof Error ? error.message : 'Error al subir la imagen.';
+      alert(message);
+    }
+  };
+
+  const handleAvatarRemove = async () => {
+    if (!user) return;
+    try {
+      await removeAvatar(user.id);
+      await refreshUser();
+    } catch (error) {
+      console.error('Error in handleAvatarRemove:', error);
+      alert('Error al eliminar la imagen.');
     }
   };
 
@@ -38,8 +51,7 @@ const Settings = () => {
 
   const fullName = user?.user_metadata?.full_name || 'Usuario de Londy';
   const email = user?.email || 'No disponible';
-  // Priorizar avatar personalizado sobre el de Google OAuth
-  const avatarUrl = user?.user_metadata?.custom_avatar_url || user?.user_metadata?.avatar_url || null;
+  const avatarUrl = getAvatarUrl(user);
   const joinedDate = user?.created_at 
     ? new Date(user.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })
     : 'Recientemente';
@@ -61,6 +73,7 @@ const Settings = () => {
             joinedDate={joinedDate}
             onLogout={handleLogout}
             onAvatarUpload={handleAvatarUpload}
+            onAvatarRemove={handleAvatarRemove}
             onUpdateName={handleUpdateName}
           />
         </div>

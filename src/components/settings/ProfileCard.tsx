@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
-import { Mail, Calendar, LogOut, Edit2, Camera, Loader2, Check, X } from 'lucide-react';
+import { Mail, Calendar, LogOut, Edit2, Camera, Trash2, Loader2, Check, X } from 'lucide-react';
 import type { AppRole } from '../../contexts/AuthContext';
+import { getInitials, AVATAR_ALLOWED_TYPES } from '../../lib/avatar';
 
 interface ProfileCardProps {
   fullName: string;
@@ -10,6 +11,7 @@ interface ProfileCardProps {
   joinedDate: string;
   onLogout: () => void;
   onAvatarUpload?: (file: File) => Promise<void>;
+  onAvatarRemove?: () => Promise<void>;
   onUpdateName?: (newName: string) => Promise<void>;
 }
 
@@ -21,6 +23,7 @@ const ProfileCard = ({
   joinedDate, 
   onLogout,
   onAvatarUpload,
+  onAvatarRemove,
   onUpdateName
 }: ProfileCardProps) => {
   const [isUploading, setIsUploading] = useState(false);
@@ -86,7 +89,7 @@ const ProfileCard = ({
                 <img src={avatarUrl} alt={fullName} className="h-full w-full object-cover" />
               ) : (
                 <span className="text-4xl font-black text-purple-600">
-                  {fullName.substring(0, 1).toUpperCase()}
+                  {getInitials(fullName)}
                 </span>
               )}
               {isUploading && (
@@ -101,17 +104,30 @@ const ProfileCard = ({
             type="file" 
             ref={fileInputRef}
             className="hidden" 
-            accept="image/*"
+            accept={AVATAR_ALLOWED_TYPES.join(',')}
             onChange={handleFileChange}
           />
           
-          <button 
-            onClick={handleCameraClick}
-            disabled={isUploading}
-            className="absolute bottom-1 right-1 h-9 w-9 rounded-full bg-white border border-gray-100 shadow-lg flex items-center justify-center text-gray-600 transition-all hover:scale-110 hover:text-purple-600 active:scale-90 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
-          </button>
+          <div className="absolute bottom-1 right-1 flex gap-1">
+            <button 
+              onClick={handleCameraClick}
+              disabled={isUploading}
+              className="h-9 w-9 rounded-full bg-white border border-gray-100 shadow-lg flex items-center justify-center text-gray-600 transition-all hover:scale-110 hover:text-purple-600 active:scale-90 disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Cambiar foto"
+            >
+              {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
+            </button>
+            {avatarUrl && onAvatarRemove && (
+              <button 
+                onClick={onAvatarRemove}
+                disabled={isUploading}
+                className="h-9 w-9 rounded-full bg-white border border-gray-100 shadow-lg flex items-center justify-center text-gray-600 transition-all hover:scale-110 hover:text-red-500 active:scale-90 disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Eliminar foto"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            )}
+          </div>
         </div>
         
         <div className="mt-6">

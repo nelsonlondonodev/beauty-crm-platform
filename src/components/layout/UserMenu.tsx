@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { getAvatarUrl, getInitials } from '../../lib/avatar';
 import UserMenuTrigger from './UserMenu/UserMenuTrigger';
 import UserMenuDropdown from './UserMenu/UserMenuDropdown';
 
@@ -27,14 +28,8 @@ const UserMenu = () => {
 
   const fullName = user?.user_metadata?.full_name || 'Usuario';
   const email = user?.email || '';
-  // Priorizar avatar personalizado sobre el de Google OAuth
-  const avatarUrl = user?.user_metadata?.custom_avatar_url || user?.user_metadata?.avatar_url || null;
-  const initials = fullName
-    .split(' ')
-    .map((n: string) => n[0])
-    .join('')
-    .toUpperCase()
-    .substring(0, 2);
+  const avatarUrl = getAvatarUrl(user);
+  const initials = getInitials(fullName);
 
   return (
     <div className="relative" ref={menuRef}>
