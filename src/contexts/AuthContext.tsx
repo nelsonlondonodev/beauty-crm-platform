@@ -152,12 +152,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
 
       if (currentSession?.user) {
-        // Actualizamos siempre el usuario para captar cambios de metadata
         const isSameUser = activeUserIdRef.current === currentSession.user.id;
         
         if (isSameUser) {
           setSession(currentSession);
-          setUser(currentSession.user);
+          // Fusionar metadata: mantener datos frescos del servidor (getUser)
+          // y solo agregar campos nuevos desde el token JWT de la sesión.
+          // Esto evita que el token (con metadata vieja) sobreescriba
+          // campos como avatar_url que ya fueron obtenidos del servidor.
+          setUser(prev => {
+            if (!prev) return currentSession.user;
+            const mergedMetadata = {
+              ...currentSession.user.user_metadata,
+              ...prev.user_metadata,
+            };
+            return { ...currentSession.user, user_metadata: mergedMetadata };
+          });
           return;
         }
 
