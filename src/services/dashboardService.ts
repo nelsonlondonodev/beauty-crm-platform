@@ -1,6 +1,7 @@
 import { supabase } from '../lib/supabase';
 import type { PostgrestError } from '@supabase/supabase-js';
 import { startOfMonth, endOfMonth, addDays, addMonths } from 'date-fns';
+import { fetchWithTimeout } from '../lib/utils';
 
 export interface RevenueData {
   name: string;
@@ -24,26 +25,6 @@ export interface DashboardStats {
   revenueData: RevenueData[];
   recentActivity: ActivityItem[];
 }
-
-/**
- * Función utilitaria para evitar promesas bloqueantes.
- * Reutilizamos el patrón establecido en AuthContext.
- */
-function fetchWithTimeout<T>(
-  promise: Promise<T>,
-  ms: number = 5000
-): Promise<T> {
-  let timeoutId: ReturnType<typeof setTimeout>;
-  const timeoutPromise = new Promise<never>((_, reject) => {
-    timeoutId = setTimeout(() => reject(new Error('REQUEST_TIMEOUT')), ms);
-  });
-
-  return Promise.race([promise, timeoutPromise]).finally(() => {
-    clearTimeout(timeoutId);
-  });
-}
-
-// --- Helper Functions mapped to individual responsibilities ---
 
 async function fetchTotalClients(): Promise<number> {
   const { count, error } = await fetchWithTimeout(

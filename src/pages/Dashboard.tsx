@@ -4,13 +4,13 @@ import { useDashboardStats } from '../hooks/useDashboardStats';
 import RevenueChart from '../components/dashboard/RevenueChart';
 import RecentActivity from '../components/dashboard/RecentActivity';
 import { useAuth } from '../contexts/AuthContext';
+import { APP_CONFIG } from '../config/brand';
 
 const Dashboard = () => {
   const { stats, loading } = useDashboardStats();
   const { user } = useAuth();
 
-  // Obtener el primer nombre para un saludo más cercano
-  const userName = user?.user_metadata?.full_name?.split(' ')[0] || 'Nelson';
+  const userName = user?.user_metadata?.full_name?.split(' ')[0] || APP_CONFIG.defaults.userName;
 
   const statCards = [
     {

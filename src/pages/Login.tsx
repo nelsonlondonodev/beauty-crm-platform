@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { Scissors, Loader2, Lock, Mail, ArrowRight } from 'lucide-react';
 import GoogleIcon from '../components/icons/GoogleIcon';
+import { APP_CONFIG } from '../config/brand';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -69,7 +70,7 @@ const Login = () => {
           <div className="from-primary shadow-primary/30 mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-tr to-purple-400 text-white shadow-lg">
             <Scissors size={28} />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900">Londy</h2>
+          <h2 className="text-2xl font-bold text-gray-900">{APP_CONFIG.brandName}</h2>
           <p className="mt-1 text-gray-500">Inicia sesión para continuar</p>
         </div>
 
@@ -181,8 +182,7 @@ const Login = () => {
         {/* Footer */}
         <div className="border-t border-white/40 bg-gray-50/50 p-4 text-center">
           <p className="text-xs text-gray-500">
-            © {new Date().getFullYear()} Londy. Todos los derechos
-            reservados.
+            {APP_CONFIG.legal.copyright(new Date().getFullYear())}
           </p>
         </div>
       </div>

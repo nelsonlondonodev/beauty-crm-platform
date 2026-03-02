@@ -8,6 +8,7 @@ import React, {
 } from 'react';
 import type { Session, User, PostgrestError } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
+import { fetchWithTimeout } from '../lib/utils';
 
 // Tipos de roles soportados
 export type AppRole = 'owner' | 'admin' | 'staff';
@@ -29,20 +30,6 @@ const AuthContext = createContext<AuthContextType>({
   signOut: async () => {},
   refreshUser: async () => {},
 });
-
-/**
- * Función utilitaria para evitar que promesas estancadas congelen la UI.
- */
-function fetchWithTimeout<T>(promise: Promise<T>, ms: number = 5000): Promise<T> {
-  let timeoutId: ReturnType<typeof setTimeout>;
-  const timeoutPromise = new Promise<never>((_, reject) => {
-    timeoutId = setTimeout(() => reject(new Error('REQUEST_TIMEOUT')), ms);
-  });
-
-  return Promise.race([promise, timeoutPromise]).finally(() => {
-    clearTimeout(timeoutId);
-  });
-}
 
 /**
  * Función pura para obtener el rol desde Supabase.

@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useAuth, type AppRole } from '../../contexts/AuthContext';
+import { APP_CONFIG } from '../../config/brand';
 
 // ── Tipos ───────────────────────────────────────────────────────────────────
 
@@ -96,7 +97,7 @@ const Sidebar = () => {
             <Scissors size={24} />
           </div>
           <span className="ml-3 text-xl font-bold tracking-tight text-gray-900">
-            Londy
+            {APP_CONFIG.brandName}
           </span>
         </div>
 

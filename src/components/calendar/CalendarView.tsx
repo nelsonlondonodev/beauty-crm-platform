@@ -139,8 +139,6 @@ const CalendarView = ({
                     }`}
                     onClick={(e) => {
                       e.stopPropagation();
-                      // TODO: Open edit modal
-                      console.log('Edit', apt);
                     }}
                     title={`${format(new Date(apt.fecha_cita), 'HH:mm')} - ${apt.servicio}`}
                   >

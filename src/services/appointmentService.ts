@@ -1,7 +1,7 @@
 import { supabase } from '../lib/supabase';
 import type { Appointment } from '../types';
 
-const N8N_WEBHOOK_URL = 'https://n8n.srv1033442.hstgr.cloud/webhook/nueva-cita';
+const N8N_WEBHOOK_URL = import.meta.env.VITE_N8N_WEBHOOK_URL || '';
 
 export const getAppointments = async (
   startDate: string,
@@ -47,7 +47,7 @@ const notifyN8n = async (
     client?: { nombre: string; email: string; whatsapp: string };
   }
 ) => {
-  if (!appointmentData.client) return;
+  if (!N8N_WEBHOOK_URL || !appointmentData.client) return;
 
   const payload = {
     cita_id: appointmentData.id,

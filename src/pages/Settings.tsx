@@ -6,6 +6,7 @@ import ProfileCard from '../components/settings/ProfileCard';
 import SettingsLink from '../components/settings/SettingsLink';
 import { uploadAvatar, removeAvatar, updateUserInfo } from '../services/userService';
 import { getAvatarUrl } from '../lib/avatar';
+import { APP_CONFIG } from '../config/brand';
 
 const Settings = () => {
   const { user, role, signOut, refreshUser } = useAuth();
@@ -49,7 +50,7 @@ const Settings = () => {
     }
   };
 
-  const fullName = user?.user_metadata?.full_name || 'Usuario de Londy';
+  const fullName = user?.user_metadata?.full_name || APP_CONFIG.defaults.userFullName;
   const email = user?.email || 'No disponible';
   const avatarUrl = getAvatarUrl(user);
   const joinedDate = user?.created_at 
@@ -118,7 +119,7 @@ const Settings = () => {
               <div>
                 <h4 className="font-bold text-gray-900">¿Necesitas ayuda con tu cuenta?</h4>
                 <p className="text-sm text-gray-500 mt-1">
-                  Si deseas cambiar tu correo electrónico principal o tienes problemas de acceso, por favor contacta a soporte técnico de Londy.
+                  {APP_CONFIG.legal.supportText}
                 </p>
                 <button className="mt-4 text-sm font-bold text-purple-600 hover:text-purple-700">
                   Contactar Soporte →

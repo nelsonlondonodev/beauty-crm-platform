@@ -1,12 +1,4 @@
-export type UserRole = 'admin' | 'staff';
-
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-  role: UserRole;
-  avatar_url?: string;
-}
+// ── Bonos ──────────────────────────────────────────────────────────────────
 
 export type BonusStatus =
   | 'pendiente'
@@ -65,12 +57,7 @@ export interface Appointment {
   pago_estado: 'pagado' | 'pendiente';
 }
 
-export interface DashboardStats {
-  totalClients: number;
-  activeBonuses: number;
-  todayAppointments: number;
-  upcomingBirthdays: number;
-}
+// ── Facturación ───────────────────────────────────────────────────────────
 
 export interface InvoiceItem {
   id: string;
