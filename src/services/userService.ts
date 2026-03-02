@@ -1,9 +1,9 @@
 import { supabase } from '../lib/supabase';
 
 export const uploadAvatar = async (userId: string, file: File): Promise<string> => {
-  // 1. Definir ruta fija: Carpeta del usuario / avatar + extensión real
-  const fileExt = file.name.split('.').pop() || 'png';
-  const filePath = `${userId}/avatar.${fileExt}`;
+  // 1. Ruta fija sin extensión para que el upsert SIEMPRE reemplace el anterior,
+  //    independientemente del formato del archivo (.jpg, .png, .webp, etc.)
+  const filePath = `${userId}/avatar`;
 
   // 2. Subir al Storage (Upsert para reemplazar el anterior)
   const { error: uploadError } = await supabase.storage
