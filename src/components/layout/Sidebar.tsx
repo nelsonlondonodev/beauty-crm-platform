@@ -72,25 +72,32 @@ const Sidebar = () => {
         </div>
 
         <nav className="flex-1 space-y-1">
-          {filteredNavItems.map((item) => (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              className={({ isActive }) =>
-                cn(
-                  'group relative flex items-center overflow-hidden rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200',
-                  isActive
-                    ? 'bg-primary shadow-primary/25 text-white shadow-lg'
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                )
-              }
-            >
-              <item.icon className="mr-3 h-5 w-5 flex-shrink-0" />
-              <div className="flex flex-1 items-center justify-between">
-                <span>{item.label}</span>
-              </div>
-            </NavLink>
-          ))}
+          {filteredNavItems.map((item) => {
+            const isDashboard = item.path === '/';
+
+            return (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                end={isDashboard}
+                className={({ isActive }) =>
+                  cn(
+                    'group relative flex items-center overflow-hidden rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200',
+                    isActive
+                      ? isDashboard
+                        ? 'bg-primary shadow-primary/25 text-white shadow-lg'
+                        : 'bg-gradient-to-r from-purple-700 via-purple-600 to-pink-500 text-white shadow-lg shadow-purple-500/25'
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                  )
+                }
+              >
+                <item.icon className="mr-3 h-5 w-5 flex-shrink-0" />
+                <div className="flex flex-1 items-center justify-between">
+                  <span>{item.label}</span>
+                </div>
+              </NavLink>
+            );
+          })}
         </nav>
 
 
