@@ -5,6 +5,7 @@ import {
   updateAppointment,
   deleteAppointment,
 } from '../services/appointmentService';
+import { logger } from '../lib/logger';
 import type { Appointment } from '../types';
 import { startOfMonth, endOfMonth } from 'date-fns';
 
@@ -22,7 +23,7 @@ export const useAppointments = () => {
       setAppointments(data);
       setError(null);
     } catch (err) {
-      console.error('Error fetching appointments:', err);
+      logger.error('Error fetching appointments', err, 'useAppointments');
       setError(err instanceof Error ? err.message : 'Error al cargar citas');
     } finally {
       setLoading(false);
@@ -35,7 +36,7 @@ export const useAppointments = () => {
       setAppointments((prev) => [...prev, newAppointment]);
       return { success: true, data: newAppointment };
     } catch (err) {
-      console.error('Error creating appointment:', err);
+      logger.error('Error creating appointment', err, 'useAppointments');
       return {
         success: false,
         error: err instanceof Error ? err.message : 'Error al crear cita',
@@ -51,7 +52,7 @@ export const useAppointments = () => {
       );
       return { success: true, data: updatedAppointment };
     } catch (err) {
-      console.error('Error updating appointment:', err);
+      logger.error('Error updating appointment', err, 'useAppointments');
       return {
         success: false,
         error: err instanceof Error ? err.message : 'Error al actualizar cita',
@@ -65,7 +66,7 @@ export const useAppointments = () => {
       setAppointments((prev) => prev.filter((a) => a.id !== id));
       return { success: true };
     } catch (err) {
-      console.error('Error deleting appointment:', err);
+      logger.error('Error deleting appointment', err, 'useAppointments');
       return {
         success: false,
         error: err instanceof Error ? err.message : 'Error al eliminar cita',

@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import { Mail, Calendar, LogOut, Edit2, Camera, Trash2, Loader2, Check, X } from 'lucide-react';
 import type { AppRole } from '../../contexts/AuthContext';
 import { getInitials, AVATAR_ALLOWED_TYPES } from '../../lib/avatar';
+import { logger } from '../../lib/logger';
 
 interface ProfileCardProps {
   fullName: string;
@@ -64,7 +65,7 @@ const ProfileCard = ({
       if (onUpdateName) await onUpdateName(editName);
       setIsEditing(false);
     } catch (error) {
-      console.error('Error updating name:', error);
+      logger.error('Error updating name', error, 'ProfileCard');
     } finally {
       setIsSaving(false);
     }
@@ -219,5 +220,3 @@ const ProfileCard = ({
 };
 
 export default ProfileCard;
-
-

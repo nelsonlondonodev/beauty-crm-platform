@@ -2,6 +2,7 @@ import { supabase } from '../lib/supabase';
 import type { PostgrestError } from '@supabase/supabase-js';
 import { startOfMonth, endOfMonth, addDays, addMonths } from 'date-fns';
 import { fetchWithTimeout } from '../lib/utils';
+import { logger } from '../lib/logger';
 
 export interface RevenueData {
   name: string;
@@ -105,7 +106,7 @@ async function fetchUpcomingBirthdays(): Promise<number> {
       }
     }
   } catch (err) {
-    console.error('Error fetching birthdays:', err);
+    logger.error('Error fetching birthdays', err, 'Dashboard');
   }
   return 0;
 }
@@ -127,7 +128,7 @@ async function fetchExpiringBonuses(): Promise<number> {
     );
     return count || 0;
   } catch (err) {
-    console.error('Error fetching expiring bonuses:', err);
+    logger.error('Error fetching expiring bonuses', err, 'Dashboard');
     return 0;
   }
 }
@@ -148,7 +149,7 @@ async function fetchRevenueData(): Promise<RevenueData[]> {
   let revenueData: RevenueBucket[] = [];
 
   if (error) {
-    console.error(`Error fetching facturas for revenue: ${error.message}`);
+    logger.error('Error fetching revenue data', error.message, 'Dashboard');
     return [];
   }
 
@@ -312,7 +313,7 @@ async function fetchRecentActivity(): Promise<ActivityItem[]> {
     recentActivity.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
     recentActivity = recentActivity.slice(0, 10);
   } catch (err) {
-    console.error('Error fetching recent activity:', err);
+    logger.error('Error fetching recent activity', err, 'Dashboard');
   }
 
   return recentActivity;

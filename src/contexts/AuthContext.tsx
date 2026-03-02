@@ -9,6 +9,7 @@ import React, {
 import type { Session, User, PostgrestError } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import { fetchWithTimeout } from '../lib/utils';
+import { logger } from '../lib/logger';
 
 // Tipos de roles soportados
 export type AppRole = 'owner' | 'admin' | 'staff';
@@ -48,12 +49,12 @@ export const fetchRoleFromDB = async (
     const { data, error } = response;
 
     if (error || !data) {
-      console.warn('Rol no encontrado o error fetching:', error?.message || 'Sin rol');
+      logger.warn('Rol no encontrado o error fetching', error?.message || 'Sin rol', 'Auth');
       return null;
     }
     return data.role as AppRole;
   } catch (err) {
-    console.error('Excepción resolviendo rol:', err);
+    logger.error('Excepción resolviendo rol', err, 'Auth');
     return null;
   }
 };
@@ -89,7 +90,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUser(updatedUser);
       }
     } catch (err) {
-      console.error('Error al refrescar usuario:', err);
+      logger.error('Error al refrescar usuario', err, 'Auth');
     }
   }, []);
 
@@ -118,7 +119,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           }
         }
       } catch (err) {
-        console.error('Error al iniciar sesión:', err);
+        logger.error('Error al iniciar sesión', err, 'Auth');
         if (mounted) await clearSession(false);
       } finally {
         if (mounted) setLoading(false);
@@ -185,7 +186,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       activeUserIdRef.current = null;
       await fetchWithTimeout(supabase.auth.signOut(), 3000);
     } catch (error) {
-      console.error('Error durante el cierre de sesión:', error);
+      logger.error('Error durante el cierre de sesión', error, 'Auth');
     }
   };
 

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Calendar, User, DollarSign, CheckCircle } from 'lucide-react';
+import { logger } from '../../lib/logger';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import type { ActivityItem } from '../../services/dashboardService';
@@ -58,7 +59,7 @@ const RecentActivity: React.FC<RecentActivityProps> = ({ data = [] }) => {
                   );
                 }
               } catch (err) {
-                console.error('Error formatting date', err);
+                logger.error('Error formatting date', err, 'RecentActivity');
               }
 
               return (

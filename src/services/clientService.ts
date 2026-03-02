@@ -7,6 +7,7 @@ import type {
   BonoDbRow,
 } from '../types';
 import { addMonths, isPast } from 'date-fns';
+import { logger } from '../lib/logger';
 
 // Helper to process bones
 const processClientBonuses = (bonosRow?: BonoDbRow[]) => {
@@ -115,7 +116,7 @@ export const getClients = async (): Promise<Client[]> => {
     .order('created_at', { ascending: false });
 
   if (error) {
-    console.error('Supabase error:', error);
+    logger.error('Error fetching clients', error, 'ClientService');
     throw new Error(error.message);
   }
 

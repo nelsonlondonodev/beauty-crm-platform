@@ -5,6 +5,7 @@ import {
   updateClient as updateClientService,
   deleteClient as deleteClientService,
 } from '../services/clientService';
+import { logger } from '../lib/logger';
 import type { Client } from '../types';
 
 export const useClients = () => {
@@ -23,7 +24,7 @@ export const useClients = () => {
       setClients(data);
       setError(null);
     } catch (err) {
-      console.error('Error fetching clients:', err);
+      logger.error('Error fetching clients', err, 'useClients');
       setError(
         err instanceof Error
           ? err.message
@@ -40,7 +41,7 @@ export const useClients = () => {
       setClients((prev) => [data, ...prev]);
       return { success: true, data };
     } catch (err) {
-      console.error('Error adding client:', err);
+      logger.error('Error adding client', err, 'useClients');
       return {
         success: false,
         error:
@@ -57,7 +58,7 @@ export const useClients = () => {
       setClients((prev) => prev.map((c) => (c.id === id ? data : c)));
       return { success: true, data };
     } catch (err) {
-      console.error('Error updating client:', err);
+      logger.error('Error updating client', err, 'useClients');
       return {
         success: false,
         error:
@@ -74,7 +75,7 @@ export const useClients = () => {
       setClients((prev) => prev.filter((c) => c.id !== id));
       return { success: true };
     } catch (err) {
-      console.error('Error deleting client:', err);
+      logger.error('Error deleting client', err, 'useClients');
       return {
         success: false,
         error:

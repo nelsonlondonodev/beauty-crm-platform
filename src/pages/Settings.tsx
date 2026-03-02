@@ -7,6 +7,7 @@ import SettingsLink from '../components/settings/SettingsLink';
 import { uploadAvatar, removeAvatar, updateUserInfo } from '../services/userService';
 import { getAvatarUrl } from '../lib/avatar';
 import { APP_CONFIG } from '../config/brand';
+import { logger } from '../lib/logger';
 
 const Settings = () => {
   const { user, role, signOut, refreshUser } = useAuth();
@@ -23,7 +24,7 @@ const Settings = () => {
       await uploadAvatar(user.id, file);
       await refreshUser();
     } catch (error) {
-      console.error('Error in handleAvatarUpload:', error);
+      logger.error('Error in handleAvatarUpload', error, 'Settings');
       const message = error instanceof Error ? error.message : 'Error al subir la imagen.';
       alert(message);
     }
@@ -35,7 +36,7 @@ const Settings = () => {
       await removeAvatar(user.id);
       await refreshUser();
     } catch (error) {
-      console.error('Error in handleAvatarRemove:', error);
+      logger.error('Error in handleAvatarRemove', error, 'Settings');
       alert('Error al eliminar la imagen.');
     }
   };
@@ -45,7 +46,7 @@ const Settings = () => {
       await updateUserInfo({ full_name: newName });
       await refreshUser(); // Forzar actualización de metadata en la UI
     } catch (error) {
-      console.error('Error in handleUpdateName:', error);
+      logger.error('Error in handleUpdateName', error, 'Settings');
       alert('Error al actualizar el nombre.');
     }
   };

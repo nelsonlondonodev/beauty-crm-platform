@@ -3,6 +3,7 @@ import {
   getDashboardStats,
   type DashboardStats,
 } from '../services/dashboardService';
+import { logger } from '../lib/logger';
 
 export type { DashboardStats };
 
@@ -28,7 +29,7 @@ export const useDashboardStats = () => {
       const data = await getDashboardStats();
       setStats(data);
     } catch (error) {
-      console.error('Error fetching dashboard stats:', error);
+      logger.error('Error fetching dashboard stats', error, 'useDashboardStats');
     } finally {
       setLoading(false);
     }

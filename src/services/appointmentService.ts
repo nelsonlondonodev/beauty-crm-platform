@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase';
 import type { Appointment } from '../types';
+import { logger } from '../lib/logger';
 
 const N8N_WEBHOOK_URL = import.meta.env.VITE_N8N_WEBHOOK_URL || '';
 
@@ -37,7 +38,7 @@ export const createAppointment = async (
 
   // 2. Notificar a n8n (Asíncrono, "fire and forget")
   // No esperamos a que termine para no bloquear la UI
-  notifyN8n(data).catch((err) => console.error('Failed to notify n8n:', err));
+  notifyN8n(data).catch((err) => logger.error('Failed to notify n8n', err, 'Appointments'));
 
   return data as Appointment;
 };
@@ -67,7 +68,7 @@ const notifyN8n = async (
       body: JSON.stringify(payload),
     });
   } catch (error) {
-    console.error('Error sending webhook to n8n:', error);
+    logger.error('Error sending webhook to n8n', error, 'Appointments');
     // No lanzamos error para no afectar la experiencia del usuario en el frontend
   }
 };
