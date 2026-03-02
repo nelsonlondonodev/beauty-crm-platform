@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+import type { PostgrestError } from '@supabase/supabase-js';
 import { startOfMonth, endOfMonth, addDays, addMonths } from 'date-fns';
 
 export interface RevenueData {
@@ -48,7 +49,7 @@ async function fetchTotalClients(): Promise<number> {
   const { count, error } = await fetchWithTimeout(
     supabase
       .from('clientes_fidelizacion')
-      .select('*', { count: 'exact', head: true }) as unknown as Promise<{ count: number | null; error: any }>
+      .select('*', { count: 'exact', head: true }) as unknown as Promise<{ count: number | null; error: PostgrestError | null }>
   );
   if (error) throw new Error(`Error fetching total clients: ${error.message}`);
   return count || 0;
@@ -63,7 +64,7 @@ async function fetchNewClientsThisMonth(): Promise<number> {
       .from('clientes_fidelizacion')
       .select('*', { count: 'exact', head: true })
       .gte('created_at', start)
-      .lte('created_at', end) as unknown as Promise<{ count: number | null; error: any }>
+      .lte('created_at', end) as unknown as Promise<{ count: number | null; error: PostgrestError | null }>
   );
 
   if (error) throw new Error(`Error fetching new clients: ${error.message}`);
@@ -75,7 +76,7 @@ async function fetchActiveBonuses(): Promise<number> {
     supabase
       .from('bonos')
       .select('*', { count: 'exact', head: true })
-      .eq('estado', 'Pendiente') as unknown as Promise<{ count: number | null; error: any }>
+      .eq('estado', 'Pendiente') as unknown as Promise<{ count: number | null; error: PostgrestError | null }>
   );
 
   if (error) throw new Error(`Error fetching active bonuses: ${error.message}`);
@@ -140,7 +141,7 @@ async function fetchExpiringBonuses(): Promise<number> {
         .select('*', { count: 'exact', head: true })
         .eq('estado', 'Pendiente')
         .gte('fecha_vencimiento', today.toISOString())
-        .lte('fecha_vencimiento', nextWeek.toISOString()) as unknown as Promise<{ count: number | null; error: any }>,
+        .lte('fecha_vencimiento', nextWeek.toISOString()) as unknown as Promise<{ count: number | null; error: PostgrestError | null }>,
       3000
     );
     return count || 0;
@@ -275,13 +276,15 @@ async function fetchRecentActivity(): Promise<ActivityItem[]> {
     }
 
     if (clientsRes.data) {
-      clientsRes.data.forEach((c) => {
+      type ClientRow = { id: number; created_at: string; nombre: string | null };
+
+      (clientsRes.data as unknown as ClientRow[]).forEach((c) => {
         recentActivity.push({
           id: `cli-${c.id}`,
           type: 'client',
           title: 'Nuevo Cliente',
           description: `${(c.nombre || '').trim()} se unió al programa`,
-          timestamp: (c as any).created_at, // created_at exists in DB but maybe not in select
+          timestamp: c.created_at,
         });
       });
     }

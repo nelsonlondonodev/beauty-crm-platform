@@ -6,7 +6,7 @@ import React, {
   useRef,
   useCallback,
 } from 'react';
-import type { Session, User } from '@supabase/supabase-js';
+import type { Session, User, PostgrestError } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 
 // Tipos de roles soportados
@@ -57,7 +57,7 @@ export const fetchRoleFromDB = async (
       .eq('user_id', userId)
       .maybeSingle();
 
-    const response = await fetchWithTimeout(request as unknown as Promise<{ data: { role: AppRole } | null; error: any }>, 5000);
+    const response = await fetchWithTimeout(request as unknown as Promise<{ data: { role: AppRole } | null; error: PostgrestError | null }>, 5000);
     const { data, error } = response;
 
     if (error || !data) {
