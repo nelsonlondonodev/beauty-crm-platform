@@ -69,28 +69,39 @@ async function fetchUpcomingBirthdays(): Promise<number> {
   const today = new Date();
   
   // Generate the 'MM-DD' format for today and the next 7 days
-  const upcomingDaysMMDD = Array.from({ length: 8 }).map((_, i) => {
+  const upcomingDaysMMDD = new Set(Array.from({ length: 8 }).map((_, i) => {
     const d = addDays(today, i);
     // Use local timezone to extract month and day to avoid UTC shift bugs
     const month = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
     return `${month}-${day}`;
-  });
-
-  // Construct the OR query for Supabase (e.g., "birthday.ilike.%-03-03,birthday.ilike.%-03-04")
-  const orQuery = upcomingDaysMMDD.map(mmdd => `birthday.ilike.%-${mmdd}`).join(',');
+  }));
 
   try {
-    const { count, error } = await fetchWithTimeout(
+    // Fetch only the birthday string (extremely lightweight payload)
+    const { data, error } = await fetchWithTimeout(
       supabase
         .from('clientes_fidelizacion')
-        .select('*', { count: 'exact', head: true })
-        .not('birthday', 'is', null)
-        .or(orQuery) as unknown as Promise<{ count: number | null; error: PostgrestError | null }>
+        .select('birthday')
+        .not('birthday', 'is', null) as unknown as Promise<{ data: { birthday: string | null }[] | null, error: PostgrestError | null }>
     );
 
     if (error) throw new Error(error.message);
-    return count || 0;
+    if (!data) return 0;
+    
+    // O(1) in-memory filter -> Very fast even with 10k rows
+    let count = 0;
+    for (const client of data) {
+      if (!client.birthday) continue;
+      // Extract MM-DD from YYYY-MM-DD
+      const mmdd = client.birthday.substring(5, 10);
+      if (upcomingDaysMMDD.has(mmdd)) {
+        count++;
+      }
+    }
+    
+    return count;
+    
   } catch (err) {
     logger.error('Error fetching birthdays', err, 'Dashboard');
     return 0;
