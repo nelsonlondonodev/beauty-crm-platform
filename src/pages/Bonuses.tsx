@@ -13,7 +13,8 @@ const Bonuses = () => {
   } | null>(null);
 
   const handleValidate = async () => {
-    if (!couponCode) return;
+    const cleanCode = couponCode.trim();
+    if (!cleanCode) return;
     setIsValidating(true);
     setResult(null);
 
@@ -25,7 +26,7 @@ const Bonuses = () => {
           client_id,
           clientes_fidelizacion (nombre)
         `)
-        .eq('codigo', couponCode)
+        .eq('codigo', cleanCode)
         .single();
 
       if (error || !bonoData) throw new Error('Cupón no encontrado o código incorrecto.');

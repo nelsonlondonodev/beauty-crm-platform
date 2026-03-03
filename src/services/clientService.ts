@@ -52,13 +52,9 @@ const processClientBonuses = (bonosRow?: BonoDbRow[]) => {
     });
   }
 
-  // Keep all active ones (or at least the most recent historical if none are active)
-  let displayBonuses = allProcessedBonuses.filter(
-    (b) => b.estado === 'pendiente' || b.estado === 'alerta_5_meses'
-  );
-  if (displayBonuses.length === 0 && allProcessedBonuses.length > 0) {
-    displayBonuses = [allProcessedBonuses[0]]; // Latest historical
-  }
+  // Return all processed bonuses so the user can see the full history 
+  // (redeemed, expired, pending). We can sort them to show the latest first.
+  let displayBonuses = allProcessedBonuses;
 
   return { activeBonus, displayBonuses };
 };
