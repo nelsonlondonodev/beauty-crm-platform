@@ -42,22 +42,25 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
   }
 
   // Verifica si la ruta requiere roles específicos y el usuario los tiene
-  if (allowedRoles && role && !allowedRoles.includes(role)) {
-    const fallbackRoute = getFallbackRoute(role);
-    // VITAL: Prevenir bucles infinitos de redirección
-    if (window.location.pathname === fallbackRoute) {
-      return (
-        <div className="flex h-screen w-full flex-col items-center justify-center bg-gray-50 px-4 text-center">
-          <h2 className="mb-2 text-2xl font-bold text-gray-900">
-            Acceso Restringido
-          </h2>
-          <p className="text-gray-500">
-            No cuentas con los permisos para ver esta sección.
-          </p>
-        </div>
-      );
+  if (allowedRoles) {
+    const userRole = role || 'staff';
+    if (!allowedRoles.includes(userRole)) {
+      const fallbackRoute = getFallbackRoute(role);
+      // VITAL: Prevenir bucles infinitos de redirección
+      if (window.location.pathname === fallbackRoute) {
+        return (
+          <div className="flex h-screen w-full flex-col items-center justify-center bg-gray-50 px-4 text-center">
+            <h2 className="mb-2 text-2xl font-bold text-gray-900">
+              Acceso Restringido
+            </h2>
+            <p className="text-gray-500">
+              No cuentas con los permisos para ver esta sección.
+            </p>
+          </div>
+        );
+      }
+      return <Navigate to={fallbackRoute} replace />;
     }
-    return <Navigate to={fallbackRoute} replace />;
   }
 
   return <>{children}</>;

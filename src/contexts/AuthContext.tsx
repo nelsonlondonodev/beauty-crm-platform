@@ -97,41 +97,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     let mounted = true;
 
-    const initializeAuth = async () => {
-      try {
-        // Obtenemos el usuario real del servidor para asegurar metadata fresca
-        const { data: { user: currentUser }, error: userError } = await fetchWithTimeout(supabase.auth.getUser(), 5000);
-
-        if (userError || !currentUser) {
-          if (mounted) await clearSession(false);
-          return;
-        }
-
-        const { data: { session: currentSession } } = await supabase.auth.getSession();
-
-        if (currentUser && currentSession) {
-          const userRole = await fetchRoleFromDB(currentUser.id);
-          if (mounted) {
-            setSession(currentSession);
-            setUser(currentUser);
-            setRole(userRole);
-            activeUserIdRef.current = currentUser.id;
-          }
-        }
-      } catch (err) {
-        logger.error('Error al iniciar sesión', err, 'Auth');
-        if (mounted) await clearSession(false);
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    };
-
-    initializeAuth();
-
+    // Use a single unified listener for all auth state changes, including the initial load
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
       if (!mounted) return;
-
-      if (event === 'INITIAL_SESSION') return;
 
       if (event === 'SIGNED_OUT' || !currentSession) {
         await clearSession(false);
@@ -143,11 +111,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const isSameUser = activeUserIdRef.current === currentSession.user.id;
         
         if (isSameUser) {
+          // Fusionar metadata: mantener datos frescos si ya se tenían
           setSession(currentSession);
-          // Fusionar metadata: mantener datos frescos del servidor (getUser)
-          // y solo agregar campos nuevos desde el token JWT de la sesión.
-          // Esto evita que el token (con metadata vieja) sobreescriba
-          // campos como avatar_url que ya fueron obtenidos del servidor.
           setUser(prev => {
             if (!prev) return currentSession.user;
             const mergedMetadata = {
@@ -160,14 +125,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
 
         setLoading(true);
-        const userRole = await fetchRoleFromDB(currentSession.user.id);
 
-        if (mounted) {
-          setSession(currentSession);
-          setUser(currentSession.user);
-          setRole(userRole);
-          activeUserIdRef.current = currentSession.user.id;
-          setLoading(false);
+        try {
+          // Fetch fresh user data from server (optional but good for security & metadata)
+          const { data: { user: currentUser }, error: userError } = await fetchWithTimeout(supabase.auth.getUser(), 5000);
+          const validUser = (!userError && currentUser) ? currentUser : currentSession.user;
+
+          const userRole = await fetchRoleFromDB(validUser.id);
+
+          if (mounted) {
+            setSession(currentSession);
+            setUser(validUser);
+            setRole(userRole);
+            activeUserIdRef.current = validUser.id;
+          }
+        } catch (err) {
+          logger.error('Error resolviendo estado de autenticación', err, 'Auth');
+        } finally {
+          if (mounted) setLoading(false);
         }
       }
     });
