@@ -1,3 +1,5 @@
+import { useState, useEffect } from 'react';
+
 interface UserMenuTriggerProps {
   initials: string;
   avatarUrl?: string | null;
@@ -6,13 +8,24 @@ interface UserMenuTriggerProps {
 }
 
 const UserMenuTrigger = ({ initials, avatarUrl, onClick }: UserMenuTriggerProps) => {
+  const [imgError, setImgError] = useState(false);
+
+  useEffect(() => {
+    setImgError(false);
+  }, [avatarUrl]);
+
   return (
     <button
       onClick={onClick}
       className="group relative flex h-10 w-10 items-center justify-center rounded-xl overflow-hidden bg-gradient-to-tr from-purple-600 to-pink-500 font-bold text-white shadow-md transition-all hover:shadow-purple-200/50 hover:scale-105 active:scale-95"
     >
-      {avatarUrl ? (
-        <img src={avatarUrl} alt="User" className="h-full w-full object-cover" />
+      {avatarUrl && !imgError ? (
+        <img 
+          src={avatarUrl} 
+          alt="User" 
+          className="h-full w-full object-cover" 
+          onError={() => setImgError(true)}
+        />
       ) : (
         <span className="relative z-10">{initials}</span>
       )}
