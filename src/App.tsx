@@ -9,13 +9,15 @@ import Billing from './pages/Billing';
 import Bonuses from './pages/Bonuses';
 import Login from './pages/Login';
 import { AuthProvider } from './contexts/AuthContext';
+import { TenantProvider } from './contexts/TenantContext';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   return (
     <Router>
       <AuthProvider>
-        <Routes>
+        <TenantProvider>
+          <Routes>
           <Route path="/login" element={<Login />} />
 
           <Route
@@ -94,6 +96,7 @@ function App() {
             }
           />
         </Routes>
+        </TenantProvider>
       </AuthProvider>
     </Router>
   );

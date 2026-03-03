@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useAuth, type AppRole } from '../../contexts/AuthContext';
-import { APP_CONFIG } from '../../config/brand';
+import { useTenant } from '../../contexts/TenantContext';
 
 // ── Tipos ───────────────────────────────────────────────────────────────────
 
@@ -91,6 +91,7 @@ const getNavLinkClassName = (isActive: boolean, isDashboard: boolean): string =>
 
 const Sidebar = () => {
   const { role } = useAuth();
+  const { config } = useTenant();
 
   const filteredNavItems = NAV_ITEMS.filter((item) =>
     item.allowedRoles.includes(role || 'staff')
@@ -100,11 +101,15 @@ const Sidebar = () => {
     <aside className="fixed top-0 left-0 z-40 h-screen w-64 -translate-x-full border-r border-gray-200 bg-white/80 backdrop-blur-xl transition-transform md:translate-x-0">
       <div className="flex h-full flex-col px-3 py-4">
         <div className="mb-10 flex items-center px-2">
-          <div className="bg-primary/10 text-primary flex h-10 w-10 items-center justify-center rounded-xl">
-            <Scissors size={24} />
+          <div className="bg-primary/10 text-primary flex h-10 w-10 items-center justify-center rounded-xl overflow-hidden shrink-0">
+            {config.logoUrl ? (
+              <img src={config.logoUrl} alt={config.brandName} className="h-full w-full object-cover" />
+            ) : (
+              <Scissors size={24} />
+            )}
           </div>
-          <span className="ml-3 text-xl font-bold tracking-tight text-gray-900">
-            {APP_CONFIG.brandName}
+          <span className="ml-3 text-xl font-bold tracking-tight text-gray-900 truncate">
+            {config.brandName}
           </span>
         </div>
 
