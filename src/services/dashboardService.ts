@@ -67,48 +67,34 @@ async function fetchActiveBonuses(): Promise<number> {
 
 async function fetchUpcomingBirthdays(): Promise<number> {
   const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const nextWeek = addDays(today, 7);
+  
+  // Generate the 'MM-DD' format for today and the next 7 days
+  const upcomingDaysMMDD = Array.from({ length: 8 }).map((_, i) => {
+    const d = addDays(today, i);
+    // Use local timezone to extract month and day to avoid UTC shift bugs
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${month}-${day}`;
+  });
 
-  const formatMMDD = (d: Date) => d.toISOString().slice(5, 10);
-  const todayMMDD = formatMMDD(today);
-  const nextWeekMMDD = formatMMDD(nextWeek);
+  // Construct the OR query for Supabase (e.g., "birthday.ilike.%-03-03,birthday.ilike.%-03-04")
+  const orQuery = upcomingDaysMMDD.map(mmdd => `birthday.ilike.%-${mmdd}`).join(',');
 
   try {
-    if (nextWeekMMDD < todayMMDD) {
-      const { data } = await fetchWithTimeout(
-        supabase
-          .from('clientes_fidelizacion')
-          .select('birthday')
-          .not('birthday', 'is', null)
-          .or(`birthday.ilike.%-${todayMMDD},birthday.ilike.%-${nextWeekMMDD}`) as unknown as Promise<{ data: { birthday: string | null }[] | null }>
-      );
-      return data?.length || 0;
-    } else {
-      const { data } = await fetchWithTimeout(
-        supabase
-          .from('clientes_fidelizacion')
-          .select('birthday')
-          .not('birthday', 'is', null) as unknown as Promise<{ data: { birthday: string | null }[] | null }>
-      );
+    const { count, error } = await fetchWithTimeout(
+      supabase
+        .from('clientes_fidelizacion')
+        .select('*', { count: 'exact', head: true })
+        .not('birthday', 'is', null)
+        .or(orQuery) as unknown as Promise<{ count: number | null; error: PostgrestError | null }>
+    );
 
-      if (data) {
-        return data.filter((c: { birthday: string | null }) => {
-          if (!c.birthday) return false;
-          const dob = new Date(`${c.birthday}T12:00:00Z`);
-          const thisYearBirthday = new Date(
-            today.getFullYear(),
-            dob.getMonth(),
-            dob.getDate()
-          );
-          return thisYearBirthday >= today && thisYearBirthday <= nextWeek;
-        }).length;
-      }
-    }
+    if (error) throw new Error(error.message);
+    return count || 0;
   } catch (err) {
     logger.error('Error fetching birthdays', err, 'Dashboard');
+    return 0;
   }
-  return 0;
 }
 
 async function fetchExpiringBonuses(): Promise<number> {
