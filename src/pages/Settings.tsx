@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import DashboardHeader from '../components/layout/DashboardHeader';
 import { Building, User, Shield, Bell } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import ProfileCard from '../components/settings/ProfileCard';
 import SettingsLink from '../components/settings/SettingsLink';
+import BrandConfigModal from '../components/settings/BrandConfigModal';
 import { uploadAvatar, removeAvatar, updateUserInfo } from '../services/userService';
 import { getAvatarUrl } from '../lib/avatar';
 import { APP_CONFIG } from '../config/brand';
@@ -12,6 +14,7 @@ import { logger } from '../lib/logger';
 const Settings = () => {
   const { user, role, signOut, refreshUser } = useAuth();
   const navigate = useNavigate();
+  const [isBrandModalOpen, setIsBrandModalOpen] = useState(false);
 
   const handleLogout = async () => {
     await signOut();
@@ -90,10 +93,10 @@ const Settings = () => {
             <div className="grid gap-4">
               <SettingsLink 
                 icon={Building}
-                title="Perfil de la Empresa"
-                description="Horarios, dirección e información básica."
-                badge="PRÓXIMAMENTE"
+                title="Marca y Apariencia"
+                description="Personaliza el nombre de tu negocio y el logotipo."
                 colorClass="bg-blue-50 text-blue-600"
+                onClick={() => setIsBrandModalOpen(true)}
               />
               <SettingsLink 
                 icon={Shield}
@@ -130,6 +133,10 @@ const Settings = () => {
           </div>
         </div>
       </div>
+      
+      {isBrandModalOpen && (
+        <BrandConfigModal onClose={() => setIsBrandModalOpen(false)} />
+      )}
     </div>
   );
 };

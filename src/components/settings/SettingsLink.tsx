@@ -6,11 +6,12 @@ interface SettingsLinkProps {
   description: string;
   badge?: string;
   colorClass: string;
+  onClick?: () => void;
 }
 
-const SettingsLink = ({ icon: Icon, title, description, badge, colorClass }: SettingsLinkProps) => {
+const SettingsLink = ({ icon: Icon, title, description, badge, colorClass, onClick }: SettingsLinkProps) => {
   return (
-    <button className="flex items-center justify-between p-4 rounded-xl border border-gray-100 hover:border-purple-200 hover:bg-purple-50/10 transition-all group text-left">
+    <button onClick={onClick} className="flex items-center justify-between p-4 w-full rounded-xl border border-gray-100 hover:border-purple-200 hover:bg-purple-50/10 transition-all group text-left">
       <div className="flex items-center gap-4">
         <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${colorClass}`}>
           <Icon className="h-5 w-5" />
