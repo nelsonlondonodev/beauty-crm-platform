@@ -1,135 +1,6 @@
 {
-  "name": "Fidelización Narbo's - Canje QR",
+  "name": "Validación y Canje de Código QR",
   "nodes": [
-    {
-      "parameters": {
-        "path": "canje-QR",
-        "responseMode": "responseNode",
-        "options": {}
-      },
-      "id": "14ae5a94-d1bc-428e-84f9-2f5550a24c0f",
-      "name": "Webhook (Canje QR)",
-      "type": "n8n-nodes-base.webhook",
-      "typeVersion": 1,
-      "position": [
-        -688,
-        -336
-      ],
-      "webhookId": "25fb3331-953c-4bd9-816b-8fc4aad84456"
-    },
-    {
-      "parameters": {
-        "operation": "getAll",
-        "tableId": "bonos",
-        "returnAll": true,
-        "filters": {
-          "conditions": [
-            {
-              "keyName": "codigo",
-              "condition": "eq",
-              "keyValue": "={{ $json.query.code || '' }}"
-            }
-          ]
-        }
-      },
-      "id": "1fac542d-215f-4998-97bb-f860bf180a3c",
-      "name": "Supabase: Buscar Cupón",
-      "type": "n8n-nodes-base.supabase",
-      "alwaysOutputData": true,
-      "typeVersion": 1,
-      "position": [
-        -308,
-        -336
-      ],
-      "credentials": {
-        "supabaseApi": {
-          "id": "5hkYuZVAhznvx7lf",
-          "name": "Supabase Fidelizacion Narbo's Pro"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "strict",
-            "version": 1
-          },
-          "conditions": [
-            {
-              "id": "1",
-              "leftValue": "={{ $node[\"Supabase: Buscar Cupón\"].json[\"estado\"] }}",
-              "rightValue": "Pendiente",
-              "operator": {
-                "type": "string",
-                "operation": "equals"
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
-      },
-      "id": "c8fd0979-a001-4855-975f-83ec13189256",
-      "name": "Verificar Estado",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2,
-      "position": [
-        -272,
-        -336
-      ]
-    },
-    {
-      "parameters": {
-        "respondWith": "text",
-        "responseBody": "=<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n<title>Confirmar Canje</title>\n<style>\nbody { font-family: 'Montserrat', sans-serif; text-align: center; padding: 20px; background: #f8fafc; color: #334155; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; flex-direction: column }\n.card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); max-width: 400px; width: 100% }\n.icon { font-size: 50px; margin-bottom: 15px }\nh1 { margin: 0 0 10px; font-size: 22px }\np { margin: 5px 0; color: #64748b; font-size: 15px }\n.code { font-size: 24px; font-weight: bold; color: #0f172a; margin: 20px 0; padding: 15px; background: #f1f5f9; border: 2px dashed #cbd5e1; border-radius: 10px }\n.btn-confirm { display: inline-block; background-color: #16a34a; color: white; text-decoration: none; padding: 16px 32px; border-radius: 30px; font-weight: 600; font-size: 16px; margin-top: 20px; width: 100%; box-sizing: border-box; border: none; cursor: pointer; transition: background 0.3s }\n.btn-confirm:hover { background-color: #15803d }\n.btn-cancel { display: inline-block; background-color: transparent; color: #ef4444; text-decoration: none; padding: 12px; font-weight: 600; font-size: 14px; margin-top: 10px; border: none; cursor: pointer }\n</style>\n<script>\nfunction cancelarCanje() {\n    document.body.innerHTML = \"<div class='card'><div class='icon'>✋</div><h1>Canje Cancelado</h1><p>No se ha redimido el cupón. Puedes cerrar esta pantalla de forma segura.</p></div>\";\n}\n</script>\n</head>\n<body>\n<div class=\"card\">\n<div class=\"icon\">👋</div>\n<h1>Validar Cupón</h1>\n<p>Cupón <strong>{{ $node[\"Supabase: Buscar Cupón\"].json.tipo }}</strong> encontrado y listo para usar.</p>\n<div class=\"code\">{{ $node[\"Webhook (Canje QR)\"].json.query.code }}</div>\n<form method=\"POST\" action=\"https://n8n.srv1033442.hstgr.cloud/webhook/confirmar-canje\">\n<input type=\"hidden\" name=\"id\" value=\"{{ $node['Supabase: Buscar Cupón'].json.id }}\">\n<button type=\"submit\" class=\"btn-confirm\">✔ Confirmar y Canjear</button>\n</form>\n<button type=\"button\" onclick=\"cancelarCanje()\" class=\"btn-cancel\">Cancelar y no canjear</button>\n</div>\n</body>\n</html>",
-        "options": {
-          "responseHeaders": {
-            "entries": [
-              {
-                "name": "Content-Type",
-                "value": "text/html"
-              }
-            ]
-          }
-        }
-      },
-      "id": "1a34b678-75c1-4b11-a8ca-2d3b4a2f8c5c",
-      "name": "HTML: Confirmar",
-      "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1,
-      "position": [
-        -32,
-        -432
-      ]
-    },
-    {
-      "parameters": {
-        "respondWith": "text",
-        "responseBody": "=<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Error de Canje</title><style>body{font-family:'Montserrat',sans-serif;text-align:center;padding:20px;background:#fef2f2;color:#991b1b;display:flex;align-items:center;justify-content:center;height:100vh;margin:0}.card{background:white;padding:40px;border-radius:20px;box-shadow:0 10px 25px rgba(0,0,0,0.1);max-width:400px;width:100%}.icon{font-size:60px;margin-bottom:20px}h1{margin:0 0 10px;font-size:24px}p{margin:5px 0}</style></head><body><div class=\"card\"><div class=\"icon\">❌</div><h1>Cupón Inválido</h1><p>El código <strong>{{ $node[\"Webhook (Canje QR)\"].json.query.code }}</strong> no existe o ya fue usado. Verifica en el sistema.</p></div></body></html>",
-        "options": {
-          "responseCode": 400,
-          "responseHeaders": {
-            "entries": [
-              {
-                "name": "Content-Type",
-                "value": "text/html"
-              }
-            ]
-          }
-        }
-      },
-      "id": "b029f2aa-4ff8-4c25-8628-bcac1e306441",
-      "name": "HTML: Error",
-      "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1,
-      "position": [
-        -32,
-        -176
-      ]
-    },
     {
       "parameters": {
         "httpMethod": "POST",
@@ -137,13 +8,13 @@
         "responseMode": "responseNode",
         "options": {}
       },
-      "id": "2d8f9a2b-1a5c-4d3e-b8d9-3f5c9a7b2e1d",
+      "id": "13424740-c03a-41ac-a037-7332d5133d59",
       "name": "Webhook (Confirmar Canje)",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 1,
       "position": [
-        224,
-        -688
+        192,
+        0
       ],
       "webhookId": "7e8f9a2b-1a5c-4d3e-b8d9-3f5c9a7b2e1d"
     },
@@ -173,13 +44,13 @@
           ]
         }
       },
-      "id": "059efff3-399d-4266-ac39-7944617b8f51",
+      "id": "038993de-c857-4cc8-9b42-83d89d09b6f8",
       "name": "Supabase: Marcar Uso",
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        432,
-        -688
+        400,
+        0
       ],
       "credentials": {
         "supabaseApi": {
@@ -203,91 +74,18 @@
           }
         }
       },
-      "id": "0451d6e5-6932-448c-953e-c32474b05a4d",
+      "id": "6f6bdee3-89c6-4145-87df-5be43a964132",
       "name": "HTML: Exito",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
       "position": [
-        688,
-        -688
-      ]
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "strict",
-            "version": 1
-          },
-          "conditions": [
-            {
-              "id": "1",
-              "leftValue": "={{ $json.query.code }}",
-              "rightValue": "",
-              "operator": {
-                "type": "string",
-                "operation": "notEmpty"
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
-      },
-      "id": "c1f2e3d4-b5a6-4c7d-8e9f-a0b1c2d3e4f5",
-      "name": "Código Presente?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2,
-      "position": [
-        -498,
-        -336
+        608,
+        0
       ]
     }
   ],
   "pinData": {},
   "connections": {
-    "Webhook (Canje QR)": {
-      "main": [
-        [
-          {
-            "node": "Código Presente?",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Supabase: Buscar Cupón": {
-      "main": [
-        [
-          {
-            "node": "Verificar Estado",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Verificar Estado": {
-      "main": [
-        [
-          {
-            "node": "HTML: Confirmar",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "HTML: Error",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Webhook (Confirmar Canje)": {
       "main": [
         [
@@ -309,24 +107,6 @@
           }
         ]
       ]
-    },
-    "Código Presente?": {
-      "main": [
-        [
-          {
-            "node": "Supabase: Buscar Cupón",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "HTML: Error",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
     }
   },
   "active": true,
@@ -335,11 +115,10 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "b28c67b0-4662-4339-bd25-0abcf24f4fbf",
+  "versionId": "0495f081-e338-49d0-a191-af8f88cb9371",
   "meta": {
-    "templateCredsSetupCompleted": true,
     "instanceId": "fdffcaf648a7aa062da0ec843fff869b930e75adc5303a6a19e86b840cf683f2"
   },
-  "id": "phGikpAzQ970dllA",
+  "id": "XFVOMykaF0XBYeX3",
   "tags": []
 }

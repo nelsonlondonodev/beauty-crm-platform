@@ -1,23 +1,19 @@
-[
-  {
-    "description": "Workflow empty structure"
-  }
-]
 {
-  "name": "Fidelización Narbos",
+  "name": "Registro de Cliente y Bienvenida",
   "nodes": [
     {
       "parameters": {
         "fromEmail": "contacto@narbossalon.com",
         "toEmail": "={{ $items(\"Generador de Cupón\")[0].json.email }}",
         "subject": "¡Bienvenido al Club Narbo's! Aquí tienes tu descuento exclusivo 🎁",
-        "html": "=<!DOCTYPE html>\n<html lang=\"es\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <meta name=\"robots\" content=\"noindex, nofollow\">\n    <style>\n        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Playfair+Display:wght@700&display=swap');\n    </style>\n</head>\n<body style=\"margin: 0; padding: 0; font-family: 'Montserrat', sans-serif; background-color: #f7f7f7; color: #333333;\">\n    <div style=\"max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05);\">\n        \n        <!-- Header -->\n        <div style=\"background-color: #6B755A; padding: 40px 20px; text-align: center;\">\n            <img src=\"https://narbossalon.com/images/brand/logo_narbos.png\" alt=\"Narbo's Salón\" style=\"height: 60px; margin-bottom: 20px;\">\n            <h1 style=\"font-family: 'Playfair Display', serif; color: #ffffff; margin: 0; font-size: 28px;\">¡Bienvenida al Club Narbo's!</h1>\n        </div>\n\n        <!-- Content -->\n        <div style=\"padding: 40px 30px; text-align: center;\">\n            <p style=\"font-size: 16px; line-height: 1.6; color: #666666; margin-bottom: 30px;\">\n                Hola <b>{{ $node[\"Generador de Cupón\"].json[\"name\"] }}</b>,<br><br>\n                Nos encanta tenerte aquí. Como agradecimiento por unirte a nuestro programa de fidelización, te regalamos un **10% de descuento** para tu próxima visita.\n            </p>\n\n            <div style=\"background-color: #f9f9f9; padding: 25px; border-radius: 8px; border: 1px dashed #BE9D8A; display: inline-block; margin-bottom: 30px;\">\n                <p style=\"margin: 0; font-size: 14px; color: #888888; text-transform: uppercase; letter-spacing: 1px;\">Tu Código Personal</p>\n                <p style=\"margin: 10px 0 0 0; font-size: 24px; font-weight: 600; color: #5B4636;\">{{ $node[\"Generador de Cupón\"].json[\"coupon_code\"] }}</p>\n            </div>\n\n            <!-- QR Code Section -->\n            <div style=\"margin: 30px 0; text-align: center;\">\n                <div style=\"display: inline-block; padding: 15px; background-color: #ffffff; border: 1px solid #eeeeee; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);\">\n                    <img src=\"https://quickchart.io/qr?text={{ encodeURIComponent('https://n8n.srv1033442.hstgr.cloud/webhook/canje-QR?code=' + $node['Generador de Cupón'].json['coupon_code']) }}&size=200\" \n                         alt=\"Código QR de Descuento\" \n                         style=\"width: 200px; height: 200px; display: block; border: 0; outline: none; text-decoration: none;\">\n                </div>\n                <p style=\"font-size: 13px; color: #999999; margin-top: 10px;\">Escanea este código en el salón</p>\n            </div>\n\n            <p style=\"font-size: 16px; line-height: 1.6; color: #666666; margin-bottom: 10px;\">\n                Muestra este código en recepción para disfrutar de tu beneficio exclusivo.\n            </p>\n            \n            <a href=\"https://wa.me/573123462618?text=Hola%20Narbo's!%20Me%20acabo%20de%20registrar%20en%20el%20Club%20de%20Fidelizaci%C3%B3n%20y%20me%20gustar%C3%ADa%20reservar%20mi%20pr%C3%B3xima%20cita.\" style=\"display: inline-block; background-color: #6C7053; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 30px; font-weight: 600; margin-top: 20px;\">Reservar Cita</a>\n        </div>\n\n        <!-- Footer -->\n        <div style=\"background-color: #333333; color: #ffffff; padding: 30px 20px; text-align: center; font-size: 12px;\">\n            <p style=\"margin-bottom: 10px;\">Válido por 6 meses a partir de la fecha de registro. No acumulable con otras promociones.</p>\n            <p style=\"margin: 0;\">© 2026 Narbo's Salón Spa. Chía, Cundinamarca.</p>\n        </div>\n    </div>\n</body>\n</html>\n",
+        "emailFormat": "html",
+        "html": "==<!DOCTYPE html>\n<html lang=\"es\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <meta name=\"robots\" content=\"noindex, nofollow\">\n    <style>\n        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Playfair+Display:wght@700&display=swap');\n    </style>\n</head>\n<body style=\"margin: 0; padding: 0; font-family: 'Montserrat', sans-serif; background-color: #f7f7f7; color: #333333;\">\n    <div style=\"max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05);\">\n        \n        <!-- Header -->\n        <div style=\"background-color: #6B755A; padding: 40px 20px; text-align: center;\">\n            <img src=\"https://narbossalon.com/images/brand/logo_narbos.png\" alt=\"Narbo's Salón\" style=\"height: 60px; margin-bottom: 20px;\">\n            <h1 style=\"font-family: 'Playfair Display', serif; color: #ffffff; margin: 0; font-size: 28px;\">¡Bienvenido al Club Narbo's!</h1>\n        </div>\n\n        <!-- Content -->\n        <div style=\"padding: 40px 30px; text-align: center;\">\n            <p style=\"font-size: 16px; line-height: 1.6; color: #666666; margin-bottom: 30px;\">\n                Hola <b>{{ $node[\"Generador de Cupón\"].json[\"name\"] }}</b>,<br><br>\n                Nos encanta tenerte aquí. Como agradecimiento por unirte a nuestro programa de fidelización, te regalamos un **10% de descuento** para tu próxima visita.\n            </p>\n\n            <div style=\"background-color: #f9f9f9; padding: 25px; border-radius: 8px; border: 1px dashed #BE9D8A; display: inline-block; margin-bottom: 30px;\">\n                <p style=\"margin: 0; font-size: 14px; color: #888888; text-transform: uppercase; letter-spacing: 1px;\">Tu Código Personal</p>\n                <p style=\"margin: 10px 0 0 0; font-size: 24px; font-weight: 600; color: #5B4636;\">{{ $node[\"Generador de Cupón\"].json[\"coupon_code\"] }}</p>\n            </div>\n\n            <!-- QR Code Section -->\n            <div style=\"margin: 30px 0; text-align: center;\">\n                <div style=\"display: inline-block; padding: 15px; background-color: #ffffff; border: 1px solid #eeeeee; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);\">\n                    <img src=\"https://quickchart.io/qr?text={{ encodeURIComponent('https://n8n.srv1033442.hstgr.cloud/webhook/canje-QR?code=' + $node['Generador de Cupón'].json['coupon_code']) }}&size=200\" \n                         alt=\"Código QR de Descuento\" \n                         style=\"width: 200px; height: 200px; display: block; border: 0; outline: none; text-decoration: none;\">\n                </div>\n                <p style=\"font-size: 13px; color: #999999; margin-top: 10px;\">Escanea este código en el salón</p>\n            </div>\n\n            <p style=\"font-size: 16px; line-height: 1.6; color: #666666; margin-bottom: 10px;\">\n                Muestra este código en recepción para disfrutar de tu beneficio exclusivo.\n            </p>\n            \n            <!-- EL BOTÓN ARREGLADO CON WHATSAPP Y MENSAJE PRE-CARGADO -->\n            <a href=\"https://wa.me/573123462618?text=Hola%20Narbo's!%20Me%20acabo%20de%20registrar%20en%20el%20Club%20de%20Fidelizaci%C3%B3n%20y%20me%20gustar%C3%ADa%20reservar%20mi%20pr%C3%B3xima%20cita.\" style=\"display: inline-block; background-color: #6C7053; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 30px; font-weight: 600; margin-top: 20px;\">Reservar Cita</a>\n        </div>\n\n        <!-- Footer -->\n        <div style=\"background-color: #333333; color: #ffffff; padding: 30px 20px; text-align: center; font-size: 12px;\">\n            <p style=\"margin-bottom: 10px;\">Válido por 6 meses a partir de la fecha de registro. No acumulable con otras promociones.</p>\n            <p style=\"margin: 0;\">© 2026 Narbo's Salón Spa. Chía, Cundinamarca.</p>\n        </div>\n    </div>\n</body>\n</html>\n",
         "options": {}
       },
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2,
       "position": [
-        928,
+        992,
         208
       ],
       "id": "13b6c20d-bd93-40b2-bbfb-2d7413ec9425",
@@ -50,7 +46,7 @@
     },
     {
       "parameters": {
-        "jsCode": "/* CÓDIGO UPDATE: Generador de Cupón Único */\nconst items = $input.all();\nconst item = items[0].json;\n\n// IMPORTANTE: Extraemos los datos del BODY, que es donde viven realmente\nconst userData = item.body; \n\nconst couponPrefix = 'NARBO-';\n\n// 1. Generar parte temporal (Timestamp base 36) para garantizar unicidad\n// Tomamos los últimos 4 caracteres del timestamp actual\nconst timePart = Date.now().toString(36).slice(-4).toUpperCase();\n\n// 2. Extraer los últimos 2 caracteres del nombre (limpiando espacios y tildes)\nconst rawName = userData.name ? String(userData.name).trim() : '';\nconst cleanName = rawName.normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/[^a-zA-Z0-9]/g, '');\nconst nameSuffix = cleanName.length >= 2 ? cleanName.slice(-2).toUpperCase() : 'XX';\n\n// 3. Combinar todo: Prefijo + Tiempo + SufijoNombre -> Ej: NARBO-KZ92pe \nconst fullCoupon = couponPrefix + timePart + nameSuffix;\n\nreturn [{\n  json: {\n    name: userData.name,       \n    email: userData.email,     \n    whatsapp: userData.whatsapp,\n    birthday: userData.birthday, \n    coupon_code: fullCoupon\n  }\n}];"
+        "jsCode": "/* CÓDIGO UPDATE: Generador de Cupón Único */\nconst items = $input.all();\nconst item = items[0].json;\n\n// IMPORTANTE: Extraemos los datos del BODY, que es donde viven realmente\nconst userData = item.body; \n\nconst couponPrefix = 'NARBO-';\n\n// 1. Generar parte temporal (Timestamp base 36) para garantizar unicidad\n// Tomamos los últimos 4 caracteres del timestamp actual\nconst timePart = Date.now().toString(36).slice(-4).toUpperCase();\n\n// 2. Extraer los últimos 2 caracteres del nombre (limpiando espacios y tildes)\nconst rawName = userData.name ? String(userData.name).trim() : '';\nconst cleanName = rawName.normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/[^a-zA-Z0-9]/g, '');\nconst nameSuffix = cleanName.length >= 2 ? cleanName.slice(-2).toUpperCase() : 'XX';\n\n// 3. Combinar todo: Prefijo + Tiempo + SufijoNombre -> Ej: NARBO-KZ92pe \nconst fullCoupon = couponPrefix + timePart + nameSuffix;\n\nreturn [{\n  json: {\n    name: userData.name,       \n    email: userData.email,     \n    whatsapp: userData.whatsapp,\n    birthday: userData.birthday, \n    coupon_code: fullCoupon\n  }\n}];\n"
       },
       "id": "18fea22d-11c7-48c8-92e7-c83f1cf1d0be",
       "name": "Generador de Cupón",
@@ -86,7 +82,7 @@
         }
       },
       "id": "31b88dc2-b350-4d77-843f-dfb1f7efb67d",
-      "name": "Supabase: Guardar Cliente",
+      "name": "Supabase (Guardar)",
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
@@ -119,19 +115,19 @@
             },
             {
               "fieldId": "codigo",
-              "fieldValue": "={{ $node[\"Generador de Cupón\"].json[\"coupon_code\"] }}"
+              "fieldValue": "={{ $('Generador de Cupón').item.json[\"coupon_code\"] }}"
             }
           ]
         }
       },
-      "id": "8c37d402-4416-43dd-9ad2-51aef83dddb6",
-      "name": "Supabase: Guardar Bono",
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        736,
+        768,
         208
       ],
+      "id": "b7d1ada0-4486-4b0d-a7d5-ebdc655aab1c",
+      "name": "Create a row",
       "credentials": {
         "supabaseApi": {
           "id": "5hkYuZVAhznvx7lf",
@@ -157,25 +153,25 @@
       "main": [
         [
           {
-            "node": "Supabase: Guardar Cliente",
+            "node": "Supabase (Guardar)",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Supabase: Guardar Cliente": {
+    "Supabase (Guardar)": {
       "main": [
         [
           {
-            "node": "Supabase: Guardar Bono",
+            "node": "Create a row",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Supabase: Guardar Bono": {
+    "Create a row": {
       "main": [
         [
           {
@@ -193,7 +189,7 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "2745d57c-5b42-4b2a-9097-d037bfd9189a",
+  "versionId": "a575f47d-3ec6-4498-bd4f-51721a7461f0",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "fdffcaf648a7aa062da0ec843fff869b930e75adc5303a6a19e86b840cf683f2"

@@ -4,10 +4,10 @@
     {
       "parameters": {
         "fromEmail": "contacto@narbossalon.com",
-        "toEmail": "={{ $json[\"email\"] }}",
+        "toEmail": "={{ $('Filtrar Cumpleaños Hoy').item.json.email }}",
         "subject": "¡Feliz Cumpleaños! Un regalo especial de Narbo's 🎂",
         "emailFormat": "html",
-        "html": "<!DOCTYPE html>\n<html lang=\"es\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <style>\n        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Playfair+Display:wght@700&display=swap');\n    </style>\n</head>\n<body style=\"margin: 0; padding: 0; font-family: 'Montserrat', sans-serif; background-color: #f7f7f7;\">\n    <div style=\"max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05);\">\n        <div style=\"background-color: #6B755A; padding: 40px 20px; text-align: center;\">\n            <img src=\"https://narbossalon.com/images/brand/logo_narbos.png\" alt=\"Narbo's Salón\" width=\"200\" style=\"height: auto; max-width: 200px; margin-bottom: 20px;\">\n            <h1 style=\"font-family: 'Playfair Display', serif; color: #ffffff; margin: 0; font-size: 24px;\">¡Tu día especial merece brillar! 🎂</h1>\n        </div>\n        <div style=\"padding: 40px 30px; text-align: center;\">\n            <p style=\"font-size: 16px; line-height: 1.6; color: #666666; margin-bottom: 30px;\">\n                Hola <b>{{ $json[\"nombre\"] }}</b>,<br><br>\n                En Narbo's Salón Spa queremos celebrar tu vida. Por ser parte de nuestro Club, hoy tenemos un regalo exclusivo para ti:\n            </p>\n            <div style=\"background-color: #f9f9f9; padding: 25px; border-radius: 20px; border: 2px solid #6B755A; display: inline-block; margin-bottom: 30px;\">\n                <p style=\"margin: 0; font-size: 14px; color: #888888; text-transform: uppercase;\">🎁 Bono de 15% de descuento</p>\n                <p style=\"margin: 10px 0 0 0; font-size: 18px; font-weight: 600; color: #5B4636;\">Código: {{ $json[\"coupon_code\"] }}</p>\n                <div style=\"margin-top: 15px;\">\n                    <img src=\"https://quickchart.io/qr?text={{ encodeURIComponent('https://n8n.srv1033442.hstgr.cloud/webhook/canje-QR?code=' + $json['coupon_code']) }}&size=150\" alt=\"Código QR de tu Bono\" width=\"150\" height=\"150\">\n                </div>\n            </div>\n            <p style=\"font-size: 14px; color: #999999; margin-bottom: 30px;\">Válido durante todo tu mes de cumpleaños en cualquiera de nuestros servicios.</p>\n            <a href=\"https://wa.me/573123462618?text=Hola%20Narbo's!%20Hoy%20cumplo%20a%C3%B1os%20y%20me%20gustar%C3%ADa%20reservar%20mi%20cita%20con%20el%20bono%20de%20regalo.\" style=\"display: inline-block; background-color: #6B755A; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 30px; font-weight: 600;\">Reclamar mi regalo de cumple</a>\n        </div>\n        <div style=\"background-color: #333333; color: #ffffff; padding: 20px; text-align: center; font-size: 11px;\">\n            <p><strong>*Condiciones:</strong> Válido para 1 solo uso. No acumulable con otras promociones o cupones.</p>\n            <p style=\"margin-top: 5px;\">© 2026 Narbo's Salón Spa &bull; Chía, Cundinamarca.</p>\n        </div>\n    </div>\n</body>\n</html>",
+        "html": "==<!DOCTYPE html>\n<html lang=\"es\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n</head>\n<body style=\"margin: 0; padding: 0; font-family: 'Montserrat', sans-serif; background-color: #f7f7f7;\">\n    <div style=\"max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05);\">\n        <div style=\"background-color: #6B755A; padding: 40px 20px; text-align: center;\">\n            <img src=\"https://narbossalon.com/images/brand/logo_narbos.png\" alt=\"Narbo's Salón\" width=\"200\" style=\"height: auto; max-width: 200px; margin-bottom: 20px;\">\n            <h1 style=\"font-family: 'Playfair Display', serif; color: #ffffff; margin: 0; font-size: 24px;\">¡Tu día especial merece brillar! 🎂</h1>\n        </div>\n        <div style=\"padding: 40px 30px; text-align: center;\">\n            <p style=\"font-size: 16px; line-height: 1.6; color: #666666; margin-bottom: 30px;\">\n                Hola <b>{{ $('Filtrar Cumpleaños Hoy').item.json[\"nombre\"] }}</b>,<br><br>\n                En Narbo's Salón Spa queremos celebrar tu vida. Por ser parte de nuestro Club, hoy tenemos un regalo exclusivo para ti:\n            </p>\n            <div style=\"background-color: #f9f9f9; padding: 25px; border-radius: 20px; border: 2px solid #6B755A; display: inline-block; margin-bottom: 30px;\">\n                <p style=\"margin: 0; font-size: 14px; color: #888888; text-transform: uppercase;\">🎁 Bono de 15% de descuento</p>\n                <p style=\"margin: 10px 0 0 0; font-size: 18px; font-weight: 600; color: #5B4636;\">Código: {{ $json[\"codigo\"] }}</p>\n                <div style=\"margin-top: 15px; text-align: center;\">\n                    <div style=\"display: inline-block; padding: 15px; background-color: #ffffff; border: 1px solid #eeeeee; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);\">\n                        <img src=\"https://api.qrserver.com/v1/create-qr-code/?data={{ encodeURIComponent('https://n8n.srv1033442.hstgr.cloud/webhook/canje-QR?code=' + $json['codigo']) }}&size=200x200&format=png&bgcolor=ffffff&qzone=1\" alt=\"Código QR de tu Bono\" width=\"200\" height=\"200\" style=\"display: block; border: 0; outline: none; text-decoration: none;\">\n                    </div>\n                    <p style=\"font-size: 13px; color: #999999; margin-top: 10px;\">Escanea este código en el salón</p>\n                </div>\n            </div>\n            <p style=\"font-size: 14px; color: #999999; margin-bottom: 30px;\">Válido durante todo tu mes de cumpleaños en cualquiera de nuestros servicios.</p>\n            <a href=\"https://wa.me/573123462618?text=Hola%20Narbo's!%20Hoy%20cumplo%20a%C3%B1os%20y%20me%20gustar%C3%ADa%20reservar%20mi%20cita%20con%20el%20bono%20de%20regalo.\" style=\"display: inline-block; background-color: #6B755A; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 30px; font-weight: 600;\">Reclamar mi regalo de cumple</a>\n        </div>\n        <div style=\"background-color: #333333; color: #ffffff; padding: 20px; text-align: center; font-size: 11px;\">\n            <p><strong>*Condiciones:</strong> Válido para 1 solo uso. No acumulable con otras promociones o cupones.</p>\n            <p style=\"margin-top: 5px;\">© 2026 Narbo's Salón Spa &bull; Chía, Cundinamarca.</p>\n        </div>\n    </div>\n</body>\n</html>\n",
         "options": {}
       },
       "id": "df0cfd35-22f2-4889-a080-b77b14f68df2",
@@ -15,7 +15,7 @@
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2,
       "position": [
-        2420,
+        2240,
         192
       ],
       "webhookId": "cf036a87-e453-40c9-9c77-a0af663ce681",
@@ -29,10 +29,10 @@
     {
       "parameters": {
         "fromEmail": "contacto@narbossalon.com",
-        "toEmail": "={{ $json[\"email\"] }}",
+        "toEmail": "={{ $node[\"Supabase: Buscar Vencimientos\"].json[\"email\"] }}",
         "subject": "¡Tu beneficio de Narbo's expira pronto! ⏳",
         "emailFormat": "html",
-        "html": "<!DOCTYPE html>\n<html lang=\"es\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <style>\n        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Playfair+Display:wght@700&display=swap');\n    </style>\n</head>\n<body style=\"margin: 0; padding: 0; font-family: 'Montserrat', sans-serif; background-color: #f7f7f7;\">\n    <div style=\"max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05);\">\n        <div style=\"background-color: #6B755A; padding: 40px 20px; text-align: center;\">\n            <img src=\"https://narbossalon.com/images/brand/logo_narbos.png\" alt=\"Narbo's Salón\" width=\"200\" style=\"height: auto; max-width: 200px; margin-bottom: 20px;\">\n            <h1 style=\"font-family: 'Playfair Display', serif; color: #ffffff; margin: 0; font-size: 24px;\">¡No dejes que expire tu beneficio! ⏳</h1>\n        </div>\n        <div style=\"padding: 40px 30px; text-align: center;\">\n            <p style=\"font-size: 16px; line-height: 1.6; color: #666666; margin-bottom: 30px;\">\n                Hola <b>{{ $json[\"nombre\"] }}</b>,<br><br>\n                Notamos que aún tienes pendiente tu cupón de bienvenida. Te escribimos para recordarte que **le queda poco tiempo de vigencia**.\n            </p>\n            <div style=\"background-color: #FFF9F5; padding: 25px; border-radius: 20px; border: 1px solid #E5D5C6; display: inline-block; margin-bottom: 30px;\">\n                <p style=\"margin: 0; font-size: 14px; color: #888888;\">Tu cupón de 10% OFF vence pronto.</p>\n                <p style=\"margin: 10px 0 0 0; font-size: 18px; font-weight: 600; color: #5B4636;\">Código: {{ $json[\"codigo_descuento\"] }}</p>\n                <div style=\"margin-top: 15px;\">\n                    <img src=\"https://quickchart.io/qr?text={{ $json[\"codigo_descuento\"] }}&size=150\" alt=\"Código QR de tu Bono\" width=\"150\" height=\"150\">\n                </div>\n            </div>\n            <p style=\"font-size: 14px; color: #999999; margin-bottom: 30px;\">Visítanos antes de que expire y vive la experiencia que mereces.</p>\n            <a href=\"https://wa.me/573123462618\" style=\"display: inline-block; background-color: #6B755A; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 30px; font-weight: 600;\">Agendar mi cita ahora</a>\n        </div>\n        <div style=\"background-color: #333333; color: #ffffff; padding: 20px; text-align: center; font-size: 11px;\">\n            <p><strong>*Condiciones:</strong> Válido para 1 solo uso. No acumulable con otras promociones o cupones.</p>\n            <p style=\"margin-top: 5px;\">© 2026 Narbo's Salón Spa &bull; Chía, Cundinamarca.</p>\n        </div>\n    </div>\n</body>\n</html>",
+        "html": "==<!DOCTYPE html>\n<html lang=\"es\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n</head>\n<body style=\"margin: 0; padding: 0; font-family: 'Montserrat', sans-serif; background-color: #f7f7f7;\">\n    <div style=\"max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05);\">\n        <div style=\"background-color: #6B755A; padding: 40px 20px; text-align: center;\">\n            <img src=\"https://narbossalon.com/images/brand/logo_narbos.png\" alt=\"Narbo's Salón\" width=\"200\" style=\"height: auto; max-width: 200px; margin-bottom: 20px;\">\n            <h1 style=\"font-family: 'Playfair Display', serif; color: #ffffff; margin: 0; font-size: 24px;\">¡No dejes que expire tu beneficio! ⏳</h1>\n        </div>\n        <div style=\"padding: 40px 30px; text-align: center;\">\n            <p style=\"font-size: 16px; line-height: 1.6; color: #666666; margin-bottom: 30px;\">\n                Hola <b>{{ $json[\"nombre\"] }}</b>,<br><br>\n                Notamos que aún tienes pendiente tu cupón de bienvenida. Te escribimos para recordarte que **le queda poco tiempo de vigencia**.\n            </p>\n            <div style=\"background-color: #FFF9F5; padding: 25px; border-radius: 20px; border: 1px solid #E5D5C6; display: inline-block; margin-bottom: 30px;\">\n                <p style=\"margin: 0; font-size: 14px; color: #888888;\">Tu cupón de 10% OFF vence pronto.</p>\n                <p style=\"margin: 10px 0 0 0; font-size: 18px; font-weight: 600; color: #5B4636;\">Código: {{ $json[\"codigo_descuento\"] }}</p>\n                <div style=\"margin-top: 15px; text-align: center;\">\n                    <div style=\"display: inline-block; padding: 15px; background-color: #ffffff; border: 1px solid #eeeeee; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);\">\n                        <img src=\"https://api.qrserver.com/v1/create-qr-code/?data={{ $json[\"codigo_descuento\"] }}&size=200x200&format=png&bgcolor=ffffff&qzone=1\" alt=\"Código QR de tu Bono\" width=\"200\" height=\"200\" style=\"display: block; border: 0; outline: none; text-decoration: none;\">\n                    </div>\n                    <p style=\"font-size: 13px; color: #999999; margin-top: 10px;\">Escanea este código en el salón</p>\n                </div>\n            </div>\n            <p style=\"font-size: 14px; color: #999999; margin-bottom: 30px;\">Visítanos antes de que expire y vive la experiencia que mereces.</p>\n            <a href=\"https://wa.me/573123462618\" style=\"display: inline-block; background-color: #6B755A; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 30px; font-weight: 600;\">Agendar mi cita ahora</a>\n        </div>\n        <div style=\"background-color: #333333; color: #ffffff; padding: 20px; text-align: center; font-size: 11px;\">\n            <p><strong>*Condiciones:</strong> Válido para 1 solo uso. No acumulable con otras promociones o cupones.</p>\n            <p style=\"margin-top: 5px;\">© 2026 Narbo's Salón Spa &bull; Chía, Cundinamarca.</p>\n        </div>\n    </div>\n</body>\n</html>\n",
         "options": {}
       },
       "id": "38c79adf-9bf3-4b2a-b802-63a85380b12c",
@@ -40,7 +40,7 @@
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2,
       "position": [
-        2224,
+        2048,
         448
       ],
       "webhookId": "fc2df3b6-3e3b-4369-850a-ce87c4d9cd22",
@@ -192,25 +192,12 @@
     },
     {
       "parameters": {
-        "jsCode": "const items = $input.all();\nreturn items.map((item, index) => {\n  const userData = item.json;\n  const couponPrefix = 'CUMPL-';\n  // Añadimos el index al Date.now() para evitar colisiones si hay múltiples cumpleaños el mismo ms\n  const timePart = (Date.now() + index).toString(36).slice(-4).toUpperCase();\n  const rawName = userData.nombre ? String(userData.nombre).trim() : '';\n  const cleanName = rawName.normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/[^a-zA-Z0-9]/g, '');\n  const nameSuffix = cleanName.length >= 2 ? cleanName.slice(-2).toUpperCase() : 'XX';\n  \n  const fullCoupon = couponPrefix + timePart + nameSuffix;\n  \n  return {\n    json: {\n      ...userData,\n      coupon_code: fullCoupon\n    }\n  };\n});"
-      },
-      "id": "e4c5b2a1-1234-5678-9abc-def012345678",
-      "name": "Generador de Cupón",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 1,
-      "position": [
-        2020,
-        192
-      ]
-    },
-    {
-      "parameters": {
         "tableId": "bonos",
         "fieldsUi": {
           "fieldValues": [
             {
               "fieldId": "client_id",
-              "fieldValue": "={{ $json[\"id\"] }}"
+              "fieldValue": "={{ $json[\"id\"].trim() }}"
             },
             {
               "fieldId": "tipo",
@@ -222,25 +209,57 @@
             },
             {
               "fieldId": "codigo",
-              "fieldValue": "={{ $json[\"coupon_code\"] }}"
+              "fieldValue": "=NARBO-HB{{ $now.toFormat('yyyy') }}-{{ Math.random().toString(36).substring(2,6).toUpperCase() }}"
             }
           ]
         }
       },
-      "id": "4b6149dd-12ab-4c3e-83d3-7d2d3ad7a840",
-      "name": "Supabase: Guardar Bono (Cumple)",
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        2220,
+        2032,
         192
       ],
+      "id": "a300e6a2-cc63-4ff8-845d-6092d858abcd",
+      "name": "Supabase: Guardar Bono (Cumple)",
       "credentials": {
         "supabaseApi": {
           "id": "5hkYuZVAhznvx7lf",
           "name": "Supabase Fidelizacion Narbo's Pro"
         }
       }
+    },
+    {
+      "parameters": {
+        "content": "## 🎁 Cumpleaños\n1. Filtra registros que coinciden en mes y día.\n2. Genera y guarda cupón dinámico.\n3. Envía correo QR de regalo.",
+        "height": 180,
+        "width": 844,
+        "color": 2
+      },
+      "id": "99e1bf9b-0b9c-43d9-afab-631957740526",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1552,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## ⏳ Vencimiento a 5 Meses\n1. Busca registros creados justo hace 150 días exactos.\n2. Confirma que bono sigue virgen (`canjeado = false`).\n3. Manda email recordatorio.",
+        "height": 180,
+        "width": 672,
+        "color": 6
+      },
+      "id": "ad7e10ca-5593-4335-9589-002dbae6738f",
+      "name": "Sticky Note 2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1568,
+        624
+      ]
     }
   ],
   "pinData": {},
@@ -265,7 +284,7 @@
       "main": [
         [
           {
-            "node": "Generador de Cupón",
+            "node": "Supabase: Guardar Bono (Cumple)",
             "type": "main",
             "index": 0
           }
@@ -305,17 +324,6 @@
         ]
       ]
     },
-    "Generador de Cupón": {
-      "main": [
-        [
-          {
-            "node": "Supabase: Guardar Bono (Cumple)",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Supabase: Guardar Bono (Cumple)": {
       "main": [
         [
@@ -334,11 +342,11 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "22f08ea9-c806-4141-b9dd-dcafb0673edd",
+  "versionId": "a21f0bee-9648-45a9-9708-283a6ee1f3d7",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "fdffcaf648a7aa062da0ec843fff869b930e75adc5303a6a19e86b840cf683f2"
   },
-  "id": "notificaciones-bonos-cumpleanos",
+  "id": "l8GFwqHd5oRJochct6GTT",
   "tags": []
 }
