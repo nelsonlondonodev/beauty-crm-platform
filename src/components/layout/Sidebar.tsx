@@ -6,6 +6,7 @@ import {
   Scissors,
   Receipt,
   Briefcase,
+  Gift,
   type LucideIcon,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
@@ -36,6 +37,12 @@ const NAV_ITEMS: NavItem[] = [
     icon: Users,
     label: 'Clientes',
     path: '/clients',
+    allowedRoles: ['owner', 'admin', 'staff'],
+  },
+  {
+    icon: Gift,
+    label: 'Validar Bonos',
+    path: '/bonuses',
     allowedRoles: ['owner', 'admin', 'staff'],
   },
   {

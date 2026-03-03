@@ -11,6 +11,13 @@ interface BillingCheckoutSummaryProps {
   total: number;
   onCheckout: () => void;
   isProcessing: boolean;
+  couponCode: string;
+  setCouponCode: (c: string) => void;
+  validatingCoupon: boolean;
+  appliedBonus: { id: string; codigo?: string; tipo: string } | null;
+  setAppliedBonus: (b: { id: string; codigo?: string; tipo: string } | null) => void;
+  handleValidateCoupon: (c: string) => void;
+  handleApplyClientBonus: (id: string, tipo: string, codigo?: string) => void;
 }
 
 const BillingCheckoutSummary = ({
@@ -22,6 +29,13 @@ const BillingCheckoutSummary = ({
   total,
   onCheckout,
   isProcessing,
+  couponCode,
+  setCouponCode,
+  validatingCoupon,
+  appliedBonus,
+  setAppliedBonus,
+  handleValidateCoupon,
+  handleApplyClientBonus,
 }: BillingCheckoutSummaryProps) => {
   return (
     <div className="sticky top-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
@@ -50,14 +64,59 @@ const BillingCheckoutSummary = ({
                     <span className="text-sm font-medium text-gray-800">
                       {bono.tipo}
                     </span>
-                    <button className="rounded bg-green-600 px-2 py-1 text-xs font-medium text-white transition-colors hover:bg-green-700">
-                      Aplicar
+                    <button 
+                      onClick={() => handleApplyClientBonus(bono.id, bono.tipo, bono.codigo)}
+                      disabled={appliedBonus?.id === bono.id}
+                      className={cn(
+                        "rounded px-2 py-1 text-xs font-medium text-white transition-colors",
+                        appliedBonus?.id === bono.id 
+                           ? "bg-gray-400 cursor-not-allowed" 
+                           : "bg-green-600 hover:bg-green-700"
+                      )}
+                    >
+                      {appliedBonus?.id === bono.id ? 'Aplicado' : 'Aplicar'}
                     </button>
                   </div>
                 ))}
             </div>
           </div>
         )}
+
+      {/* Manual Coupon Input */}
+      <div className="mb-6">
+        <label className="mb-2 block text-sm font-medium text-gray-700">Canjear Cupón Promocional</label>
+        {appliedBonus ? (
+          <div className="flex items-center justify-between rounded-lg border border-primary/20 bg-primary/5 p-3">
+             <div className="flex flex-col">
+               <span className="text-sm font-semibold text-primary">{appliedBonus.tipo}</span>
+               {appliedBonus.codigo && <span className="text-xs text-gray-500">{appliedBonus.codigo}</span>}
+             </div>
+             <button 
+               onClick={() => setAppliedBonus(null)} 
+               className="text-xs font-medium text-red-500 hover:text-red-700"
+             >
+               Remover
+             </button>
+          </div>
+        ) : (
+          <div className="flex gap-2">
+            <input
+              type="text"
+              placeholder="Ej: NARBO-KZ92pe"
+              value={couponCode}
+              onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm uppercase outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+            />
+            <button
+              onClick={() => handleValidateCoupon(couponCode)}
+              disabled={!couponCode || validatingCoupon}
+              className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-800 disabled:bg-gray-400"
+            >
+              {validatingCoupon ? '...' : 'Validar'}
+            </button>
+          </div>
+        )}
+      </div>
 
       <div className="mb-6 space-y-3 text-sm">
         <div className="flex justify-between text-gray-600">

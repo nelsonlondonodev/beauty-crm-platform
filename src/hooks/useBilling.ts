@@ -3,6 +3,7 @@ import type { Client, InvoiceItem } from '../types';
 import { procesarFactura } from '../services/billingService';
 import { useClients } from './useClients';
 import { useStaff } from './useStaff';
+import { supabase } from '../lib/supabase';
 
 export const useBilling = () => {
   const { clients, loading: clientsLoading } = useClients();
@@ -23,6 +24,11 @@ export const useBilling = () => {
     empleado_id: '',
   });
   const [discount, setDiscount] = useState<number>(0);
+
+  // Bonos State
+  const [couponCode, setCouponCode] = useState('');
+  const [validatingCoupon, setValidatingCoupon] = useState(false);
+  const [appliedBonus, setAppliedBonus] = useState<{ id: string; codigo?: string; tipo: string } | null>(null);
 
   // Derived Logic
   const filteredClients = useMemo(() => {
@@ -78,6 +84,7 @@ export const useBilling = () => {
         descuento: discount,
         total,
         items,
+        bono_id: appliedBonus?.id,
       });
 
       alert('¡Factura guardada con éxito!');
@@ -93,10 +100,53 @@ export const useBilling = () => {
     }
   };
 
+  const handleValidateCoupon = async (code: string) => {
+    if (!code) return;
+    setValidatingCoupon(true);
+    try {
+      const { data, error } = await supabase
+        .from('bonos')
+        .select(`
+          id, codigo, tipo, estado,
+          client_id
+        `)
+        .eq('codigo', code)
+        .single();
+      
+      if (error || !data) throw new Error('Cupón no encontrado o código incorrecto.');
+      if (data.estado !== 'Pendiente') throw new Error(`El cupón no puede ser canjeado. Estado: ${data.estado}`);
+      
+      setAppliedBonus({
+        id: data.id,
+        codigo: data.codigo,
+        tipo: data.tipo,
+      });
+
+      // Si no hay cliente seleccionado, autoseleccionarlo guiado por el owner del bono
+      if (!selectedClient && data.client_id) {
+        const foundClient = clients.find(c => c.id === data.client_id);
+        if (foundClient) setSelectedClient(foundClient);
+      }
+      
+      alert(`Cupón de ${data.tipo} listo para aplicar.`);
+      setCouponCode('');
+    } catch (e: any) {
+      alert(e.message);
+    } finally {
+      setValidatingCoupon(false);
+    }
+  };
+
+  const handleApplyClientBonus = (bonoId: string, tipo: string, codigo?: string) => {
+    setAppliedBonus({ id: bonoId, tipo, codigo });
+  };
+
   const resetForm = () => {
     setItems([]);
     setDiscount(0);
     setSelectedClient(null);
+    setCouponCode('');
+    setAppliedBonus(null);
   };
 
   return {
@@ -123,6 +173,15 @@ export const useBilling = () => {
     discount,
     setDiscount,
     total,
+
+    // Coupons
+    couponCode,
+    setCouponCode,
+    validatingCoupon,
+    appliedBonus,
+    setAppliedBonus,
+    handleValidateCoupon,
+    handleApplyClientBonus,
 
     // Submission
     isProcessing,

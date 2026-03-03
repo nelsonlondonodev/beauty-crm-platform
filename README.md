@@ -132,6 +132,11 @@ CRM B2B moderno para el sector de la belleza (Peluquerías, Barberías, Spas).
 -   **Separación de Responsabilidades (Clean Architecture)**: Refactorización del monolítico `dashboardService.ts` en funciones atómicas concurrentes (`Promise.all`) para agilizar tiempos de carga y mejorar mantenibilidad.
 -   **Componentización UI**: Extracción de componentes complejos hacia módulos independientes (e.j., desacople de la tabla de comisiones a `<StaffTable />` e íconos SVG intrusivos a `<GoogleIcon />`).
 
+### 12. Validación de Bonos y UI Modular
+-   **Módulo Independiente (`/bonuses`)**: Nueva interfaz interactiva y visual para la validación y canje manual de cupones de fidelización. Totalmente aislada del módulo de Facturación para uso exclusivo administrativo/operativo.
+-   **Validación Estricta**: Consulta en tiempo real a Supabase comprobando el estado del bono (solo aplicable si está `Pendiente`) y descubriendo al `cliente_id` respectivo automáticamente, protegiendo al negocio contra canjes dobles.
+-   **Seguridad de Tipado**: Interfaz desarrollada con TypeScript Strict-Mode sin uso de `any`, empleando coerciones explícitas e instancias nativas (`instanceof Error`) para máxima seguridad y evitando quiebres en el runtime (`ReferenceError`).
+
 ## 🗺️ Roadmap de Desarrollo (Pendientes)
 
 ### Fase 3: Calidad y Continuidad (SaaS)

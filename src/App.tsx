@@ -6,6 +6,7 @@ import Calendar from './pages/Calendar';
 import Settings from './pages/Settings';
 import Staff from './pages/Staff';
 import Billing from './pages/Billing';
+import Bonuses from './pages/Bonuses';
 import Login from './pages/Login';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -38,6 +39,16 @@ function App() {
                           allowedRoles={['owner', 'admin', 'staff']}
                         >
                           <Clients />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/bonuses"
+                      element={
+                        <ProtectedRoute
+                          allowedRoles={['owner', 'admin', 'staff']}
+                        >
+                          <Bonuses />
                         </ProtectedRoute>
                       }
                     />

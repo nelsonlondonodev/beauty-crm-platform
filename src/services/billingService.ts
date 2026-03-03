@@ -8,8 +8,7 @@ interface FacturaPayload {
   total: number;
   metodo_pago?: string;
   items: InvoiceItem[];
-  // If we had the employee's commission percentages readily available here, we would pass them.
-  // Instead, the backend (or this function) will fetch them to calculate the exact commission monto.
+  bono_id?: string; // ID del bono que será canjeado con la compra
 }
 
 export const procesarFactura = async (payload: FacturaPayload) => {
@@ -87,6 +86,22 @@ export const procesarFactura = async (payload: FacturaPayload) => {
       );
   }
 
-  // 5. Devolver la factura guardada
+  // 5. Actualizar el estado del bono a "Canjeado" si se aplicó uno
+  if (payload.bono_id) {
+    const { error: bonoError } = await supabase
+      .from('bonos')
+      .update({
+        estado: 'Canjeado',
+        fecha_canje: new Date().toISOString(),
+      })
+      .eq('id', payload.bono_id);
+
+    if (bonoError) {
+      console.error('Error al redimir bono: ', bonoError);
+      // No lanzamos excepcion para no abortar la factura que ya se guardo con exito
+    }
+  }
+
+  // 6. Devolver la factura guardada
   return facturaData;
 };

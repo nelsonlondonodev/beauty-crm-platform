@@ -25,6 +25,15 @@ const Billing = () => {
     discount,
     setDiscount,
     total,
+    // Coupons
+    couponCode,
+    setCouponCode,
+    validatingCoupon,
+    appliedBonus,
+    setAppliedBonus,
+    handleValidateCoupon,
+    handleApplyClientBonus,
+    // Submission
     isProcessing,
     handleCheckout,
   } = useBilling();
@@ -78,6 +87,13 @@ const Billing = () => {
             discount={discount}
             setDiscount={setDiscount}
             total={total}
+            couponCode={couponCode}
+            setCouponCode={setCouponCode}
+            validatingCoupon={validatingCoupon}
+            appliedBonus={appliedBonus}
+            setAppliedBonus={setAppliedBonus}
+            handleValidateCoupon={handleValidateCoupon}
+            handleApplyClientBonus={handleApplyClientBonus}
             onCheckout={handleCheckout}
             isProcessing={isProcessing}
           />
