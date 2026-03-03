@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -92,6 +93,11 @@ const getNavLinkClassName = (isActive: boolean, isDashboard: boolean): string =>
 const Sidebar = () => {
   const { role } = useAuth();
   const { config } = useTenant();
+  const [imgError, setImgError] = useState(false);
+
+  useEffect(() => {
+    setImgError(false);
+  }, [config.logoUrl]);
 
   const filteredNavItems = NAV_ITEMS.filter((item) =>
     item.allowedRoles.includes(role || 'staff')
@@ -102,8 +108,13 @@ const Sidebar = () => {
       <div className="flex h-full flex-col px-3 py-4">
         <div className="mb-10 flex items-center px-2">
           <div className="bg-primary/10 text-primary flex h-10 w-10 items-center justify-center rounded-xl overflow-hidden shrink-0">
-            {config.logoUrl ? (
-              <img src={config.logoUrl} alt={config.brandName} className="h-full w-full object-cover" />
+            {config.logoUrl && !imgError ? (
+              <img 
+                src={config.logoUrl} 
+                alt={config.brandName} 
+                className="h-full w-full object-cover" 
+                onError={() => setImgError(true)}
+              />
             ) : (
               <Scissors size={24} />
             )}
