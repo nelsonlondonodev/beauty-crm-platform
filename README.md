@@ -139,6 +139,14 @@ CRM B2B moderno para el sector de la belleza (Peluquerías, Barberías, Spas).
 
 ## 🗺️ Roadmap de Desarrollo (Pendientes)
 
+### 13. SaaS Multi-Tenant y Marca Blanca Dinámica (MVP)
+-   **Configuración por Inquilino (TenantConfig)**: Tabla dedicada en Supabase (`tenant_config`) segregada por RLS (`user_id`), garantizando que cada dueño de negocio solo lea y actualice su propia marca.
+-   **Contexto Global (`TenantContext`)**: Proveedor reactivo de React que envuelve toda la aplicación, extrayendo silenciosamente las preferencias de marca en paralelo al login sin penalizar la velocidad de carga de la UI.
+-   **Interfaz Totalmente Dinámica**: Reemplazo en crudo del nombre "Londy" y el logo estático por las preferencias personalizables cargadas remotamente. Soporta fallbacks automáticos hacia logotipos genéricos e iniciales para evadir bloqueos por URLs de imagen rotas o no válidas.
+-   **Autogestión de Propietario (`BrandConfigModal`)**: Ventana flotante in-app (dentro de "Ajustes") donde el `owner` puede editar sin código el nombre comercial y el enlace de su logo para reflejar los cambios instantáneamente a nivel de todo el CRM.
+
+## 🗺️ Roadmap de Desarrollo (Pendientes)
+
 ### Fase 3: Calidad y Continuidad (SaaS)
 - [ ] **Tests Automatizados:** Implementar Vitest para servicios críticos (Facturación, Comisiones).
 - [ ] **Monitoreo Real:** Integrar el Logger con un servicio de captura de excepciones en producción.
@@ -146,7 +154,6 @@ CRM B2B moderno para el sector de la belleza (Peluquerías, Barberías, Spas).
 
 ### Fase 4: SaaS Avanzado
 - [ ] **Panel de Administrador Global:** Interfaz para gestionar todos los tenants desde una sola cuenta maestra.
-- [ ] **Marca Blanca Dinámica:** Mover la configuración de `brand.ts` a la base de datos para personalización sin cambios de código.
 - [ ] **Onboarding Wizard:** Guía interactiva para que nuevos clientes configuren sus servicios y empleados.
 
 ## Comandos
