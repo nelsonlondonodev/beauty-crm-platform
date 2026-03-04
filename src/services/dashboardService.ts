@@ -4,6 +4,8 @@ import { startOfMonth, endOfMonth, addDays, addMonths } from 'date-fns';
 import { fetchWithTimeout } from '../lib/utils';
 import { logger } from '../lib/logger';
 
+// --- Interfaces ---
+
 export interface RevenueData {
   name: string;
   ingresos: number;
@@ -26,6 +28,34 @@ export interface DashboardStats {
   revenueData: RevenueData[];
   recentActivity: ActivityItem[];
 }
+
+// Interfaces internas para el tipado de Supabase
+interface AppointmentWithClient {
+  id: string;
+  created_at: string;
+  servicio: string;
+  client: { nombre: string } | { nombre: string }[] | null;
+}
+
+interface ClientRow {
+  id: number;
+  created_at: string;
+  nombre: string | null;
+}
+
+interface FacturaRow {
+  id: string;
+  fecha_venta: string | null;
+}
+
+interface BonoWithClient {
+  id: string;
+  fecha_canje: string | null;
+  tipo: string;
+  client: { nombre: string } | { nombre: string }[] | null;
+}
+
+// --- Funciones de obtención de estadísticas básicas ---
 
 async function fetchTotalClients(): Promise<number> {
   const { count, error } = await fetchWithTimeout(
@@ -67,18 +97,14 @@ async function fetchActiveBonuses(): Promise<number> {
 
 async function fetchUpcomingBirthdays(): Promise<number> {
   const today = new Date();
-  
-  // Generate the 'MM-DD' format for today and the next 7 days
   const upcomingDaysMMDD = new Set(Array.from({ length: 8 }).map((_, i) => {
     const d = addDays(today, i);
-    // Use local timezone to extract month and day to avoid UTC shift bugs
     const month = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
     return `${month}-${day}`;
   }));
 
   try {
-    // Fetch only the birthday string (extremely lightweight payload)
     const { data, error } = await fetchWithTimeout(
       supabase
         .from('clientes_fidelizacion')
@@ -89,18 +115,11 @@ async function fetchUpcomingBirthdays(): Promise<number> {
     if (error) throw new Error(error.message);
     if (!data) return 0;
     
-    // O(1) in-memory filter -> Very fast even with 10k rows
-    let count = 0;
-    for (const client of data) {
-      if (!client.birthday) continue;
-      // Extract MM-DD from YYYY-MM-DD
+    return data.filter(client => {
+      if (!client.birthday) return false;
       const mmdd = client.birthday.substring(5, 10);
-      if (upcomingDaysMMDD.has(mmdd)) {
-        count++;
-      }
-    }
-    
-    return count;
+      return upcomingDaysMMDD.has(mmdd);
+    }).length;
     
   } catch (err) {
     logger.error('Error fetching birthdays', err, 'Dashboard');
@@ -130,10 +149,7 @@ async function fetchExpiringBonuses(): Promise<number> {
   }
 }
 
-interface RevenueBucket extends RevenueData {
-  _month: number;
-  _year: number;
-}
+// --- Funciones de Ingresos ---
 
 async function fetchRevenueData(): Promise<RevenueData[]> {
   const today = new Date();
@@ -143,182 +159,145 @@ async function fetchRevenueData(): Promise<RevenueData[]> {
     .select('fecha_venta, total')
     .gte('fecha_venta', sixMonthsAgo.toISOString());
 
-  let revenueData: RevenueBucket[] = [];
-
   if (error) {
     logger.error('Error fetching revenue data', error.message, 'Dashboard');
     return [];
   }
 
-  if (facturas) {
-    const monthNames = [
-      'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
-      'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'
-    ];
+  if (!facturas) return [];
 
-    for (let i = 6; i >= 0; i--) {
-      const targetDate = addMonths(today, -i);
-      revenueData.push({
-        name: monthNames[targetDate.getMonth()],
-        ingresos: 0,
-        _month: targetDate.getMonth(),
-        _year: targetDate.getFullYear()
-      });
-    }
+  const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+  const revenueMap = new Map<string, number>();
 
-    facturas.forEach((factura) => {
-      if (!factura.fecha_venta) return;
-      const fDate = new Date(factura.fecha_venta);
-      const fMonth = fDate.getMonth();
-      const fYear = fDate.getFullYear();
-
-      const bucket = revenueData.find(
-        (b) => b._month === fMonth && b._year === fYear
-      );
-      if (bucket) {
-        bucket.ingresos += Number(factura.total) || 0;
-      }
-    });
-
-    return revenueData.map((b) => ({
-      name: b.name,
-      ingresos: b.ingresos,
-    }));
+  // Inicializar los últimos 7 meses
+  for (let i = 6; i >= 0; i--) {
+    const targetDate = addMonths(today, -i);
+    const key = `${targetDate.getFullYear()}-${targetDate.getMonth()}`;
+    revenueMap.set(key, 0);
   }
 
-  return [];
+  facturas.forEach((factura) => {
+    if (!factura.fecha_venta) return;
+    const fDate = new Date(factura.fecha_venta);
+    const key = `${fDate.getFullYear()}-${fDate.getMonth()}`;
+    
+    if (revenueMap.has(key)) {
+      revenueMap.set(key, (revenueMap.get(key) || 0) + (Number(factura.total) || 0));
+    }
+  });
+
+  return Array.from(revenueMap.entries()).map(([key, total]) => {
+    const [, month] = key.split('-');
+    return {
+      name: monthNames[parseInt(month)],
+      ingresos: total
+    };
+  });
+}
+
+// --- Funciones Atómicas de Actividad ---
+
+async function fetchRecentAppointments(): Promise<ActivityItem[]> {
+  const { data, error } = await supabase
+    .from('appointments')
+    .select('id, created_at, servicio, client:clientes_fidelizacion(nombre)')
+    .order('created_at', { ascending: false })
+    .limit(5);
+
+  if (error || !data) return [];
+
+  return (data as unknown as AppointmentWithClient[]).map(a => {
+    const nombre = Array.isArray(a.client) ? a.client[0]?.nombre : a.client?.nombre;
+    return {
+      id: `app-${a.id}`,
+      type: 'appointment',
+      title: 'Nueva Cita Programada',
+      description: `${(nombre || 'Cliente desconocido').trim()} reservó para ${a.servicio}`,
+      timestamp: a.created_at,
+    };
+  });
+}
+
+async function fetchRecentClients(): Promise<ActivityItem[]> {
+  const { data, error } = await supabase
+    .from('clientes_fidelizacion')
+    .select('id, created_at, nombre')
+    .order('created_at', { ascending: false })
+    .limit(5);
+
+  if (error || !data) return [];
+
+  return (data as unknown as ClientRow[]).map(c => ({
+    id: `cli-${c.id}`,
+    type: 'client',
+    title: 'Nuevo Cliente',
+    description: `${(c.nombre || '').trim()} se unió al programa`,
+    timestamp: c.created_at,
+  }));
+}
+
+async function fetchRecentSales(): Promise<ActivityItem[]> {
+  const { data, error } = await supabase
+    .from('facturas')
+    .select('id, fecha_venta')
+    .order('fecha_venta', { ascending: false })
+    .limit(5);
+
+  if (error || !data) return [];
+
+  return (data as unknown as FacturaRow[]).map(v => ({
+    id: `ven-${v.id}`,
+    type: 'sale',
+    title: 'Venta Procesada',
+    description: `Nueva factura generada en el sistema`,
+    timestamp: v.fecha_venta || new Date().toISOString(),
+  }));
+}
+
+async function fetchRecentBonuses(): Promise<ActivityItem[]> {
+  const { data, error } = await supabase
+    .from('bonos')
+    .select('id, fecha_canje, tipo, client:clientes_fidelizacion(nombre)')
+    .not('fecha_canje', 'is', null)
+    .order('fecha_canje', { ascending: false })
+    .limit(5);
+
+  if (error || !data) return [];
+
+  return (data as unknown as BonoWithClient[]).map(b => {
+    const nombre = Array.isArray(b.client) ? b.client[0]?.nombre : b.client?.nombre;
+    return {
+      id: `bon-${b.id}`,
+      type: 'bonus',
+      title: 'Bono Canjeado',
+      description: `${(nombre || 'Cliente desconocido').trim()} canjeó su bono de ${b.tipo}`,
+      timestamp: b.fecha_canje || new Date().toISOString(),
+    };
+  });
 }
 
 async function fetchRecentActivity(): Promise<ActivityItem[]> {
-  let recentActivity: ActivityItem[] = [];
-
   try {
-    const [appointmentsRes, clientsRes, ventasRes, bonosRes] = await Promise.all([
-      supabase
-        .from('appointments')
-        .select(`
-          id, 
-          created_at, 
-          servicio, 
-          client:clientes_fidelizacion(nombre)
-        `)
-        .order('created_at', { ascending: false })
-        .limit(5),
-      supabase
-        .from('clientes_fidelizacion')
-        .select('id, created_at, nombre')
-        .order('created_at', { ascending: false })
-        .limit(5),
-      supabase
-        .from('facturas')
-        .select('id, fecha_venta')
-        .order('fecha_venta', { ascending: false })
-        .limit(5),
-      supabase
-        .from('bonos')
-        .select(`
-          id, 
-          fecha_canje, 
-          tipo, 
-          client:clientes_fidelizacion(nombre)
-        `)
-        .not('fecha_canje', 'is', null)
-        .order('fecha_canje', { ascending: false })
-        .limit(5),
+    const results = await Promise.all([
+      fetchRecentAppointments(),
+      fetchRecentClients(),
+      fetchRecentSales(),
+      fetchRecentBonuses()
     ]);
 
-    if (appointmentsRes.data) {
-      type AppointmentWithClient = {
-        id: string;
-        created_at: string;
-        servicio: string;
-        client: { nombre: string } | { nombre: string }[] | null;
-      };
-
-      (appointmentsRes.data as unknown as AppointmentWithClient[]).forEach((a) => {
-        let nombre = 'Cliente desconocido';
-        if (a.client) {
-          if (Array.isArray(a.client)) {
-            nombre = a.client[0]?.nombre || nombre;
-          } else {
-            nombre = a.client.nombre || nombre;
-          }
-        }
-        recentActivity.push({
-          id: `app-${a.id}`,
-          type: 'appointment',
-          title: 'Nueva Cita Programada',
-          description: `${nombre.trim()} reservó para ${a.servicio}`,
-          timestamp: a.created_at,
-        });
-      });
-    }
-
-    if (clientsRes.data) {
-      type ClientRow = { id: number; created_at: string; nombre: string | null };
-
-      (clientsRes.data as unknown as ClientRow[]).forEach((c) => {
-        recentActivity.push({
-          id: `cli-${c.id}`,
-          type: 'client',
-          title: 'Nuevo Cliente',
-          description: `${(c.nombre || '').trim()} se unió al programa`,
-          timestamp: c.created_at,
-        });
-      });
-    }
-
-    if (ventasRes.data) {
-      ventasRes.data.forEach((v) => {
-        recentActivity.push({
-          id: `ven-${v.id}`,
-          type: 'sale',
-          title: 'Venta Procesada',
-          description: `Nueva factura generada en el sistema`,
-          timestamp: v.fecha_venta || new Date().toISOString(),
-        });
-      });
-    }
-
-    if (bonosRes.data) {
-      type BonoWithClient = {
-        id: string;
-        fecha_canje: string | null;
-        tipo: string;
-        client: { nombre: string } | { nombre: string }[] | null;
-      };
-
-      (bonosRes.data as unknown as BonoWithClient[]).forEach((b) => {
-        let nombre = 'Cliente desconocido';
-        if (b.client) {
-          if (Array.isArray(b.client)) {
-            nombre = b.client[0]?.nombre || nombre;
-          } else {
-            nombre = b.client.nombre || nombre;
-          }
-        }
-        recentActivity.push({
-          id: `bon-${b.id}`,
-          type: 'bonus',
-          title: 'Bono Canjeado',
-          description: `${nombre.trim()} canjeó su bono de ${b.tipo}`,
-          timestamp: b.fecha_canje || new Date().toISOString(),
-        });
-      });
-    }
-
-    recentActivity.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-    recentActivity = recentActivity.slice(0, 10);
+    return results
+      .flat()
+      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+      .slice(0, 10);
   } catch (err) {
     logger.error('Error fetching recent activity', err, 'Dashboard');
+    return [];
   }
-
-  return recentActivity;
 }
 
+// --- Función Principal ---
+
 export const getDashboardStats = async (): Promise<DashboardStats> => {
-  // Ejecutamos las promesas de forma concurrente, lo que además de limpiar
-  // el código monolítico, aumenta enormemente la velocidad de carga de la página.
   const [
     totalClients,
     newClientsThisMonth,

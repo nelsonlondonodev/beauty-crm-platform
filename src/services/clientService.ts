@@ -9,84 +9,67 @@ import type {
 import { addMonths, isPast } from 'date-fns';
 import { logger } from '../lib/logger';
 
-// Helper to process bones
+// --- Utilidades de Dominio ---
+
+/**
+ * Calcula el estado de un bono basándose en sus fechas y estado actual.
+ */
+function calculateBonusStatus(bono: BonoDbRow): { status: BonusStatus; expirationDate: Date } {
+  const createdAt = new Date(bono.created_at);
+  const expirationDate = bono.fecha_vencimiento
+    ? new Date(bono.fecha_vencimiento)
+    : addMonths(createdAt, 6);
+
+  if (bono.estado === 'Canjeado') return { status: 'reclamado', expirationDate };
+  if (bono.estado === 'Expirado' || isPast(expirationDate)) return { status: 'vencido', expirationDate };
+  
+  // Alerta de los 5 meses antes de vencer (Asumiendo 6 meses de vigencia por defecto)
+  const alertDate = addMonths(createdAt, 5);
+  if (isPast(alertDate)) return { status: 'alerta_5_meses', expirationDate };
+  
+  return { status: 'pendiente', expirationDate };
+}
+
+/**
+ * Procesa la lista de bonos de un cliente para extraer el activo y el historial.
+ */
 const processClientBonuses = (bonosRow?: BonoDbRow[]) => {
-  let activeBonus: BonoDbRow | undefined = undefined;
-  let fallbackBonus: BonoDbRow | undefined = undefined;
-  let allProcessedBonuses: ClientBonusDisplay[] = [];
-
-  if (bonosRow && Array.isArray(bonosRow) && bonosRow.length > 0) {
-    // Sort newest first
-    const sortedBonos = [...bonosRow].sort(
-      (a, b) =>
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    );
-    fallbackBonus = sortedBonos[0]; // the latest one
-    activeBonus =
-      sortedBonos.find((b) => b.estado === 'Pendiente') || fallbackBonus;
-
-    allProcessedBonuses = sortedBonos.map((b) => {
-      const createdAt = new Date(b.created_at);
-      const venc = b.fecha_vencimiento
-        ? new Date(b.fecha_vencimiento)
-        : addMonths(createdAt, 6);
-      let st: BonusStatus = 'pendiente';
-
-      if (b.estado === 'Canjeado') {
-        st = 'reclamado';
-      } else if (b.estado === 'Expirado' || isPast(venc)) {
-        st = 'vencido';
-      } else {
-        st = 'pendiente';
-        if (isPast(addMonths(createdAt, 5))) {
-          st = 'alerta_5_meses';
-        }
-      }
-      return {
-        id: b.id,
-        tipo: b.tipo || 'Bienvenida',
-        codigo: b.codigo || '',
-        estado: st,
-        fecha_vencimiento: venc.toISOString().split('T')[0],
-      };
-    });
+  if (!bonosRow || bonosRow.length === 0) {
+    return { activeBonus: null, displayBonuses: [] as ClientBonusDisplay[] };
   }
 
-  // Return all processed bonuses so the user can see the full history 
-  // (redeemed, expired, pending). We can sort them to show the latest first.
-  let displayBonuses = allProcessedBonuses;
+  // Ordenar por fecha de creación (más reciente primero)
+  const sortedBonos = [...bonosRow].sort(
+    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  );
 
-  return { activeBonus, displayBonuses };
+  const displayBonuses: ClientBonusDisplay[] = sortedBonos.map((b) => {
+    const { status, expirationDate } = calculateBonusStatus(b);
+    return {
+      id: b.id,
+      tipo: b.tipo || 'Bienvenida',
+      codigo: b.codigo || '',
+      estado: status,
+      fecha_vencimiento: expirationDate.toISOString().split('T')[0],
+    };
+  });
+
+  // El bono "activo" para mostrar en la tabla es el primero que esté Pendiente.
+  // Si no hay ninguno pendiente, tomamos el más reciente.
+  const activeBonoRaw = sortedBonos.find((b) => b.estado === 'Pendiente') || sortedBonos[0];
+  const { status, expirationDate } = calculateBonusStatus(activeBonoRaw);
+
+  return {
+    activeBonus: { ...activeBonoRaw, status, expirationDate },
+    displayBonuses,
+  };
 };
 
-// Helper to map DB row to Client type
+/**
+ * Mapea la fila de la base de datos al modelo de dominio 'Client'.
+ */
 const mapDbToClient = (row: ClientDbRow): Client => {
   const { activeBonus, displayBonuses } = processClientBonuses(row.bonos);
-
-  let estado: BonusStatus = 'vencido';
-  let vencimientoDate: Date | null = null;
-
-  if (activeBonus) {
-    const createdAt = new Date(activeBonus.created_at);
-    vencimientoDate = activeBonus.fecha_vencimiento
-      ? new Date(activeBonus.fecha_vencimiento)
-      : addMonths(createdAt, 6);
-
-    if (activeBonus.estado === 'Canjeado') {
-      estado = 'reclamado';
-    } else if (activeBonus.estado === 'Expirado' || isPast(vencimientoDate)) {
-      estado = 'vencido';
-    } else {
-      estado = 'pendiente';
-      // Check 5 month alert
-      if (isPast(addMonths(createdAt, 5))) {
-        estado = 'alerta_5_meses';
-      }
-    }
-  } else {
-    // Cliente sin bonos (creado manualmente desde el CRM)
-    estado = 'sin_bono';
-  }
 
   return {
     id: row.id,
@@ -94,14 +77,14 @@ const mapDbToClient = (row: ClientDbRow): Client => {
     email: row.email || '',
     telefono: row.whatsapp || '',
     fecha_nacimiento: row.birthday || '',
-    bono_estado: estado,
-    bono_fecha_vencimiento: vencimientoDate
-      ? vencimientoDate.toISOString().split('T')[0]
-      : '',
+    bono_estado: activeBonus ? activeBonus.status : 'sin_bono',
+    bono_fecha_vencimiento: activeBonus ? activeBonus.expirationDate.toISOString().split('T')[0] : '',
     bono_tipo: activeBonus?.tipo,
     bonos_historial: displayBonuses,
   };
 };
+
+// --- Funciones de Servicio ---
 
 export const getClients = async (): Promise<Client[]> => {
   const { data, error } = await supabase
@@ -122,72 +105,72 @@ export const createClient = async (
 ): Promise<Client> => {
   const { data, error } = await supabase
     .from('clientes_fidelizacion')
-    .insert([
-      {
-        nombre: clientData.nombre,
-        email: clientData.email,
-        whatsapp: clientData.telefono,
-        birthday: clientData.fecha_nacimiento,
-      },
-    ])
+    .insert([{
+      nombre: clientData.nombre,
+      email: clientData.email,
+      whatsapp: clientData.telefono,
+      birthday: clientData.fecha_nacimiento,
+    }])
     .select('*, bonos(*)')
     .single();
 
-  if (error) {
-    throw new Error(error.message);
-  }
-
+  if (error) throw new Error(error.message);
   return mapDbToClient(data);
 };
 
-export const updateClient = async (
-  id: string,
-  updates: Partial<Client>
-): Promise<Client> => {
+/**
+ * Redime el bono activo de un cliente si este solicita marcarlo como reclamado.
+ */
+async function redeemActiveBonusForClient(clientId: string): Promise<void> {
+  const { data: bonos } = await supabase
+    .from('bonos')
+    .select('id')
+    .eq('client_id', clientId)
+    .eq('estado', 'Pendiente')
+    .limit(1);
+
+  if (bonos && bonos.length > 0) {
+    const { error } = await supabase
+      .from('bonos')
+      .update({ estado: 'Canjeado', fecha_canje: new Date().toISOString() })
+      .eq('id', bonos[0].id);
+
+    if (error) {
+      logger.warn(`Could not redeem bonus for client ${clientId}`, error, 'ClientService');
+    }
+  }
+}
+
+export const updateClient = async (id: string, updates: Partial<Client>): Promise<Client> => {
   const dbUpdates: Partial<ClientDbRow> = {};
   if (updates.nombre) dbUpdates.nombre = updates.nombre;
   if (updates.email) dbUpdates.email = updates.email;
   if (updates.telefono) dbUpdates.whatsapp = updates.telefono;
   if (updates.fecha_nacimiento) dbUpdates.birthday = updates.fecha_nacimiento;
 
-  // Update main client fields if there are any
+  // 1. Actualizar perfil básico si hay cambios
   if (Object.keys(dbUpdates).length > 0) {
-    const { error: updateError } = await supabase
+    const { error } = await supabase
       .from('clientes_fidelizacion')
       .update(dbUpdates)
       .eq('id', id);
-
-    if (updateError) throw new Error(updateError.message);
+    
+    if (error) throw new Error(error.message);
   }
 
-  // Bono updates (manual override handler)
+  // 2. Gestionar redención de bonos de forma aislada
   if (updates.bono_estado === 'reclamado') {
-    // Find the active pendiente bonus and mark it as canjeado
-    const { data: bonos } = await supabase
-      .from('bonos')
-      .select('id')
-      .eq('client_id', id)
-      .eq('estado', 'Pendiente')
-      .limit(1);
-    if (bonos && bonos.length > 0) {
-      await supabase
-        .from('bonos')
-        .update({ estado: 'Canjeado', fecha_canje: new Date().toISOString() })
-        .eq('id', bonos[0].id);
-    }
+    await redeemActiveBonusForClient(id);
   }
 
-  // Fetch updated fully joined record
+  // 3. Recuperar y mapear el registro actualizado final
   const { data, error } = await supabase
     .from('clientes_fidelizacion')
     .select('*, bonos(*)')
     .eq('id', id)
     .single();
 
-  if (error) {
-    throw new Error(error.message);
-  }
-
+  if (error) throw new Error(error.message);
   return mapDbToClient(data);
 };
 
@@ -197,7 +180,5 @@ export const deleteClient = async (id: string): Promise<void> => {
     .delete()
     .eq('id', id);
 
-  if (error) {
-    throw new Error(error.message);
-  }
+  if (error) throw new Error(error.message);
 };

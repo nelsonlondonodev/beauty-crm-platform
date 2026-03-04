@@ -2,6 +2,8 @@ import { supabase } from '../lib/supabase';
 import type { InvoiceItem } from '../types';
 import { logger } from '../lib/logger';
 
+// --- Interfaces ---
+
 interface FacturaPayload {
   cliente_id?: string | null;
   subtotal: number;
@@ -12,55 +14,62 @@ interface FacturaPayload {
   bono_id?: string; // ID del bono que será canjeado con la compra
 }
 
-export const procesarFactura = async (payload: FacturaPayload) => {
-  // 1. Opcional: Obtener porcentajes de comisión de los empleados involucrados
-  const empleadoIds = payload.items
-    .map((item) => item.empleado_id)
-    .filter(Boolean) as string[];
+// --- Funciones Atómicas ---
 
-  let empleadosDict: Record<string, number> = {};
-  if (empleadoIds.length > 0) {
-    const { data: empleadosData, error: empError } = await supabase
-      .from('empleados')
-      .select('id, comision_porcentaje')
-      .in('id', empleadoIds);
+/**
+ * Obtiene un diccionario de IDs de empleados y sus porcentajes de comisión.
+ */
+async function getEmployeeCommissions(empleadoIds: string[]): Promise<Record<string, number>> {
+  if (empleadoIds.length === 0) return {};
 
-    if (empError)
-      throw new Error(`Error al obtener comisiones: ${empError.message}`);
-    empleadosDict = (empleadosData || []).reduce(
-      (acc, emp) => {
-        acc[emp.id] = Number(emp.comision_porcentaje);
-        return acc;
-      },
-      {} as Record<string, number>
-    );
+  const { data, error } = await supabase
+    .from('empleados')
+    .select('id, comision_porcentaje')
+    .in('id', empleadoIds);
+
+  if (error) {
+    throw new Error(`Error al obtener comisiones: ${error.message}`);
   }
 
-  // 2. Insertar Factura Principal
-  const { data: facturaData, error: facturaError } = await supabase
+  return (data || []).reduce((acc, emp) => {
+    acc[emp.id] = Number(emp.comision_porcentaje);
+    return acc;
+  }, {} as Record<string, number>);
+}
+
+/**
+ * Inserta el registro principal de la factura.
+ */
+async function createInvoice(payload: Omit<FacturaPayload, 'items' | 'bono_id'>) {
+  const { data, error } = await supabase
     .from('facturas')
-    .insert([
-      {
-        cliente_id: payload.cliente_id,
-        subtotal: payload.subtotal,
-        descuento: payload.descuento,
-        total: payload.total,
-        metodo_pago: payload.metodo_pago || 'Efectivo',
-      },
-    ])
+    .insert([{
+      cliente_id: payload.cliente_id,
+      subtotal: payload.subtotal,
+      descuento: payload.descuento,
+      total: payload.total,
+      metodo_pago: payload.metodo_pago || 'Efectivo',
+    }])
     .select()
     .single();
 
-  if (facturaError)
-    throw new Error(`Error al guardar factura: ${facturaError.message}`);
+  if (error) {
+    throw new Error(`Error al guardar factura: ${error.message}`);
+  }
 
-  const facturaId = facturaData.id;
+  return data;
+}
 
-  // 3. Preparar los items con su cálculo de comisión
-  const itemsToInsert = payload.items.map((item) => {
-    const comisionPorcentaje = item.empleado_id
-      ? empleadosDict[item.empleado_id] || 0
-      : 0;
+/**
+ * Calcula y guarda los detalles de la factura con sus comisiones.
+ */
+async function createInvoiceItems(
+  facturaId: string, 
+  items: InvoiceItem[], 
+  comisiones: Record<string, number>
+) {
+  const itemsToInsert = items.map((item) => {
+    const comisionPorcentaje = item.empleado_id ? comisiones[item.empleado_id] || 0 : 0;
     const precioTotal = item.price * item.quantity;
     const comisionMonto = precioTotal * (comisionPorcentaje / 100);
 
@@ -75,34 +84,48 @@ export const procesarFactura = async (payload: FacturaPayload) => {
     };
   });
 
-  // 4. Insertar los Items
   if (itemsToInsert.length > 0) {
-    const { error: itemsError } = await supabase
-      .from('factura_items')
-      .insert(itemsToInsert);
-
-    if (itemsError)
-      throw new Error(
-        `Error al guardar items de factura: ${itemsError.message}`
-      );
-  }
-
-  // 5. Actualizar el estado del bono a "Canjeado" si se aplicó uno
-  if (payload.bono_id) {
-    const { error: bonoError } = await supabase
-      .from('bonos')
-      .update({
-        estado: 'Canjeado',
-        fecha_canje: new Date().toISOString(),
-      })
-      .eq('id', payload.bono_id);
-
-    if (bonoError) {
-      logger.warn('Error al redimir bono con factura', bonoError, 'BillingService');
-      // No lanzamos excepcion para no abortar la factura que ya se guardo con exito
+    const { error } = await supabase.from('factura_items').insert(itemsToInsert);
+    if (error) {
+      throw new Error(`Error al guardar items de factura: ${error.message}`);
     }
   }
+}
 
-  // 6. Devolver la factura guardada
-  return facturaData;
+/**
+ * Registra el canje de un bono si el ID está presente.
+ */
+async function redeemBonusIfExists(bonoId?: string) {
+  if (!bonoId) return;
+
+  const { error } = await supabase
+    .from('bonos')
+    .update({
+      estado: 'Canjeado',
+      fecha_canje: new Date().toISOString(),
+    })
+    .eq('id', bonoId);
+
+  if (error) {
+    logger.warn('Error al redimir bono con factura', error, 'BillingService');
+  }
+}
+
+// --- Función Principal ---
+
+export const procesarFactura = async (payload: FacturaPayload) => {
+  // 1. Obtener IDs únicos de empleados omitiendo nulos
+  const empleadoIds = Array.from(new Set(
+    payload.items.map(item => item.empleado_id).filter(Boolean) as string[]
+  ));
+
+  // 2. Obtener datos necesarios e insertar factura base
+  const comisiones = await getEmployeeCommissions(empleadoIds);
+  const factura = await createInvoice(payload);
+
+  // 3. Crear items de factura y procesar bonos de fidelización
+  await createInvoiceItems(factura.id, payload.items, comisiones);
+  await redeemBonusIfExists(payload.bono_id);
+
+  return factura;
 };
