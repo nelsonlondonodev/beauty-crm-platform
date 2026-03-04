@@ -28,7 +28,7 @@ export const validateBonoCode = async (
       `
       id, codigo, tipo, estado,
       client_id,
-      clientes_fidelizacion (nombre)
+      clientes_fidelizacion!client_id (nombre)
     `
     )
     .eq('codigo', code)

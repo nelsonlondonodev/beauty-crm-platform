@@ -141,6 +141,7 @@ CRM B2B moderno para el sector de la belleza (Peluquerías, Barberías, Spas).
 ### 14. Auditoría de MVP y Estabilización (V0.2.0)
 -   **Sincronización Multimódulo**: Implementación de un sistema de eventos ligero (`lib/events.ts`) que comunica cambios entre secciones. El canje de un bono ahora actualiza instantáneamente el Dashboard y la tabla de Clientes sin necesidad de recargar la página.
 -   **Servicio de Bonos Centralizado**: Extracción de la lógica de negocio a `bonoService.ts`, unificando procesos y eliminando accesos directos redundantes a Supabase en los Hooks.
+-   **Seguridad y Relaciones Precisas**: Corrección de ambigüedades en llaves foráneas causadas por RLS (`clientes_fidelizacion!client_id`), asegurando que las vistas JOIN se rendericen limpias sin emitir errores de estado restrictivo HTTP (`406 Not Acceptable`).
 -   **Validación de Datos Robusta**:
     -   **Validación de Teléfono**: Sanitización de caracteres y comprobación de longitud mínima (9 dígitos) con feedback visual en tiempo real.
     -   **Vencimientos Automáticos**: Eliminación de campos manuales de fecha; el sistema ahora gestiona la expiración de bonos de manera automatizada (6 meses para bienvenida, mes completo para cumpleaños).
