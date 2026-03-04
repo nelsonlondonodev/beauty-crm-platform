@@ -17,7 +17,7 @@ import { cn } from '../../lib/utils';
 interface ClientTableProps {
   clients: Client[];
   onEdit: (client: Client) => void;
-  onDelete: (clientId: string) => void;
+  onDelete: (client: Client) => void;
 }
 
 const ClientTable: React.FC<ClientTableProps> = ({
@@ -156,7 +156,7 @@ const ClientTable: React.FC<ClientTableProps> = ({
                       <Edit className="h-4 w-4" />
                     </button>
                     <button
-                      onClick={() => onDelete(client.id)}
+                      onClick={() => onDelete(client)}
                       className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500"
                       title="Eliminar Cliente"
                     >

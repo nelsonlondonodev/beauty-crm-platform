@@ -2,6 +2,7 @@ import { useState } from 'react';
 import DashboardHeader from '../components/layout/DashboardHeader';
 import ClientTable from '../components/clients/ClientTable';
 import NewClientModal from '../components/clients/NewClientModal';
+import ConfirmDialog from '../components/ui/ConfirmDialog';
 import { useClients } from '../hooks/useClients';
 import { Search, Plus, Loader2 } from 'lucide-react';
 import { cn } from '../lib/utils';
@@ -14,6 +15,8 @@ const Clients = () => {
   const [filter, setFilter] = useState<'all' | 'Activo' | 'Vencido'>('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
+  const [deletingClient, setDeletingClient] = useState<Client | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Filter Logic
   const filteredClients = clients.filter((client) => {
@@ -67,10 +70,16 @@ const Clients = () => {
     setIsModalOpen(true);
   };
 
-  const handleDeleteClient = async (id: string) => {
-    if (window.confirm('¿Estás seguro de eliminar este cliente?')) {
-      await deleteClient(id);
-    }
+  const handleDeleteClient = async (client: Client) => {
+    setDeletingClient(client);
+  };
+
+  const confirmDelete = async () => {
+    if (!deletingClient) return;
+    setIsDeleting(true);
+    await deleteClient(deletingClient.id);
+    setIsDeleting(false);
+    setDeletingClient(null);
   };
 
   return (
@@ -138,6 +147,17 @@ const Clients = () => {
         onClose={() => setIsModalOpen(false)}
         onSave={handleSaveClient}
         initialData={editingClient}
+      />
+
+      <ConfirmDialog
+        isOpen={!!deletingClient}
+        onClose={() => setDeletingClient(null)}
+        onConfirm={confirmDelete}
+        title="Eliminar cliente"
+        message={`¿Estás seguro de eliminar a ${deletingClient?.nombre ?? 'este cliente'}? Esta acción no se puede deshacer.`}
+        confirmLabel="Sí, eliminar"
+        variant="danger"
+        isLoading={isDeleting}
       />
     </div>
   );
