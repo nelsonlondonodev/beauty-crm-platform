@@ -68,6 +68,8 @@ const GlobalSearch = () => {
         return 'bg-red-100 text-red-800';
       case 'reclamado':
         return 'bg-blue-100 text-blue-800';
+      case 'sin_bono':
+        return 'bg-gray-100 text-gray-600';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -83,6 +85,8 @@ const GlobalSearch = () => {
         return 'Inactivo / Vencido';
       case 'reclamado':
         return 'Bono Canjeado';
+      case 'sin_bono':
+        return 'Sin bono';
       default:
         return 'No definido';
     }

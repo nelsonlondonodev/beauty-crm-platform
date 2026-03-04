@@ -84,10 +84,8 @@ const mapDbToClient = (row: ClientDbRow): Client => {
       }
     }
   } else {
-    // Legacy fallback
-    const createdAt = row.created_at ? new Date(row.created_at) : new Date();
-    vencimientoDate = addMonths(createdAt, 6);
-    estado = isPast(vencimientoDate) ? 'vencido' : 'pendiente';
+    // Cliente sin bonos (creado manualmente desde el CRM)
+    estado = 'sin_bono';
   }
 
   return {
@@ -100,7 +98,7 @@ const mapDbToClient = (row: ClientDbRow): Client => {
     bono_fecha_vencimiento: vencimientoDate
       ? vencimientoDate.toISOString().split('T')[0]
       : '',
-    bono_tipo: activeBonus ? activeBonus.tipo : 'Bienvenida',
+    bono_tipo: activeBonus?.tipo,
     bonos_historial: displayBonuses,
   };
 };

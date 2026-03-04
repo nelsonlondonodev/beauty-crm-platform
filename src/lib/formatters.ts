@@ -15,6 +15,8 @@ export const getStatusColor = (status: string): string => {
       return 'bg-red-50 text-red-700 ring-red-600/10';
     case 'alerta_5_meses':
       return 'bg-yellow-50 text-yellow-800 ring-yellow-600/20';
+    case 'sin_bono':
+      return 'bg-gray-50 text-gray-500 ring-gray-500/10';
     default:
       return 'bg-gray-50 text-gray-600 ring-gray-500/10';
   }
@@ -30,6 +32,8 @@ export const getStatusLabel = (status: string): string => {
       return 'Vencido';
     case 'alerta_5_meses':
       return 'Por Vencer';
+    case 'sin_bono':
+      return 'Sin bono';
     default:
       return status;
   }

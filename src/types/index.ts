@@ -4,7 +4,8 @@ export type BonusStatus =
   | 'pendiente'
   | 'reclamado'
   | 'vencido'
-  | 'alerta_5_meses';
+  | 'alerta_5_meses'
+  | 'sin_bono';
 
 export interface ClientBonusDisplay {
   id: string;
