@@ -16,12 +16,14 @@ const Bonuses = () => {
     message: string;
     data?: ValidatedBono;
   } | null>(null);
+  const [showConfirmation, setShowConfirmation] = useState(false);
 
   const handleValidate = async () => {
     const cleanCode = couponCode.trim();
     if (!cleanCode) return;
     setIsValidating(true);
     setResult(null);
+    setShowConfirmation(false);
 
     try {
       const bono = await validateBonoCode(cleanCode);
@@ -66,6 +68,7 @@ const Bonuses = () => {
       });
     } finally {
       setIsValidating(false);
+      setShowConfirmation(false);
     }
   };
 
@@ -143,13 +146,42 @@ const Bonuses = () => {
                             <span className="col-span-2 font-mono text-primary font-bold">{result.data.codigo}</span>
                          </div>
                          
-                         <button
-                           onClick={handleRedeem}
-                           disabled={isValidating}
-                           className="mt-6 w-full rounded-lg bg-green-600 py-3 text-center font-bold text-white transition-all hover:bg-green-700"
-                         >
-                           Redimir Bono Ahora
-                         </button>
+                         {!showConfirmation ? (
+                           <button
+                             onClick={() => setShowConfirmation(true)}
+                             disabled={isValidating}
+                             className="mt-6 w-full rounded-lg bg-green-600 py-3 text-center font-bold text-white transition-all hover:bg-green-700"
+                           >
+                             Redimir Bono Ahora
+                           </button>
+                         ) : (
+                           <div className="mt-6 space-y-3 rounded-lg border border-amber-200 bg-amber-50 p-4">
+                             <p className="text-sm font-medium text-amber-900">
+                               ¿Confirmar canje del bono{' '}
+                               <span className="font-bold">{result.data?.tipo}</span>{' '}
+                               de{' '}
+                               <span className="font-bold">
+                                 {result.data?.clientes_fidelizacion?.nombre}
+                               </span>
+                               ? Esta acción no se puede deshacer.
+                             </p>
+                             <div className="flex gap-3">
+                               <button
+                                 onClick={() => setShowConfirmation(false)}
+                                 className="flex-1 rounded-lg border border-gray-300 bg-white py-2.5 text-sm font-medium text-gray-700 transition-all hover:bg-gray-50"
+                               >
+                                 Cancelar
+                               </button>
+                               <button
+                                 onClick={handleRedeem}
+                                 disabled={isValidating}
+                                 className="flex-1 rounded-lg bg-green-600 py-2.5 text-sm font-bold text-white transition-all hover:bg-green-700 disabled:bg-gray-400"
+                               >
+                                 {isValidating ? 'Canjeando...' : 'Sí, canjear'}
+                               </button>
+                             </div>
+                           </div>
+                         )}
                        </div>
                      )}
                   </div>
