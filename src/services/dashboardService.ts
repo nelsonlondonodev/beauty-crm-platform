@@ -1,8 +1,9 @@
 import { supabase } from '../lib/supabase';
 import type { PostgrestError } from '@supabase/supabase-js';
-import { startOfMonth, endOfMonth, addDays, addMonths } from 'date-fns';
+import { startOfMonth, endOfMonth, addMonths, addDays } from 'date-fns';
 import { fetchWithTimeout } from '../lib/utils';
 import { logger } from '../lib/logger';
+import { isBirthdayInRange } from '../lib/dateUtils';
 
 // --- Interfaces ---
 
@@ -96,14 +97,6 @@ async function fetchActiveBonuses(): Promise<number> {
 }
 
 async function fetchUpcomingBirthdays(): Promise<number> {
-  const today = new Date();
-  const upcomingDaysMMDD = new Set(Array.from({ length: 8 }).map((_, i) => {
-    const d = addDays(today, i);
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${month}-${day}`;
-  }));
-
   try {
     const { data, error } = await fetchWithTimeout(
       supabase
@@ -115,11 +108,7 @@ async function fetchUpcomingBirthdays(): Promise<number> {
     if (error) throw new Error(error.message);
     if (!data) return 0;
     
-    return data.filter(client => {
-      if (!client.birthday) return false;
-      const mmdd = client.birthday.substring(5, 10);
-      return upcomingDaysMMDD.has(mmdd);
-    }).length;
+    return data.filter(client => isBirthdayInRange(client.birthday)).length;
     
   } catch (err) {
     logger.error('Error fetching birthdays', err, 'Dashboard');
