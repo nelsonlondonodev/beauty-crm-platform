@@ -7,14 +7,22 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import { useStaff } from '../hooks/useStaff';
+import { useAuth } from '../contexts/AuthContext';
+import { canPerform } from '../lib/rbac';
+import { Navigate } from 'react-router-dom';
 import NewStaffModal from '../components/staff/NewStaffModal';
 import StaffTable from '../components/staff/StaffTable';
 
 const Staff = () => {
   const { staff, loading, error, payEmployee, payAllPending, addStaff } =
     useStaff();
+  const { role } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  if (!canPerform(role, 'MANAGE_STAFF')) {
+    return <Navigate to="/" replace />;
+  }
 
   const totalSales = staff.reduce((acc, emp) => acc + emp.ventas_totales, 0);
   const totalCommissions = staff.reduce(

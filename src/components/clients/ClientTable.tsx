@@ -13,6 +13,8 @@ import {
   getStatusLabel,
 } from '../../lib/formatters';
 import { cn } from '../../lib/utils';
+import { useAuth } from '../../contexts/AuthContext';
+import { canPerform } from '../../lib/rbac';
 
 interface ClientTableProps {
   clients: Client[];
@@ -25,6 +27,7 @@ const ClientTable: React.FC<ClientTableProps> = ({
   onEdit,
   onDelete,
 }) => {
+  const { role } = useAuth();
   return (
     <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
       <div className="overflow-x-auto">
@@ -155,13 +158,15 @@ const ClientTable: React.FC<ClientTableProps> = ({
                     >
                       <Edit className="h-4 w-4" />
                     </button>
-                    <button
-                      onClick={() => onDelete(client)}
-                      className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500"
-                      title="Eliminar Cliente"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                    {canPerform(role, 'DELETE_CLIENT') && (
+                      <button
+                        onClick={() => onDelete(client)}
+                        className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500"
+                        title="Eliminar Cliente"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    )}
                   </div>
                 </td>
               </tr>

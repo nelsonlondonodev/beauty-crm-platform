@@ -13,6 +13,7 @@ import {
 import { cn } from '../../lib/utils';
 import { useAuth, type AppRole } from '../../contexts/AuthContext';
 import { useTenant } from '../../contexts/TenantContext';
+import { hasRequiredRole } from '../../lib/rbac';
 
 // ── Tipos ───────────────────────────────────────────────────────────────────
 
@@ -100,7 +101,7 @@ const Sidebar = () => {
   }, [config.logoUrl]);
 
   const filteredNavItems = NAV_ITEMS.filter((item) =>
-    item.allowedRoles.includes(role || 'staff')
+    hasRequiredRole(role, item.allowedRoles)
   );
 
   return (

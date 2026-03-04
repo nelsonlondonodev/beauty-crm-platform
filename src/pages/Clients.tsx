@@ -4,6 +4,8 @@ import ClientTable from '../components/clients/ClientTable';
 import NewClientModal from '../components/clients/NewClientModal';
 import ConfirmDialog from '../components/ui/ConfirmDialog';
 import { useClients } from '../hooks/useClients';
+import { useAuth } from '../contexts/AuthContext';
+import { canPerform } from '../lib/rbac';
 import { Search, Plus, Loader2 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import type { Client } from '../types';
@@ -11,6 +13,7 @@ import type { Client } from '../types';
 const Clients = () => {
   const { clients, loading, addClient, updateClient, deleteClient } =
     useClients();
+  const { role } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState<'all' | 'Activo' | 'Vencido'>('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -88,13 +91,15 @@ const Clients = () => {
         title="Gestión de Clientes"
         subtitle="Administra tu base de datos de clientes y sus fidelizaciones."
         actions={
-          <button
-            onClick={openNewClientModal}
-            className="bg-primary hover:bg-primary/90 focus-visible:outline-primary inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Nuevo Cliente
-          </button>
+          canPerform(role, 'MANAGE_CLIENTS') && (
+            <button
+              onClick={openNewClientModal}
+              className="bg-primary hover:bg-primary/90 focus-visible:outline-primary inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Nuevo Cliente
+            </button>
+          )
         }
       />
 
