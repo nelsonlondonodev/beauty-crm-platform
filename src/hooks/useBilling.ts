@@ -1,9 +1,9 @@
 import { useState, useMemo } from 'react';
 import type { Client, InvoiceItem } from '../types';
 import { procesarFactura } from '../services/billingService';
+import { validateBonoCode } from '../services/bonoService';
 import { useClients } from './useClients';
 import { useStaff } from './useStaff';
-import { supabase } from '../lib/supabase';
 
 export const useBilling = () => {
   const { clients, loading: clientsLoading } = useClients();
@@ -104,34 +104,25 @@ export const useBilling = () => {
     if (!code) return;
     setValidatingCoupon(true);
     try {
-      const { data, error } = await supabase
-        .from('bonos')
-        .select(`
-          id, codigo, tipo, estado,
-          client_id
-        `)
-        .eq('codigo', code)
-        .single();
-      
-      if (error || !data) throw new Error('Cupón no encontrado o código incorrecto.');
-      if (data.estado !== 'Pendiente') throw new Error(`El cupón no puede ser canjeado. Estado: ${data.estado}`);
-      
+      const bono = await validateBonoCode(code);
+
       setAppliedBonus({
-        id: data.id,
-        codigo: data.codigo,
-        tipo: data.tipo,
+        id: bono.id,
+        codigo: bono.codigo,
+        tipo: bono.tipo,
       });
 
       // Si no hay cliente seleccionado, autoseleccionarlo guiado por el owner del bono
-      if (!selectedClient && data.client_id) {
-        const foundClient = clients.find(c => c.id === data.client_id);
+      if (!selectedClient && bono.client_id) {
+        const foundClient = clients.find((c) => c.id === bono.client_id);
         if (foundClient) setSelectedClient(foundClient);
       }
-      
-      alert(`Cupón de ${data.tipo} listo para aplicar.`);
+
+      alert(`Cupón de ${bono.tipo} listo para aplicar.`);
       setCouponCode('');
-    } catch (e: any) {
-      alert(e.message);
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : 'Error al validar cupón.';
+      alert(message);
     } finally {
       setValidatingCoupon(false);
     }

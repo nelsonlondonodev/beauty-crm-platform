@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase';
 import type { InvoiceItem } from '../types';
+import { logger } from '../lib/logger';
 
 interface FacturaPayload {
   cliente_id?: string | null;
@@ -97,7 +98,7 @@ export const procesarFactura = async (payload: FacturaPayload) => {
       .eq('id', payload.bono_id);
 
     if (bonoError) {
-      console.error('Error al redimir bono: ', bonoError);
+      logger.warn('Error al redimir bono con factura', bonoError, 'BillingService');
       // No lanzamos excepcion para no abortar la factura que ya se guardo con exito
     }
   }
