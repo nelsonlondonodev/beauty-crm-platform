@@ -56,7 +56,7 @@ const ROLE_PERMISSIONS: Record<AppRole, AppAction[]> = {
  * @param action - La acción a validar
  */
 export const canPerform = (role: AppRole | null, action: AppAction): boolean => {
-  if (!role) return false;
+  if (!role || !ROLE_PERMISSIONS[role]) return false;
   return ROLE_PERMISSIONS[role].includes(action);
 };
 
