@@ -164,7 +164,7 @@ CRM B2B moderno para el sector de la belleza (Peluquerías, Barberías, Spas).
 ## 🗺️ Roadmap de Desarrollo (Pendientes)
 
 ### Fase 3: Calidad y Continuidad (SaaS)
-- [ ] **Tests Automatizados:** Implementar Vitest para servicios críticos (Facturación, Comisiones).
+- [x] **Tests Automatizados:** Implementar Vitest (17 tests) para servicios críticos (Fechas, Roles, Comisiones).
 - [ ] **Monitoreo Real:** Integrar el Logger con un servicio de captura de excepciones en producción.
 - [ ] **Documentación API:** Documentar los endpoints de Supabase y esquemas de tablas.
 
