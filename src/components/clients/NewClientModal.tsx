@@ -2,6 +2,19 @@ import { useState, useEffect } from 'react';
 import { X, Save } from 'lucide-react';
 import type { Client } from '../../types';
 
+const MIN_PHONE_DIGITS = 9;
+
+/** Solo permite dígitos, +, espacios y guiones */
+const sanitizePhone = (value: string): string =>
+  value.replace(/[^\d+\s-]/g, '');
+
+/** Valida que tenga al menos N dígitos reales */
+const isPhoneValid = (phone: string): boolean => {
+  if (!phone.trim()) return true; // campo opcional
+  const digitCount = phone.replace(/\D/g, '').length;
+  return digitCount >= MIN_PHONE_DIGITS;
+};
+
 interface NewClientModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -16,6 +29,7 @@ const NewClientModal = ({
   initialData,
 }: NewClientModalProps) => {
   const [loading, setLoading] = useState(false);
+  const [phoneError, setPhoneError] = useState('');
   const [formData, setFormData] = useState<Omit<Client, 'id' | 'bono_estado'>>({
     nombre: '',
     email: '',
@@ -42,15 +56,25 @@ const NewClientModal = ({
         bono_fecha_vencimiento: '', // auto-calculado, no editable
       });
     }
+    setPhoneError('');
   }, [initialData, isOpen]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    if (name === 'telefono') {
+      setFormData((prev) => ({ ...prev, telefono: sanitizePhone(value) }));
+      setPhoneError('');
+      return;
+    }
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isPhoneValid(formData.telefono)) {
+      setPhoneError(`Debe tener al menos ${MIN_PHONE_DIGITS} dígitos.`);
+      return;
+    }
     setLoading(true);
     await onSave(formData);
     setLoading(false);
@@ -109,10 +133,18 @@ const NewClientModal = ({
               <input
                 type="tel"
                 name="telefono"
-                className="focus:border-primary focus:ring-primary mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-1 focus:outline-none sm:text-sm"
+                placeholder="+34 612 345 678"
+                className={`focus:border-primary focus:ring-primary mt-1 block w-full rounded-md border px-3 py-2 shadow-sm focus:ring-1 focus:outline-none sm:text-sm ${
+                  phoneError
+                    ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
+                    : 'border-gray-300'
+                }`}
                 value={formData.telefono}
                 onChange={handleChange}
               />
+              {phoneError && (
+                <p className="mt-1 text-xs text-red-600">{phoneError}</p>
+              )}
             </div>
           </div>
 
