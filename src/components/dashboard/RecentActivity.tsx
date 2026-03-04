@@ -94,11 +94,6 @@ const RecentActivity: React.FC<RecentActivityProps> = ({ data = [] }) => {
           </div>
         )}
       </div>
-      <div className="border-t border-gray-100 p-4">
-        <button className="text-primary hover:text-primary/80 hover:bg-primary/5 w-full rounded-lg py-2 text-center text-sm font-medium transition-colors">
-          Ver toda la actividad
-        </button>
-      </div>
     </div>
   );
 };

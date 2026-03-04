@@ -125,9 +125,14 @@ const Settings = () => {
                 <p className="text-sm text-gray-500 mt-1">
                   {APP_CONFIG.legal.supportText}
                 </p>
-                <button className="mt-4 text-sm font-bold text-purple-600 hover:text-purple-700">
+                <a
+                  href={APP_CONFIG.legal.supportUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-4 inline-block text-sm font-bold text-purple-600 hover:text-purple-700"
+                >
                   Contactar Soporte →
-                </button>
+                </a>
               </div>
             </div>
           </div>

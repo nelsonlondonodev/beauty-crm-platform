@@ -186,20 +186,6 @@ const ClientTable: React.FC<ClientTableProps> = ({
           <span className="font-medium text-gray-900">{clients.length}</span>{' '}
           resultados
         </span>
-        <div className="flex gap-2">
-          <button
-            disabled
-            className="cursor-not-allowed rounded border border-gray-200 bg-gray-50 px-3 py-1 opacity-50"
-          >
-            Anterior
-          </button>
-          <button
-            disabled
-            className="cursor-not-allowed rounded border border-gray-200 bg-gray-50 px-3 py-1 opacity-50"
-          >
-            Siguiente
-          </button>
-        </div>
       </div>
     </div>
   );
