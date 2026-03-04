@@ -2,7 +2,10 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 export const formatDate = (dateString: string): string => {
-  return format(new Date(dateString), 'dd MMM yyyy', { locale: es });
+  if (!dateString) return '—';
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return '—';
+  return format(date, 'dd MMM yyyy', { locale: es });
 };
 
 export const getStatusColor = (status: string): string => {
