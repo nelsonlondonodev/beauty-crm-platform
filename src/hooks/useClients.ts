@@ -6,6 +6,8 @@ import {
   deleteClient as deleteClientService,
 } from '../services/clientService';
 import { logger } from '../lib/logger';
+import { useCrmEvent } from './useCrmEvent';
+import { CRM_EVENTS } from '../lib/events';
 import type { Client } from '../types';
 
 export const useClients = () => {
@@ -16,6 +18,9 @@ export const useClients = () => {
   useEffect(() => {
     fetchClients();
   }, []);
+
+  // Refrescar datos cuando un bono es canjeado desde otro módulo
+  useCrmEvent(CRM_EVENTS.BONO_REDEEMED, () => fetchClients());
 
   const fetchClients = async () => {
     try {

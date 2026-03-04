@@ -4,6 +4,8 @@ import {
   type DashboardStats,
 } from '../services/dashboardService';
 import { logger } from '../lib/logger';
+import { useCrmEvent } from './useCrmEvent';
+import { CRM_EVENTS } from '../lib/events';
 
 export type { DashboardStats };
 
@@ -22,6 +24,9 @@ export const useDashboardStats = () => {
   useEffect(() => {
     fetchStats();
   }, []);
+
+  // Refrescar stats cuando un bono es canjeado desde otro módulo
+  useCrmEvent(CRM_EVENTS.BONO_REDEEMED, () => fetchStats());
 
   const fetchStats = async () => {
     try {

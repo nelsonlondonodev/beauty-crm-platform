@@ -21,18 +21,17 @@ const NewClientModal = ({
     email: '',
     telefono: '',
     fecha_nacimiento: '',
-    bono_fecha_vencimiento: '',
+    bono_fecha_vencimiento: '', // auto-calculado, no editable
   });
 
   useEffect(() => {
     if (initialData) {
-      // eslint-disable-next-line react-hooks/exhaustive-deps
       setFormData({
         nombre: initialData.nombre,
         email: initialData.email,
         telefono: initialData.telefono,
         fecha_nacimiento: initialData.fecha_nacimiento,
-        bono_fecha_vencimiento: initialData.bono_fecha_vencimiento,
+        bono_fecha_vencimiento: '', // auto-calculado, no editable
       });
     } else {
       setFormData({
@@ -40,7 +39,7 @@ const NewClientModal = ({
         email: '',
         telefono: '',
         fecha_nacimiento: '',
-        bono_fecha_vencimiento: '',
+        bono_fecha_vencimiento: '', // auto-calculado, no editable
       });
     }
   }, [initialData, isOpen]);
@@ -117,31 +116,17 @@ const NewClientModal = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Fecha Nacimiento
-              </label>
-              <input
-                type="date"
-                name="fecha_nacimiento"
-                className="focus:border-primary focus:ring-primary mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-1 focus:outline-none sm:text-sm"
-                value={formData.fecha_nacimiento}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Vencimiento Bono
-              </label>
-              <input
-                type="date"
-                name="bono_fecha_vencimiento"
-                className="focus:border-primary focus:ring-primary mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-1 focus:outline-none sm:text-sm"
-                value={formData.bono_fecha_vencimiento}
-                onChange={handleChange}
-              />
-            </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Fecha de Nacimiento
+            </label>
+            <input
+              type="date"
+              name="fecha_nacimiento"
+              className="focus:border-primary focus:ring-primary mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-1 focus:outline-none sm:text-sm"
+              value={formData.fecha_nacimiento}
+              onChange={handleChange}
+            />
           </div>
 
           <div className="mt-6 flex justify-end gap-3 pt-2">

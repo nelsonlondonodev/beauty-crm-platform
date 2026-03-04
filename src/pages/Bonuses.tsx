@@ -1,7 +1,12 @@
 import { useState } from 'react';
 import DashboardHeader from '../components/layout/DashboardHeader';
 import { Gift, Search, Tag, CheckCircle, XCircle } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import {
+  validateBonoCode,
+  redeemBono,
+  type ValidatedBono,
+} from '../services/bonoService';
+import { emitCrmEvent, CRM_EVENTS } from '../lib/events';
 
 const Bonuses = () => {
   const [couponCode, setCouponCode] = useState('');
@@ -9,7 +14,7 @@ const Bonuses = () => {
   const [result, setResult] = useState<{
     success: boolean;
     message: string;
-    data?: { id: string; codigo: string; tipo: string; estado: string; client_id: string; clientes_fidelizacion?: { nombre: string } | null };
+    data?: ValidatedBono;
   } | null>(null);
 
   const handleValidate = async () => {
@@ -19,32 +24,13 @@ const Bonuses = () => {
     setResult(null);
 
     try {
-      const { data: bonoData, error } = await supabase
-        .from('bonos')
-        .select(`
-          id, codigo, tipo, estado,
-          client_id,
-          clientes_fidelizacion (nombre)
-        `)
-        .eq('codigo', cleanCode)
-        .single();
-
-      if (error || !bonoData) throw new Error('Cupón no encontrado o código incorrecto.');
-      if (bonoData.estado !== 'Pendiente') {
-         throw new Error(`El cupón se encuentra en estado: ${bonoData.estado}.`);
-      }
+      const bono = await validateBonoCode(cleanCode);
 
       setResult({
         success: true,
         message: '¡Cupón válido y listo para canjear!',
-        data: {
-          ...bonoData,
-          clientes_fidelizacion: Array.isArray(bonoData.clientes_fidelizacion) 
-            ? bonoData.clientes_fidelizacion[0] 
-            : bonoData.clientes_fidelizacion
-        } as unknown as { id: string; codigo: string; tipo: string; estado: string; client_id: string; clientes_fidelizacion?: { nombre: string } | null },
+        data: bono,
       });
-
     } catch (e: unknown) {
       setResult({
         success: false,
@@ -58,29 +44,25 @@ const Bonuses = () => {
   const handleRedeem = async () => {
     if (!result?.data?.id) return;
     setIsValidating(true);
-    
-    try {
-      const { error } = await supabase
-        .from('bonos')
-        .update({
-          estado: 'Canjeado',
-          fecha_canje: new Date().toISOString(),
-        })
-        .eq('id', result.data.id);
 
-      if (error) throw new Error(error.message);
+    try {
+      await redeemBono(result.data.id);
 
       setResult({
         success: true,
         message: '¡Bono canjeado exitosamente!',
       });
       setCouponCode('');
-      
+
+      // Notificar a otros módulos (Clientes, Dashboard) para refrescar datos
+      emitCrmEvent(CRM_EVENTS.BONO_REDEEMED);
     } catch (e: unknown) {
       setResult({
         success: false,
-        message: 'Error al canjear: ' + (e instanceof Error ? e.message : 'Desconocido'),
-        data: result.data // keep data so they can try again if network error
+        message:
+          'Error al canjear: ' +
+          (e instanceof Error ? e.message : 'Desconocido'),
+        data: result.data, // mantener datos para reintentar si falla la red
       });
     } finally {
       setIsValidating(false);
