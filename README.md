@@ -112,7 +112,7 @@ CRM B2B moderno para el sector de la belleza (Peluquerías, Barberías, Spas).
 -   **Resiliencia con Timeouts**: Implementación de `fetchWithTimeout` en todas las consultas críticas del dashboard para asegurar que la interfaz nunca se bloquee por latencia de red.
 -   **Timeline Real de Actividades**: El feed de `Actividad Reciente` consolidado desde 4 tablas distintas (`appointments`, `clientes_fidelizacion`, `facturas`, `bonos`). Usa `date-fns` para cálculo de fechas relativas ("Hace 5 minutos") y ordena históricamente asegurando que todos los eventos del ecosistema beauty se reflejen de último momento sin estancamientos.
 
-### 11. Marca Blanca y Escalabilidad (White-Label Readiness)
+### 10. Marca Blanca y Escalabilidad (White-Label Readiness)
 -   **Configuración Centralizada**: Implementación de `src/config/brand.ts` como punto único de verdad para el nombre de la app, textos legales, logos y fallbacks de marca.
 -   **Desacople de Identidad**: Eliminación de referencias hardcodeadas ("Londy", "Nelson") en todo el código fuente, preparándolo para ser renombrado instantáneamente por otros clientes.
 -   **Seguridad de Integración**: Migración de URLs críticas (webhooks de n8n) a variables de entorno (`.env`).
@@ -125,21 +125,37 @@ CRM B2B moderno para el sector de la belleza (Peluquerías, Barberías, Spas).
 -   **Gestión de Perfil Premium (`ProfileCard`)**: Implementación de una interfaz de perfil elegante con banner dinámico, subida de avatar a Supabase Storage con reemplazo automático (Upsert) y edición de nombre en tiempo real sincronizada con Supabase Auth.
 -   **Notificaciones Vivas**: Campana con efecto de "ping" animado para alertas críticas del negocio.
 
-### 10. Estabilidad Estructural y Patrones Limpios (Strict Mode)
+### 12. Estabilidad Estructural y Patrones Limpios (Strict Mode)
 -   **Anti-Spaghetti AuthProvider**: Refactorización profunda y asíncrona del puente SDK para eliminar por completo cierres silenciosos o recargas en bucle de la aplicación.
 -   **Failsafe Timeout de Seguridad**: Implementación de temporizadores estrictos (`fetchWithTimeout` de 5s) para promesas de Supabase, escudando a la UI de parálisis (`loading: true` infinito) originadas por fallos en red o consultas de bases de datos colgadas.
 -   **Seguridad RLS Anti-Bucles (PostgreSQL)**: Refactorización en la base de datos empleando funciones `SECURITY DEFINER` (`is_admin`, `is_owner`) para romper dependencias de recursividad infinita durante validaciones escalonadas de roles (RBAC), evitando el ahogamiento del servidor de Supabase y de la aplicación concurrente.
 -   **Separación de Responsabilidades (Clean Architecture)**: Refactorización del monolítico `dashboardService.ts` en funciones atómicas concurrentes (`Promise.all`) para agilizar tiempos de carga y mejorar mantenibilidad.
 -   **Componentización UI**: Extracción de componentes complejos hacia módulos independientes (e.j., desacople de la tabla de comisiones a `<StaffTable />` e íconos SVG intrusivos a `<GoogleIcon />`).
+-   **TypeScript Estricto**: Eliminación total del tipo `any` en todo el codebase y configuración de `strict: true` para prevenir errores en tiempo de ejecución.
 
-### 12. Validación de Bonos y UI Modular
+### 13. Validación de Bonos y UI Modular
 -   **Módulo Independiente (`/bonuses`)**: Nueva interfaz interactiva y visual para la validación y canje manual de cupones de fidelización. Totalmente aislada del módulo de Facturación para uso exclusivo administrativo/operativo.
 -   **Validación Estricta**: Consulta en tiempo real a Supabase comprobando el estado del bono (solo aplicable si está `Pendiente`) y descubriendo al `cliente_id` respectivo automáticamente, protegiendo al negocio contra canjes dobles.
 -   **Seguridad de Tipado**: Interfaz desarrollada con TypeScript Strict-Mode sin uso de `any`, empleando coerciones explícitas e instancias nativas (`instanceof Error`) para máxima seguridad y evitando quiebres en el runtime (`ReferenceError`).
 
+### 14. Auditoría de MVP y Estabilización (V0.2.0)
+-   **Sincronización Multimódulo**: Implementación de un sistema de eventos ligero (`lib/events.ts`) que comunica cambios entre secciones. El canje de un bono ahora actualiza instantáneamente el Dashboard y la tabla de Clientes sin necesidad de recargar la página.
+-   **Servicio de Bonos Centralizado**: Extracción de la lógica de negocio a `bonoService.ts`, unificando procesos y eliminando accesos directos redundantes a Supabase en los Hooks.
+-   **Validación de Datos Robusta**:
+    -   **Validación de Teléfono**: Sanitización de caracteres y comprobación de longitud mínima (9 dígitos) con feedback visual en tiempo real.
+    -   **Vencimientos Automáticos**: Eliminación de campos manuales de fecha; el sistema ahora gestiona la expiración de bonos de manera automatizada (6 meses para bienvenida, mes completo para cumpleaños).
+-   **Experiencia de Usuario (UX) Segura**:
+    -   **Confirmación de Canje**: Interfaz de confirmación in-place antes de redimir bonos para evitar errores accidentales.
+    -   **Diálogos Personalizados**: Implementación de `ConfirmDialog` para reemplazar alertas nativas del navegador, manteniendo una estética consistente y premium.
+    -   **Manejo de Clientes Manuales**: Lógica mejorada para mostrar "Sin bono" en lugar de estados predeterminados incorrectos para registros manuales.
+-   **Mantenibilidad y Código Limpio**:
+    -   **Organización DB**: Migraciones SQL organizadas jerárquicamente en `database/migrations/`.
+    -   **Depuración Consecuente**: Eliminación de scripts de depuración obsoletos y centralización de todos los logs mediante el servicio de `logger`.
+    -   **Cero Deuda Técnica**: Eliminación completa de tipos `any` y advertencias de TypeScript en todo el proyecto.
+
 ## 🗺️ Roadmap de Desarrollo (Pendientes)
 
-### 13. SaaS Multi-Tenant y Marca Blanca Dinámica (MVP)
+### 15. SaaS Multi-Tenant y Marca Blanca Dinámica (MVP)
 -   **Configuración por Inquilino (TenantConfig)**: Tabla dedicada en Supabase (`tenant_config`) segregada por RLS (`user_id`), garantizando que cada dueño de negocio solo lea y actualice su propia marca.
 -   **Contexto Global (`TenantContext`)**: Proveedor reactivo de React que envuelve toda la aplicación, extrayendo silenciosamente las preferencias de marca en paralelo al login sin penalizar la velocidad de carga de la UI.
 -   **Interfaz Totalmente Dinámica**: Reemplazo en crudo del nombre "Londy" y el logo estático por las preferencias personalizables cargadas remotamente. Soporta fallbacks automáticos hacia logotipos genéricos e iniciales para evadir bloqueos por URLs de imagen rotas o no válidas.
