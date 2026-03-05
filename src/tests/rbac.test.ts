@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { canPerform, hasRequiredRole } from '../lib/rbac';
 import type { AppAction } from '../lib/rbac';
-import type { AppRole } from '../contexts/AuthContext';
 
 describe('RBAC (Role Based Access Control)', () => {
   describe('canPerform(role, action)', () => {
