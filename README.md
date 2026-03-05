@@ -154,9 +154,15 @@ CRM B2B moderno para el sector de la belleza (Peluquerías, Barberías, Spas).
     -   **Depuración Consecuente**: Eliminación de scripts de depuración obsoletos y centralización de todos los logs mediante el servicio de `logger`.
     -   **Cero Deuda Técnica**: Eliminación completa de tipos `any` y advertencias de TypeScript en todo el proyecto.
 
-## 🗺️ Roadmap de Desarrollo (Pendientes)
+### 15. Despliegue a Producción (Vercel)
+-   **Hosting en Vercel**: Despliegue automático desde la rama `main` del repositorio GitHub. Cada push a `main` genera un nuevo deploy de producción sin intervención manual.
+-   **SPA Routing (`vercel.json`)**: Configuración de rewrites para que todas las rutas de React Router (`/clients`, `/calendar`, `/billing`, etc.) funcionen correctamente sin errores 404 al recargar la página.
+-   **Variables de Entorno en Producción**: Migración segura de `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` y `VITE_N8N_WEBHOOK_URL` al panel de Vercel, eliminando cualquier dependencia de archivos `.env` locales.
+-   **Google OAuth en Producción**: Configuración de Supabase (Site URL + Redirect URLs) y Google Cloud Console (Authorized JavaScript Origins + Redirect URIs) para permitir autenticación con Google desde el dominio de producción.
+-   **URL de Producción**: `https://beauty-crm-platform.vercel.app`
+-   **Flujo de Onboarding de Clientes**: El cliente se loguea con Google OAuth → El administrador asigna el rol (`owner`, `admin`, `staff`) desde el SQL Editor de Supabase en la tabla `user_roles`.
 
-### 15. SaaS Multi-Tenant y Marca Blanca Dinámica (MVP)
+### 16. SaaS Multi-Tenant y Marca Blanca Dinámica (MVP)
 -   **Configuración por Inquilino (TenantConfig)**: Tabla dedicada en Supabase (`tenant_config`) segregada por RLS (`user_id`), garantizando que cada dueño de negocio solo lea y actualice su propia marca.
 -   **Contexto Global (`TenantContext`)**: Proveedor reactivo de React que envuelve toda la aplicación, extrayendo silenciosamente las preferencias de marca en paralelo al login sin penalizar la velocidad de carga de la UI.
 -   **Interfaz Totalmente Dinámica**: Reemplazo en crudo del nombre "Londy" y el logo estático por las preferencias personalizables cargadas remotamente. Soporta fallbacks automáticos hacia logotipos genéricos e iniciales para evadir bloqueos por URLs de imagen rotas o no válidas.
@@ -166,6 +172,7 @@ CRM B2B moderno para el sector de la belleza (Peluquerías, Barberías, Spas).
 
 ### Fase 3: Calidad y Continuidad (SaaS)
 - [x] **Tests Automatizados:** Implementar Vitest (17 tests) para servicios críticos (Fechas, Roles, Comisiones).
+- [x] **Despliegue a Producción:** Deploy en Vercel con CI/CD automático desde `main`.
 - [ ] **Monitoreo Real:** Integrar el Logger con un servicio de captura de excepciones en producción.
 - [ ] **Documentación API:** Documentar los endpoints de Supabase y esquemas de tablas.
 
