@@ -210,6 +210,10 @@
             {
               "fieldId": "codigo",
               "fieldValue": "=NARBO-HB{{ $now.toFormat('yyyy') }}-{{ Math.random().toString(36).substring(2,6).toUpperCase() }}"
+            },
+            {
+              "fieldId": "user_id",
+              "fieldValue": "={{ $json[\"user_id\"] }}"
             }
           ]
         }
