@@ -14,9 +14,18 @@ ALTER TABLE public.factura_items ADD COLUMN IF NOT EXISTS user_id UUID DEFAULT a
 ALTER TABLE public.pagos_comisiones ADD COLUMN IF NOT EXISTS user_id UUID DEFAULT auth.uid();
 ALTER TABLE public.appointments ADD COLUMN IF NOT EXISTS user_id UUID DEFAULT auth.uid();
 
--- OPCIONAL: Si ya tienes registros existentes (ej: Narbo's) y quieres asignarlos
--- a tu usuario administrador maestro actual, comenta las siguientes líneas y reemplaza
--- "TU-USER-ID" por el ID actual de tu usuario en Supabase (Auth -> Users).
+-- OPCIONAL: Si ya tienes registros existentes y quieres asignarlos
+-- a tu usuario actual, puedes correr esto manualmente en el SQL Editor de Supabase:
+-- UPDATE public.clientes_fidelizacion SET user_id = auth.uid();
+-- UPDATE public.bonos SET user_id = auth.uid();
+-- UPDATE public.empleados SET user_id = auth.uid();
+-- UPDATE public.facturas SET user_id = auth.uid();
+-- UPDATE public.factura_items SET user_id = auth.uid();
+-- UPDATE public.pagos_comisiones SET user_id = auth.uid();
+-- UPDATE public.appointments SET user_id = auth.uid();
+
+/* 
+-- Estas líneas estaban en duro y podrían haber causado que perdieras visibilidad:
 UPDATE public.clientes_fidelizacion SET user_id = '7de4c9ac-6897-4f0f-9989-e38ed9629bdc';
 UPDATE public.bonos SET user_id = '7de4c9ac-6897-4f0f-9989-e38ed9629bdc';
 UPDATE public.empleados SET user_id = '7de4c9ac-6897-4f0f-9989-e38ed9629bdc';
@@ -24,6 +33,7 @@ UPDATE public.facturas SET user_id = '7de4c9ac-6897-4f0f-9989-e38ed9629bdc';
 UPDATE public.factura_items SET user_id = '7de4c9ac-6897-4f0f-9989-e38ed9629bdc';
 UPDATE public.pagos_comisiones SET user_id = '7de4c9ac-6897-4f0f-9989-e38ed9629bdc';
 UPDATE public.appointments SET user_id = '7de4c9ac-6897-4f0f-9989-e38ed9629bdc';
+*/
 
 -- 2. Eliminar las políticas inseguras y permisivas antiguas
 DROP POLICY IF EXISTS "Permitir todo a usuarios autenticados" ON public.empleados;

@@ -77,6 +77,10 @@
             {
               "fieldId": "birthday",
               "fieldValue": "={{ $json.birthday }}"
+            },
+            {
+              "fieldId": "user_id",
+              "fieldValue": "7de4c9ac-6897-4f0f-9989-e38ed9629bdc"
             }
           ]
         }
@@ -116,6 +120,10 @@
             {
               "fieldId": "codigo",
               "fieldValue": "={{ $('Generador de Cupón').item.json[\"coupon_code\"] }}"
+            },
+            {
+              "fieldId": "user_id",
+              "fieldValue": "7de4c9ac-6897-4f0f-9989-e38ed9629bdc"
             }
           ]
         }

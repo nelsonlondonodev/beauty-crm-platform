@@ -168,6 +168,12 @@ CRM B2B moderno para el sector de la belleza (Peluquerías, Barberías, Spas).
 -   **Interfaz Totalmente Dinámica**: Reemplazo en crudo del nombre "Londy" y el logo estático por las preferencias personalizables cargadas remotamente. Soporta fallbacks automáticos hacia logotipos genéricos e iniciales para evadir bloqueos por URLs de imagen rotas o no válidas.
 -   **Autogestión de Propietario (`BrandConfigModal`)**: Ventana flotante in-app (dentro de "Ajustes") donde el `owner` puede editar sin código el nombre comercial y el enlace de su logo para reflejar los cambios instantáneamente a nivel de todo el CRM.
 
+### 17. Estabilización de Datos y Flujos Automáticos (Bug Fixing)
+-   **Corrección de Migraciones RLS**: Eliminación de IDs en duro (hardcoded) en los scripts de migración SQL para prevenir el secuestro de datos y asegurar que el `user_id` asigne correctamente los nuevos registros al tenant activo (`auth.uid()`).
+-   **Nodos Seguros en n8n**: Refactorización del flujo `registro_cliente.json` para inyectar explícitamente el `user_id` del salón mediante un nodo central de "Configuración Inicial".
+-   **Saneamiento Preventivo**: Implementación de validaciones defensivas en JavaScript (`.trim()`) en las llamadas a Supabase desde n8n, garantizando que espacios ocultos en los UUIDs no provoquen rechazos de base de datos.
+-   **Aislamiento Real**: Flujo End-to-End validado: el webhook capta al cliente, n8n asigna el Tenant ID de forma segura y Supabase aplica el Row Level Security (RLS) para mostrarlo instantáneamente en el Dashboard correcto.
+
 ## 🗺️ Roadmap de Desarrollo (Pendientes)
 
 ### Fase 3: Calidad y Continuidad (SaaS)
