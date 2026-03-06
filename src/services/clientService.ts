@@ -8,7 +8,7 @@ import type {
 } from '../types';
 import { addMonths } from 'date-fns';
 import { logger } from '../lib/logger';
-import { getStandardExpirationDate, hasExpired } from '../lib/dateUtils';
+import { getStandardExpirationDate, getBirthdayExpirationDate, hasExpired } from '../lib/dateUtils';
 
 // --- Utilidades de Dominio ---
 
@@ -16,17 +16,22 @@ import { getStandardExpirationDate, hasExpired } from '../lib/dateUtils';
  * Calcula el estado de un bono basándose en sus fechas y estado actual.
  */
 function calculateBonusStatus(bono: BonoDbRow): { status: BonusStatus; expirationDate: Date } {
-  const expirationDate = getStandardExpirationDate(bono.created_at, 6);
+  const isBirthday = bono.tipo === 'Cumpleaños';
+  const expirationDate = isBirthday 
+    ? getBirthdayExpirationDate(bono.created_at) 
+    : getStandardExpirationDate(bono.created_at, 6);
 
   if (bono.estado === 'Canjeado') return { status: 'reclamado', expirationDate };
   if (bono.estado === 'Expirado' || hasExpired(expirationDate.toISOString())) {
     return { status: 'vencido', expirationDate };
   }
   
-  // Alerta de los 5 meses antes de vencer
-  const alertDate = addMonths(new Date(bono.created_at), 5);
-  if (hasExpired(alertDate.toISOString())) {
-    return { status: 'alerta_5_meses', expirationDate };
+  // Alerta de los 5 meses antes de vencer (solo para Bienvenida)
+  if (!isBirthday) {
+    const alertDate = addMonths(new Date(bono.created_at), 5);
+    if (hasExpired(alertDate.toISOString())) {
+      return { status: 'alerta_5_meses', expirationDate };
+    }
   }
   
   return { status: 'pendiente', expirationDate };

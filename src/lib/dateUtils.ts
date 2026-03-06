@@ -47,6 +47,14 @@ export const getStandardExpirationDate = (baseDate: string | Date = new Date(), 
 };
 
 /**
+ * Calcula la fecha de expiración para un bono de cumpleaños (último día del mes).
+ */
+export const getBirthdayExpirationDate = (baseDate: string | Date = new Date()): Date => {
+  const date = typeof baseDate === 'string' ? parseISO(baseDate) : baseDate;
+  return endOfMonth(date);
+};
+
+/**
  * Comprueba si una fecha ha pasado con respecto a hoy.
  */
 export const hasExpired = (dateString: string | null): boolean => {
