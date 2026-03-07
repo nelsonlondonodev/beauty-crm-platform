@@ -1,10 +1,11 @@
-import React from 'react';
+import { Link } from 'react-router-dom';
 import {
   Calendar as CalendarIcon,
   Mail,
   Phone,
   Edit,
   Trash2,
+  Eye,
 } from 'lucide-react';
 import type { Client } from '../../types';
 import {
@@ -63,9 +64,12 @@ const ClientTable: React.FC<ClientTableProps> = ({
                       {client.nombre.charAt(0).toUpperCase()}
                     </div>
                     <div>
-                      <div className="font-semibold text-gray-900">
+                      <Link 
+                        to={`/clients/${client.id}`}
+                        className="font-semibold text-gray-900 hover:text-primary transition-colors"
+                      >
                         {client.nombre}
-                      </div>
+                      </Link>
                       <div className="text-xs text-gray-400">
                         ID: {String(client.id).slice(0, 8)}
                       </div>
@@ -151,6 +155,13 @@ const ClientTable: React.FC<ClientTableProps> = ({
                 </td>
                 <td className="px-6 py-4 text-right">
                   <div className="flex justify-end gap-2">
+                    <Link
+                      to={`/clients/${client.id}`}
+                      className="hover:bg-primary/5 hover:text-primary rounded-lg p-2 text-gray-400 transition-colors"
+                      title="Ver Perfil Financiero"
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Link>
                     <button
                       onClick={() => onEdit(client)}
                       className="hover:bg-primary/5 hover:text-primary rounded-lg p-2 text-gray-400 transition-colors"

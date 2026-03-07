@@ -5,6 +5,7 @@ import type {
   ClientBonusDisplay,
   ClientDbRow,
   BonoDbRow,
+  Factura,
 } from '../types';
 import { addMonths } from 'date-fns';
 import { logger } from '../lib/logger';
@@ -105,6 +106,36 @@ export const getClients = async (): Promise<Client[]> => {
   }
 
   return (data || []).map(mapDbToClient);
+};
+
+export const getClientById = async (id: string): Promise<Client> => {
+  const { data, error } = await supabase
+    .from('clientes_fidelizacion')
+    .select('*, bonos(*)')
+    .eq('id', id)
+    .single();
+
+  if (error) {
+    logger.error(`Error fetching client ${id}`, error, 'ClientService');
+    throw new Error(error.message);
+  }
+
+  return mapDbToClient(data);
+};
+
+export const getClientFinancialHistory = async (clientId: string): Promise<Factura[]> => {
+  const { data, error } = await supabase
+    .from('facturas')
+    .select('*, facturas_items(*)')
+    .eq('cliente_id', clientId)
+    .order('fecha_venta', { ascending: false });
+
+  if (error) {
+    logger.error(`Error fetching financial history for client ${clientId}`, error, 'ClientService');
+    throw new Error(`No se pudo cargar el historial: ${error.message}`);
+  }
+
+  return data || [];
 };
 
 export const createClient = async (

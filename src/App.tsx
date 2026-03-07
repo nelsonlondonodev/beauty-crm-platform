@@ -5,6 +5,7 @@ import Clients from './pages/Clients';
 import Calendar from './pages/Calendar';
 import Settings from './pages/Settings';
 import Profile from './pages/Profile';
+import ClientProfile from './pages/ClientProfile';
 import Staff from './pages/Staff';
 import Billing from './pages/Billing';
 import Bonuses from './pages/Bonuses';
@@ -43,6 +44,16 @@ function App() {
                           allowedRoles={['owner', 'admin', 'staff']}
                         >
                           <Clients />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/clients/:id"
+                      element={
+                        <ProtectedRoute
+                          allowedRoles={['owner', 'admin', 'staff']}
+                        >
+                          <ClientProfile />
                         </ProtectedRoute>
                       }
                     />
