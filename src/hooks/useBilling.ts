@@ -211,7 +211,7 @@ export const useBilling = () => {
     
     // Data
     clientsLoading,
-    staff,
+    staff: staff.filter((s) => s.activo !== false),
     filteredClients,
     
     // UI selections
