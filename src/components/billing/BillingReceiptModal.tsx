@@ -34,7 +34,7 @@ const BillingReceiptModal = ({ invoice, onClose }: BillingReceiptModalProps) => 
 
     setIsSendingEmail(true);
     try {
-      const webhookUrl = import.meta.env.VITE_N8N_WEBHOOK_URL_RECEIPT || 'https://n8n.srv1033442.hstgr.cloud/webhook/send-eco-receipt';
+      const webhookUrl = import.meta.env.VITE_N8N_WEBHOOK_URL_RECEIPT || 'https://n8n.srv1033442.hstgr.cloud/webhook-test/send-eco-receipt';
       
       const payload = {
         cliente_nombre: invoice.cliente.nombre,
