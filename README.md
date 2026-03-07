@@ -199,3 +199,6 @@ CRM B2B moderno para el sector de la belleza (Peluquerías, Barberías, Spas).
 -   `npm run dev`: Iniciar servidor de desarrollo
 -   `npm run build`: Construir para producción
 -   `npx tsc --noEmit`: Verificación de tipos estricta
+
+### Fase 5: Mantenimiento y Buenas Prácticas
+- [ ] **Limpieza de SQL Editor (Supabase):** Depurar los queries acumulados en el editor web de Supabase para mantener solo los estrictamente necesarios para operaciones diarias. Los queries estructurales ya están versionados en `database/migrations`. Esta tarea debe realizarse en un horario de bajo tráfico (ej. mañana) para evitar interrupciones.
