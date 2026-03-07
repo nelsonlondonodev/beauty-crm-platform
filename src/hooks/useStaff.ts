@@ -4,6 +4,7 @@ import {
   registrarPagoComision,
   liquidarTodos,
   crearEmpleado,
+  actualizarEmpleado,
 } from '../services/staffService';
 import type { Empleado } from '../types';
 
@@ -92,6 +93,22 @@ export const useStaff = () => {
     }
   };
 
+  const updateStaff = async (
+    id: string,
+    staffData: Partial<Omit<Empleado, 'id' | 'created_at'>>
+  ) => {
+    try {
+      await actualizarEmpleado(id, staffData);
+      await fetchStaffData();
+      return { success: true };
+    } catch (err) {
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : 'Error desconocido',
+      };
+    }
+  };
+
   return {
     staff,
     loading,
@@ -100,5 +117,6 @@ export const useStaff = () => {
     payEmployee,
     payAllPending,
     addStaff,
+    updateStaff,
   };
 };

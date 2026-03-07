@@ -1,4 +1,4 @@
-import { Scissors, Loader2 } from 'lucide-react';
+import { Scissors, Loader2, Edit2 } from 'lucide-react';
 import type { EmpleadoConSaldo } from '../../hooks/useStaff';
 
 interface StaffTableProps {
@@ -7,6 +7,7 @@ interface StaffTableProps {
   isProcessing: boolean;
   handlePayAll: () => void;
   handlePaySingle: (empleadoId: string, monto: number, nombre: string) => void;
+  onEdit: (employee: EmpleadoConSaldo) => void;
 }
 
 const StaffTable = ({
@@ -15,6 +16,7 @@ const StaffTable = ({
   isProcessing,
   handlePayAll,
   handlePaySingle,
+  onEdit,
 }: StaffTableProps) => {
   const totalCommissions = staff.reduce(
     (acc, emp) => acc + emp.saldo_pendiente,
@@ -92,19 +94,28 @@ const StaffTable = ({
                     ${employee.saldo_pendiente.toLocaleString()}
                   </td>
                   <td className="px-6 py-4 text-center">
-                    <button
-                      onClick={() =>
-                        handlePaySingle(
-                          employee.id,
-                          employee.saldo_pendiente,
-                          employee.nombre
-                        )
-                      }
-                      disabled={employee.saldo_pendiente <= 0 || isProcessing}
-                      className="rounded-md bg-gray-900 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400"
-                    >
-                      Pagar
-                    </button>
+                    <div className="flex items-center justify-end gap-2">
+			<button
+			onClick={() => onEdit(employee)}
+			className="rounded-md p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+			title="Editar empleado"
+			>
+			<Edit2 className="h-4 w-4" />
+			</button>
+			<button
+			onClick={() =>
+				handlePaySingle(
+				employee.id,
+				employee.saldo_pendiente,
+				employee.nombre
+				)
+			}
+			disabled={employee.saldo_pendiente <= 0 || isProcessing}
+			className="rounded-md bg-gray-900 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400"
+			>
+			Pagar
+			</button>
+                    </div>
                   </td>
                 </tr>
               ))}
