@@ -60,6 +60,12 @@ const NAV_ITEMS: NavItem[] = [
     allowedRoles: ['owner', 'admin', 'staff'],
   },
   {
+    icon: Receipt, // We can reuse Receipt Icon
+    label: 'Historial de Ventas',
+    path: '/invoices',
+    allowedRoles: ['owner', 'admin'],
+  },
+  {
     icon: Calendar,
     label: 'Agenda',
     path: '/calendar',

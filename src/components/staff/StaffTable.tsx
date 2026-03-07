@@ -1,4 +1,5 @@
-import { Scissors, Loader2, Edit2 } from 'lucide-react';
+import { Scissors, Loader2, Edit2, History } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import type { EmpleadoConSaldo } from '../../hooks/useStaff';
 
 interface StaffTableProps {
@@ -18,6 +19,7 @@ const StaffTable = ({
   handlePaySingle,
   onEdit,
 }: StaffTableProps) => {
+  const navigate = useNavigate();
   const totalCommissions = staff.reduce(
     (acc, emp) => acc + emp.saldo_pendiente,
     0
@@ -101,6 +103,13 @@ const StaffTable = ({
 			title="Editar empleado"
 			>
 			<Edit2 className="h-4 w-4" />
+			</button>
+			<button
+			onClick={() => navigate(`/staff/${employee.id}/sales`)}
+			className="rounded-md p-1.5 text-gray-400 hover:bg-gray-100 hover:text-blue-600 transition-colors"
+			title="Ver historial de ventas"
+			>
+			<History className="h-4 w-4" />
 			</button>
 			<button
 			onClick={() =>

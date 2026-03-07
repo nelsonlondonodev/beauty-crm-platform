@@ -10,6 +10,8 @@ import Staff from './pages/Staff';
 import Billing from './pages/Billing';
 import Bonuses from './pages/Bonuses';
 import Login from './pages/Login';
+import Invoices from './pages/Invoices';
+import StaffSales from './pages/StaffSales';
 import { AuthProvider } from './contexts/AuthContext';
 import { TenantProvider } from './contexts/TenantContext';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -21,104 +23,119 @@ function App() {
       <AuthProvider>
         <TenantProvider>
           <Routes>
-          <Route path="/login" element={<Login />} />
-
-          <Route
-            path="/*"
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <Routes>
-                    <Route
-                      path="/"
-                      element={
-                        <ProtectedRoute allowedRoles={['owner', 'admin']}>
-                          <Dashboard />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/clients"
-                      element={
-                        <ProtectedRoute
-                          allowedRoles={['owner', 'admin', 'staff']}
-                        >
-                          <Clients />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/clients/:id"
-                      element={
-                        <ProtectedRoute
-                          allowedRoles={['owner', 'admin', 'staff']}
-                        >
-                          <ClientProfile />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/bonuses"
-                      element={
-                        <ProtectedRoute
-                          allowedRoles={['owner', 'admin', 'staff']}
-                        >
-                          <Bonuses />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/calendar"
-                      element={
-                        <ProtectedRoute
-                          allowedRoles={['owner', 'admin', 'staff']}
-                        >
-                          <Calendar />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/settings"
-                      element={
-                        <ProtectedRoute allowedRoles={['owner', 'admin']}>
-                          <Settings />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/profile"
-                      element={
-                        <ProtectedRoute
-                          allowedRoles={['owner', 'admin', 'staff']}
-                        >
-                          <Profile />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/staff"
-                      element={
-                        <ProtectedRoute allowedRoles={['owner', 'admin']}>
-                          <Staff />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/billing"
-                      element={
-                        <ProtectedRoute
-                          allowedRoles={['owner', 'admin', 'staff']}
-                        >
-                          <Billing />
-                        </ProtectedRoute>
-                      }
-                    />
-                  </Routes>
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
+            <Route path="/login" element={<Login />} />
+            <Route
+              path="/*"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Routes>
+                      <Route
+                        path="/"
+                        element={
+                          <ProtectedRoute allowedRoles={['owner', 'admin']}>
+                            <Dashboard />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/clients"
+                        element={
+                          <ProtectedRoute
+                            allowedRoles={['owner', 'admin', 'staff']}
+                          >
+                            <Clients />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/clients/:id"
+                        element={
+                          <ProtectedRoute
+                            allowedRoles={['owner', 'admin', 'staff']}
+                          >
+                            <ClientProfile />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/bonuses"
+                        element={
+                          <ProtectedRoute
+                            allowedRoles={['owner', 'admin', 'staff']}
+                          >
+                            <Bonuses />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/calendar"
+                        element={
+                          <ProtectedRoute
+                            allowedRoles={['owner', 'admin', 'staff']}
+                          >
+                            <Calendar />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/settings"
+                        element={
+                          <ProtectedRoute allowedRoles={['owner', 'admin']}>
+                            <Settings />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/profile"
+                        element={
+                          <ProtectedRoute
+                            allowedRoles={['owner', 'admin', 'staff']}
+                          >
+                            <Profile />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/staff"
+                        element={
+                          <ProtectedRoute allowedRoles={['owner', 'admin']}>
+                            <Staff />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/staff/:id/sales"
+                        element={
+                          <ProtectedRoute allowedRoles={['owner', 'admin']}>
+                            <StaffSales />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/billing"
+                        element={
+                          <ProtectedRoute
+                            allowedRoles={['owner', 'admin', 'staff']}
+                          >
+                            <Billing />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/invoices"
+                        element={
+                          <ProtectedRoute allowedRoles={['owner', 'admin']}>
+                            <Invoices />
+                          </ProtectedRoute>
+                        }
+                      />
+                    </Routes>
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
         </TenantProvider>
       </AuthProvider>
       <Toaster position="top-right" richColors />

@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase';
-import type { InvoiceItem } from '../types';
+import type { InvoiceItem, Factura, FacturaItem } from '../types';
 import { logger } from '../lib/logger';
 
 // --- Interfaces ---
@@ -43,5 +43,46 @@ export const procesarFactura = async (payload: FacturaPayload) => {
   }
 
   // Si fue un éxito, data contiene success: true y el factura_id
+  return data;
+};
+
+export const getFacturas = async (): Promise<Factura[]> => {
+  const { data, error } = await supabase
+    .from('facturas')
+    .select('*, clientes_fidelizacion(nombre)')
+    .order('fecha_venta', { ascending: false });
+
+  if (error) {
+    logger.error('Error fetching facturas', error.message, 'BillingService');
+    throw new Error(error.message);
+  }
+  return data;
+};
+
+export const getFacturaById = async (id: string): Promise<Factura & { factura_items: FacturaItem[] }> => {
+  const { data, error } = await supabase
+    .from('facturas')
+    .select('*, factura_items(*), clientes_fidelizacion(nombre, whatsapp, email)')
+    .eq('id', id)
+    .single();
+
+  if (error) {
+    logger.error(`Error fetching factura ${id}`, error.message, 'BillingService');
+    throw new Error(error.message);
+  }
+  return data;
+};
+
+export const getFacturasByEmpleado = async (empleadoId: string): Promise<FacturaItem[]> => {
+  const { data, error } = await supabase
+    .from('factura_items')
+    .select('*, facturas(*, clientes_fidelizacion(nombre))')
+    .eq('empleado_id', empleadoId)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    logger.error(`Error fetching facturas for empleado ${empleadoId}`, error.message, 'BillingService');
+    throw new Error(error.message);
+  }
   return data;
 };
