@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, UserPlus, Briefcase, Percent, UserCheck, UserMinus } from 'lucide-react';
+import { X, UserPlus, Briefcase, Percent, UserCheck, UserMinus, UserCog } from 'lucide-react';
 import type { Empleado } from '../../types';
 
 interface StaffModalProps {
@@ -83,7 +83,11 @@ const StaffModal: React.FC<StaffModalProps> = ({
       >
         <div className="flex items-center justify-between border-b border-gray-100 bg-gray-50/50 px-6 py-4">
           <h3 className="flex items-center text-lg font-bold text-gray-900">
-            <UserPlus className="text-primary mr-2 h-5 w-5" />
+            {initialData ? (
+              <UserCog className="text-primary mr-2 h-5 w-5" />
+            ) : (
+              <UserPlus className="text-primary mr-2 h-5 w-5" />
+            )}
             {initialData ? 'Editar Colaborador' : 'Nuevo Colaborador'}
           </h3>
           <button
