@@ -75,14 +75,14 @@ const BillingItemTable = ({
             />
           </div>
 
-          <div className="col-span-4 md:col-span-3 lg:col-span-2 text-center md:text-left">
+          <div className="col-span-4 md:col-span-3 lg:col-span-1 text-center lg:text-left">
             <label className="mb-1 block text-xs font-medium text-gray-700">
               Cant.
             </label>
             <input
               type="number"
               min="1"
-              className="focus:border-primary focus:ring-primary w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:ring-1 h-[38px] text-center md:text-left"
+              className="focus:border-primary focus:ring-primary w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:ring-1 h-[38px] text-center lg:text-left"
               value={newItem.quantity}
               onChange={(e) =>
                 setNewItem({ ...newItem, quantity: Number(e.target.value) })
@@ -105,7 +105,7 @@ const BillingItemTable = ({
             />
           </div>
 
-          <div className="col-span-2 md:col-span-3 lg:col-span-1">
+          <div className="col-span-2 md:col-span-3 lg:col-span-2">
             <button
               type="button"
               onClick={onAddItem}
