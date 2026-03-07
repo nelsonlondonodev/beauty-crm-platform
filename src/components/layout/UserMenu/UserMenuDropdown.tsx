@@ -65,7 +65,7 @@ const UserMenuDropdown = ({
 
       <div className="p-1.5">
         <button
-          onClick={() => onNavigate('/settings')}
+          onClick={() => onNavigate('/profile')}
           className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-gray-700 transition-all hover:bg-purple-50 hover:text-purple-700 group"
         >
           <div className="h-8 w-8 rounded-lg bg-gray-50 flex items-center justify-center group-hover:bg-white transition-colors">
