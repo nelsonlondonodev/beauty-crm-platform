@@ -135,7 +135,7 @@ const BillingItemTable = ({
           <tbody className="divide-y divide-gray-100">
             {items.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-gray-400">
+                <td colSpan={6} className="px-4 py-8 text-center text-gray-400">
                   No hay servicios agregados. Busca un servicio o agrégalo
                   arriba.
                 </td>
