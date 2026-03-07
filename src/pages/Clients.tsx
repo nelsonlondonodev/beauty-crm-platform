@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import DashboardHeader from '../components/layout/DashboardHeader';
 import ClientTable from '../components/clients/ClientTable';
 import NewClientModal from '../components/clients/NewClientModal';
@@ -9,17 +9,27 @@ import { canPerform } from '../lib/rbac';
 import { Search, Plus, Loader2 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import type { Client } from '../types';
+import { useSearchParams } from 'react-router-dom';
 
 const Clients = () => {
   const { clients, loading, addClient, updateClient, deleteClient } =
     useClients();
   const { role } = useAuth();
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchParams] = useSearchParams();
+  const initialSearch = searchParams.get('search') || '';
+  const [searchTerm, setSearchTerm] = useState(initialSearch);
   const [filter, setFilter] = useState<'all' | 'Activo' | 'Vencido'>('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [deletingClient, setDeletingClient] = useState<Client | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    const search = searchParams.get('search');
+    if (search !== null) {
+      setSearchTerm(search);
+    }
+  }, [searchParams]);
 
   // Filter Logic
   const filteredClients = clients.filter((client) => {

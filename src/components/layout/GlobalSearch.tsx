@@ -49,13 +49,10 @@ const GlobalSearch = () => {
       .slice(0, 5); // Render max 5 results for performance and clean UI
   }, [clients, searchTerm]);
 
-  const handleResultClick = () => {
+  const handleResultClick = (clientName: string) => {
     setIsOpen(false);
     setSearchTerm('');
-    // Ideally we would go to a specific client profile page, e.g., /clientes/id
-    // But since the current behavior is a general list in /clients, we navigate there.
-    // If you plan to add a detailed client page later, this is the perfect spot.
-    navigate('/clients');
+    navigate(`/clients?search=${encodeURIComponent(clientName)}`);
   };
 
   const getStatusColor = (status: string) => {
@@ -120,7 +117,7 @@ const GlobalSearch = () => {
                 {filteredClients.map((client) => (
                   <li key={client.id}>
                     <button
-                      onClick={() => handleResultClick()}
+                      onClick={() => handleResultClick(client.nombre)}
                       className="flex w-full items-center gap-3 rounded-lg p-3 text-left transition-colors hover:bg-gray-50"
                     >
                       <div className="bg-primary/10 text-primary flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full">
