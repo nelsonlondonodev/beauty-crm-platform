@@ -1,15 +1,15 @@
 import { DollarSign } from 'lucide-react';
+import type { UseFormReturn } from 'react-hook-form';
 import type { Client, InvoiceItem } from '../../types';
 import { cn } from '../../lib/utils';
+import type { BillingFormValues } from '../../schemas/billingSchema';
 
 interface BillingCheckoutSummaryProps {
+  form: UseFormReturn<BillingFormValues>;
   selectedClient: Client | null;
   items: InvoiceItem[];
   subtotal: number;
-  discount: number;
-  setDiscount: (discount: number) => void;
   total: number;
-  onCheckout: () => void;
   isProcessing: boolean;
   couponCode: string;
   setCouponCode: (c: string) => void;
@@ -21,13 +21,11 @@ interface BillingCheckoutSummaryProps {
 }
 
 const BillingCheckoutSummary = ({
+  form,
   selectedClient,
   items,
   subtotal,
-  discount,
-  setDiscount,
   total,
-  onCheckout,
   isProcessing,
   couponCode,
   setCouponCode,
@@ -65,6 +63,7 @@ const BillingCheckoutSummary = ({
                       {bono.tipo}
                     </span>
                     <button 
+                      type="button"
                       onClick={() => handleApplyClientBonus(bono.id, bono.tipo, bono.codigo)}
                       disabled={appliedBonus?.id === bono.id}
                       className={cn(
@@ -92,7 +91,11 @@ const BillingCheckoutSummary = ({
                {appliedBonus.codigo && <span className="text-xs text-gray-500">{appliedBonus.codigo}</span>}
              </div>
              <button 
-               onClick={() => setAppliedBonus(null)} 
+               type="button"
+               onClick={() => {
+                 setAppliedBonus(null);
+                 form.setValue('bono_id', '');
+               }} 
                className="text-xs font-medium text-red-500 hover:text-red-700"
              >
                Remover
@@ -108,6 +111,7 @@ const BillingCheckoutSummary = ({
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm uppercase outline-none focus:border-primary focus:ring-1 focus:ring-primary"
             />
             <button
+              type="button"
               onClick={() => handleValidateCoupon(couponCode)}
               disabled={!couponCode || validatingCoupon}
               className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-800 disabled:bg-gray-400"
@@ -130,8 +134,7 @@ const BillingCheckoutSummary = ({
             <input
               type="number"
               className="focus:border-primary w-20 rounded border border-gray-300 px-2 py-1 text-right outline-none"
-              value={discount || ''}
-              onChange={(e) => setDiscount(Number(e.target.value))}
+              {...form.register('descuento_manual', { valueAsNumber: true })}
             />
           </div>
         </div>
@@ -149,8 +152,8 @@ const BillingCheckoutSummary = ({
       </div>
 
       <button
+        type="submit"
         disabled={items.length === 0 || isProcessing}
-        onClick={onCheckout}
         className={cn(
           'w-full rounded-xl py-4 text-lg font-bold shadow-lg transition-all',
           items.length === 0

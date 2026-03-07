@@ -19,7 +19,7 @@ export const billingFormSchema = z.object({
   metodo_pago: z.string().min(1, 'Selecciona un método de pago'),
   bono_id: z.string().uuid().optional().or(z.literal('')), // Si aplican un bono de fidelización
   items: z.array(invoiceItemSchema).min(1, 'La factura debe tener al menos un ítem'),
-  descuento_manual: z.number().min(0, 'El descuento manual no puede ser negativo').default(0),
+  descuento_manual: z.number().min(0, 'El descuento manual no puede ser negativo'),
   appointment_id: z.string().uuid('ID de cita inválido').optional().or(z.literal('')), // Vínculo futuro con la agenda
 });
 

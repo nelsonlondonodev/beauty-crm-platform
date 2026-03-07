@@ -7,6 +7,8 @@ import { useBilling } from '../hooks/useBilling';
 
 const Billing = () => {
   const {
+    form,
+    onSubmit,
     clientsLoading,
     staff,
     filteredClients,
@@ -22,8 +24,6 @@ const Billing = () => {
     handleAddItem,
     removeItem,
     subtotal,
-    discount,
-    setDiscount,
     total,
     // Coupons
     couponCode,
@@ -35,16 +35,16 @@ const Billing = () => {
     handleApplyClientBonus,
     // Submission
     isProcessing,
-    handleCheckout,
   } = useBilling();
 
   return (
-    <div className="space-y-6 pb-20">
+    <form onSubmit={onSubmit} className="space-y-6 pb-20">
       <DashboardHeader
         title="Facturación (Punto de Venta)"
         subtitle="Crea facturas, registra servicios y aplica los bonos de tus clientes."
         actions={
           <button
+            type="button"
             onClick={() => window.print()}
             className="inline-flex items-center justify-center rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-gray-800"
           >
@@ -81,11 +81,10 @@ const Billing = () => {
         {/* Right Column: Checkout Summary */}
         <div className="space-y-6 xl:col-span-1">
           <BillingCheckoutSummary
+            form={form}
             selectedClient={selectedClient}
             items={items}
             subtotal={subtotal}
-            discount={discount}
-            setDiscount={setDiscount}
             total={total}
             couponCode={couponCode}
             setCouponCode={setCouponCode}
@@ -94,12 +93,11 @@ const Billing = () => {
             setAppliedBonus={setAppliedBonus}
             handleValidateCoupon={handleValidateCoupon}
             handleApplyClientBonus={handleApplyClientBonus}
-            onCheckout={handleCheckout}
             isProcessing={isProcessing}
           />
         </div>
       </div>
-    </div>
+    </form>
   );
 };
 

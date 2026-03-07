@@ -1,31 +1,54 @@
 import { useState, useMemo } from 'react';
-import type { Client, InvoiceItem } from '../types';
+import { useForm, useFieldArray } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import type { Client } from '../types';
 import { procesarFactura } from '../services/billingService';
 import { validateBonoCode } from '../services/bonoService';
 import { useClients } from './useClients';
 import { useStaff } from './useStaff';
 import { useTenant } from '../contexts/TenantContext';
+import { billingFormSchema, type BillingFormValues } from '../schemas/billingSchema';
 
 export const useBilling = () => {
   const { clients, loading: clientsLoading } = useClients();
   const { staff } = useStaff();
   const { config } = useTenant();
 
-  // UI State
+  // Search & Navigation State
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [isSearching, setIsSearching] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // Invoice Form State
-  const [items, setItems] = useState<InvoiceItem[]>([]);
+  // Zod & React Hook Form Initialization
+  const form = useForm<BillingFormValues>({
+    resolver: zodResolver(billingFormSchema),
+    defaultValues: {
+      cliente_id: '',
+      metodo_pago: 'efectivo',
+      bono_id: '',
+      items: [],
+      descuento_manual: 0,
+    },
+  });
+
+  // Items Field Array management
+  const { fields: items, append: appendItem, remove: removeItem } = useFieldArray({
+    control: form.control,
+    name: 'items',
+  });
+
+  // Watch form values for calculations
+  const watchedItems = form.watch('items') || [];
+  const discount = form.watch('descuento_manual') || 0;
+
+  // New Item Draft State (before adding to the actual array)
   const [newItem, setNewItem] = useState({
     description: '',
     quantity: 1,
     price: '',
     empleado_id: '',
   });
-  const [discount, setDiscount] = useState<number>(0);
 
   // Bonos State
   const [couponCode, setCouponCode] = useState('');
@@ -44,8 +67,8 @@ export const useBilling = () => {
   }, [clients, searchTerm]);
 
   const subtotal = useMemo(() => {
-    return items.reduce((acc, item) => acc + item.price * item.quantity, 0);
-  }, [items]);
+    return watchedItems.reduce((acc, item) => acc + (Number(item.price) || 0) * (Number(item.quantity) || 0), 0);
+  }, [watchedItems]);
 
   const total = useMemo(() => {
     return Math.max(0, subtotal - discount);
@@ -54,44 +77,62 @@ export const useBilling = () => {
   // Handlers
   const handleSelectClient = (client: Client | null) => {
     setSelectedClient(client);
+    form.setValue('cliente_id', client ? client.id : '');
   };
 
   const handleAddItem = () => {
     if (!newItem.description || !newItem.price) return;
-
-    setItems([
-      ...items,
-      {
-        id: Math.random().toString(36).substr(2, 9),
-        description: newItem.description,
-        quantity: Number(newItem.quantity),
-        price: Number(newItem.price),
-        empleado_id: newItem.empleado_id || undefined,
-      },
-    ]);
+    
+    appendItem({
+      id: Math.random().toString(36).substr(2, 9),
+      description: newItem.description,
+      quantity: Number(newItem.quantity),
+      price: Number(newItem.price),
+      empleado_id: newItem.empleado_id || '',
+    });
+    
     setNewItem({ description: '', quantity: 1, price: '', empleado_id: '' });
   };
 
-  const removeItem = (id: string) => {
-    setItems(items.filter((item) => item.id !== id));
+  const handleApplyClientBonus = (bonoId: string, tipo: string, codigo?: string) => {
+    setAppliedBonus({ id: bonoId, tipo, codigo });
+    form.setValue('bono_id', bonoId);
   };
 
-  const handleCheckout = async () => {
-    if (items.length === 0) return;
+  const resetFormulario = () => {
+    form.reset({
+      cliente_id: selectedClient?.id || '',
+      metodo_pago: 'efectivo',
+      bono_id: '',
+      items: [],
+      descuento_manual: 0,
+    });
+    setNewItem({ description: '', quantity: 1, price: '', empleado_id: '' });
+    setSelectedClient(null);
+    setCouponCode('');
+    setAppliedBonus(null);
+  };
+
+  // Submit Handler
+  const onSubmit = async (data: BillingFormValues) => {
     setIsProcessing(true);
     try {
       await procesarFactura({
-        cliente_id: selectedClient?.id,
+        cliente_id: selectedClient?.id || null, // Priority to selectedClient to ensure sync
         subtotal,
-        descuento: discount,
+        descuento: data.descuento_manual,
         total,
-        items,
-        bono_id: appliedBonus?.id,
+        items: data.items.map(item => ({
+          ...item,
+          id: item.id || Math.random().toString(36).substr(2, 9),
+          empleado_id: item.empleado_id || undefined,
+        })),
+        bono_id: appliedBonus?.id || undefined,
         commissionPolicy: config.commissionPolicy,
       });
 
-      alert('¡Factura guardada con éxito!');
-      resetForm();
+      alert('¡Factura procesada con éxito!');
+      resetFormulario();
     } catch (error: unknown) {
       if (error instanceof Error) {
         alert(`Error al procesar el cobro: ${error.message}`);
@@ -108,20 +149,15 @@ export const useBilling = () => {
     setValidatingCoupon(true);
     try {
       const bono = await validateBonoCode(code);
+      handleApplyClientBonus(bono.id, bono.tipo, bono.codigo);
 
-      setAppliedBonus({
-        id: bono.id,
-        codigo: bono.codigo,
-        tipo: bono.tipo,
-      });
-
-      // Si no hay cliente seleccionado, autoseleccionarlo guiado por el owner del bono
+      // Select client if implicit
       if (!selectedClient && bono.client_id) {
         const foundClient = clients.find((c) => c.id === bono.client_id);
-        if (foundClient) setSelectedClient(foundClient);
+        if (foundClient) handleSelectClient(foundClient);
       }
 
-      alert(`Cupón de ${bono.tipo} listo para aplicar.`);
+      alert(`Cupón de ${bono.tipo} validado y aplicado.`);
       setCouponCode('');
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : 'Error al validar cupón.';
@@ -131,25 +167,16 @@ export const useBilling = () => {
     }
   };
 
-  const handleApplyClientBonus = (bonoId: string, tipo: string, codigo?: string) => {
-    setAppliedBonus({ id: bonoId, tipo, codigo });
-  };
-
-  const resetForm = () => {
-    setItems([]);
-    setDiscount(0);
-    setSelectedClient(null);
-    setCouponCode('');
-    setAppliedBonus(null);
-  };
-
   return {
-    // Data & Loading State
+    form, // The main React Hook Form object
+    onSubmit: form.handleSubmit(onSubmit),
+    
+    // Data
     clientsLoading,
     staff,
     filteredClients,
-
-    // Form & Selections
+    
+    // UI selections
     searchTerm,
     setSearchTerm,
     selectedClient,
@@ -157,15 +184,16 @@ export const useBilling = () => {
     isSearching,
     setIsSearching,
 
-    // Cart Logic
+    // Array logic
     items,
     newItem,
     setNewItem,
     handleAddItem,
     removeItem,
+
+    // Math
     subtotal,
     discount,
-    setDiscount,
     total,
 
     // Coupons
@@ -177,8 +205,7 @@ export const useBilling = () => {
     handleValidateCoupon,
     handleApplyClientBonus,
 
-    // Submission
+    // State
     isProcessing,
-    handleCheckout,
   };
 };

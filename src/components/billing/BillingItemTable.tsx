@@ -17,7 +17,7 @@ interface BillingItemTableProps {
     empleado_id: string;
   }) => void;
   onAddItem: () => void;
-  onRemoveItem: (id: string) => void;
+  onRemoveItem: (index: number) => void;
 }
 
 const BillingItemTable = ({
@@ -104,6 +104,7 @@ const BillingItemTable = ({
         </div>
         <div className="w-full shrink-0 lg:w-auto">
           <button
+            type="button"
             onClick={onAddItem}
             className="h-[38px] w-full rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-800 md:w-auto"
           >
@@ -134,7 +135,7 @@ const BillingItemTable = ({
                 </td>
               </tr>
             ) : (
-              items.map((item) => (
+              items.map((item, index) => (
                 <tr key={item.id} className="hover:bg-gray-50/50">
                   <td className="px-4 py-3 font-medium text-gray-900">
                     {item.description}
@@ -147,14 +148,15 @@ const BillingItemTable = ({
                     {item.quantity}
                   </td>
                   <td className="px-4 py-3 text-right text-gray-600">
-                    ${item.price.toLocaleString()}
+                    ${Number(item.price).toLocaleString()}
                   </td>
                   <td className="px-4 py-3 text-right font-semibold text-gray-900">
-                    ${(item.price * item.quantity).toLocaleString()}
+                    ${(Number(item.price) * Number(item.quantity)).toLocaleString()}
                   </td>
                   <td className="px-4 py-3 text-center">
                     <button
-                      onClick={() => onRemoveItem(item.id)}
+                      type="button"
+                      onClick={() => onRemoveItem(index)}
                       className="text-gray-400 transition-colors hover:text-red-500"
                     >
                       <Trash2 className="h-4 w-4" />
