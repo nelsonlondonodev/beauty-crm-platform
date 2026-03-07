@@ -36,80 +36,84 @@ const BillingItemTable = ({
       </h2>
 
       {/* Add Item Form */}
-      <div className="mb-6 flex flex-col items-end gap-3 rounded-lg border border-gray-100 bg-gray-50 p-4 lg:flex-row">
-        <div className="w-full shrink-0 lg:w-48 xl:w-56">
-          <label className="mb-1 block text-xs font-medium text-gray-700">
-            Colaborador
-          </label>
-          <select
-            className="focus:border-primary focus:ring-primary w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:ring-1"
-            value={newItem.empleado_id}
-            onChange={(e) =>
-              setNewItem({ ...newItem, empleado_id: e.target.value })
-            }
-          >
-            <option value="">(Ninguno)</option>
-            {empleados
-              .filter((e) => e.activo)
-              .map((emp) => (
-                <option key={emp.id} value={emp.id}>
-                  {emp.nombre}
-                </option>
-              ))}
-          </select>
-        </div>
-        <div className="w-full min-w-[200px] flex-1">
-          <label className="mb-1 block text-xs font-medium text-gray-700">
-            Concepto / Servicio
-          </label>
-          <input
-            type="text"
-            placeholder="Ej. Corte de Cabello"
-            className="focus:border-primary focus:ring-primary w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:ring-1"
-            value={newItem.description}
-            onChange={(e) =>
-              setNewItem({ ...newItem, description: e.target.value })
-            }
-          />
-        </div>
-        <div className="flex w-full gap-3 lg:w-auto">
-          <div className="w-20 shrink-0">
+      <div className="mb-6 rounded-lg border border-gray-100 bg-gray-50 p-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4 items-end">
+          <div className="lg:col-span-3">
+            <label className="mb-1 block text-xs font-medium text-gray-700">
+              Colaborador
+            </label>
+            <select
+              className="focus:border-primary focus:ring-primary w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:ring-1 bg-white h-[38px]"
+              value={newItem.empleado_id}
+              onChange={(e) =>
+                setNewItem({ ...newItem, empleado_id: e.target.value })
+              }
+            >
+              <option value="">(Ninguno)</option>
+              {empleados
+                .filter((e) => e.activo)
+                .map((emp) => (
+                  <option key={emp.id} value={emp.id}>
+                    {emp.nombre}
+                  </option>
+                ))}
+            </select>
+          </div>
+          
+          <div className="lg:col-span-4">
+            <label className="mb-1 block text-xs font-medium text-gray-700">
+              Concepto / Servicio
+            </label>
+            <input
+              type="text"
+              placeholder="Ej. Corte de Cabello"
+              className="focus:border-primary focus:ring-primary w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:ring-1 h-[38px]"
+              value={newItem.description}
+              onChange={(e) =>
+                setNewItem({ ...newItem, description: e.target.value })
+              }
+            />
+          </div>
+
+          <div className="lg:col-span-2">
             <label className="mb-1 block text-xs font-medium text-gray-700">
               Cant.
             </label>
             <input
               type="number"
               min="1"
-              className="focus:border-primary focus:ring-primary w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:ring-1"
+              className="focus:border-primary focus:ring-primary w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:ring-1 h-[38px]"
               value={newItem.quantity}
               onChange={(e) =>
                 setNewItem({ ...newItem, quantity: Number(e.target.value) })
               }
             />
           </div>
-          <div className="w-32 shrink-0">
+
+          <div className="lg:col-span-2">
             <label className="mb-1 block text-xs font-medium text-gray-700">
               Precio Unit.
             </label>
             <input
               type="number"
               placeholder="0.00"
-              className="focus:border-primary focus:ring-primary w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:ring-1"
+              className="focus:border-primary focus:ring-primary w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:ring-1 h-[38px]"
               value={newItem.price}
               onChange={(e) =>
                 setNewItem({ ...newItem, price: e.target.value })
               }
             />
           </div>
-        </div>
-        <div className="w-full shrink-0 lg:w-auto">
-          <button
-            type="button"
-            onClick={onAddItem}
-            className="h-[38px] w-full rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-800 md:w-auto"
-          >
-            Agregar
-          </button>
+
+          <div className="lg:col-span-1">
+            <button
+              type="button"
+              onClick={onAddItem}
+              className="h-[38px] w-full rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-800 flex items-center justify-center"
+            >
+              Agregar
+            </button>
+          </div>
         </div>
       </div>
 
