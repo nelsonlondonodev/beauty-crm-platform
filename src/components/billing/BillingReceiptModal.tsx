@@ -1,10 +1,11 @@
+import { useState } from 'react';
 import { X, Printer, Mail, Send, Leaf } from 'lucide-react';
 import { useTenant } from '../../contexts/TenantContext';
 
 export interface InvoiceReceiptData {
   id: string;
   fecha: string;
-  cliente: { nombre: string; telefono?: string } | null;
+  cliente: { nombre: string; telefono?: string; email?: string } | null;
   metodo_pago: string;
   items: Array<{ description: string; quantity: number; price: number }>;
   subtotal: number;
@@ -19,14 +20,48 @@ interface BillingReceiptModalProps {
 
 const BillingReceiptModal = ({ invoice, onClose }: BillingReceiptModalProps) => {
   const { config } = useTenant();
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
 
   const handlePrint = () => {
     window.print();
   };
 
-  const handleEmail = () => {
-    // Aquí implementaremos en el futuro el backend de envío por resend / nodemailer
-    alert('Función de envío por correo en construcción (Ecológico 🌿)');
+  const handleEmail = async () => {
+    if (!invoice.cliente || !invoice.cliente.email) {
+      alert('Este usuario no tiene un correo electrónico registrado en su perfil (Aún).');
+      return;
+    }
+
+    setIsSendingEmail(true);
+    try {
+      const webhookUrl = import.meta.env.VITE_N8N_WEBHOOK_URL_RECEIPT || 'https://n8n.srv1033442.hstgr.cloud/webhook/send-eco-receipt';
+      
+      const payload = {
+        cliente_nombre: invoice.cliente.nombre,
+        cliente_email: invoice.cliente.email,
+        tenant_name: config.brandName || 'nuestro local',
+        factura_id: invoice.id.split('-')[0].toUpperCase(),
+        items: invoice.items,
+        subtotal: invoice.subtotal.toLocaleString(),
+        descuento: invoice.descuento.toLocaleString(),
+        total: invoice.total.toLocaleString()
+      };
+
+      const res = await fetch(webhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) throw new Error('Network response was not ok');
+
+      alert('¡Recibo digital ecológico enviado con éxito al cliente! 🌿');
+    } catch (e) {
+      console.error('Error enviando email vía webhook:', e);
+      alert('Hubo un problema de conexión al enviar el correo. Por favor revisa n8n.');
+    } finally {
+      setIsSendingEmail(false);
+    }
   };
 
   const handleWhatsApp = () => {
@@ -152,10 +187,11 @@ const BillingReceiptModal = ({ invoice, onClose }: BillingReceiptModalProps) => 
             </button>
             <button
               onClick={handleEmail}
-              className="flex items-center justify-center p-3 text-sm font-semibold bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
+              disabled={isSendingEmail}
+              className="flex items-center justify-center p-3 text-sm font-semibold bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50"
             >
               <Mail className="w-4 h-4 mr-2" />
-              Correo Ecológico 
+              {isSendingEmail ? 'Enviando...' : 'Correo Ecológico'}
             </button>
             <button
               onClick={handlePrint}

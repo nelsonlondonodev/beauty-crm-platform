@@ -1,0 +1,51 @@
+{
+  "name": "CRM - Enviar Recibo Ecológico (Factura)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "send-eco-receipt",
+        "options": {}
+      },
+      "id": "11d5952c-bdcb-48dd-baeb-d91d9dcb893d",
+      "name": "Webhook_Recibo",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        180,
+        240
+      ],
+      "webhookId": "send-eco-receipt-web-hook-uuid"
+    },
+    {
+      "parameters": {
+        "fromEmail": "notificaciones@beautycrm.com",
+        "toEmail": "={{$json.body.cliente_email}}",
+        "subject": "=Tu recibo de servicio en {{$json.body.tenant_name}} \uD83C\uDF3F",
+        "html": "=<html>\n<body style=\"font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;\">\n  <div style=\"text-align: center; margin-bottom: 20px;\">\n    <h1 style=\"color: #111827; margin-bottom: 5px;\">{{$json.body.tenant_name}}</h1>\n    <p style=\"color: #6B7280; font-size: 14px; margin-top: 0;\">Comprobante de Venta Electrónico \uD83C\uDF3F</p>\n  </div>\n\n  <div style=\"background-color: #F9FAFB; padding: 20px; border-radius: 8px; border: 1px dashed #D1D5DB;\">\n    <p><strong>Hola {{$json.body.cliente_nombre}},</strong></p>\n    <p>Gracias por tu visita. Aquí tienes el soporte digital de tu compra (Recibo #{{$json.body.factura_id}}). Al usar este recibo digital estás ayudando a reducir el consumo de papel comercial.</p>\n    \n    <table style=\"width: 100%; margin-top: 20px; border-collapse: collapse;\">\n      <tr style=\"border-bottom: 1px solid #E5E7EB;\">\n        <th style=\"text-align: left; padding-bottom: 8px; color: #6B7280; font-size: 12px;\">Resumen</th>\n      </tr>\n      <tr>\n        <td style=\"padding-top: 15px;\">\n          <ul style=\"list-style: none; padding: 0; margin: 0;\">\n            {{ $json.body.items.map(item => `<li style=\"margin-bottom: 8px; display: flex; justify-content: space-between;\"><span>${item.quantity}x ${item.description}</span></li>`).join('') }}\n          </ul>\n        </td>\n      </tr>\n    </table>\n\n    <div style=\"margin-top: 20px; padding-top: 15px; border-top: 1px solid #E5E7EB; text-align: right;\">\n      <p style=\"margin: 5px 0;\">Subtotal: <strong>$ {{$json.body.subtotal}}</strong></p>\n      <p style=\"margin: 5px 0; color: #059669;\">Descuento: <strong>- $ {{$json.body.descuento}}</strong></p>\n      <h3 style=\"margin: 10px 0 0 0; color: #111827; font-size: 20px;\">TOTAL: $ {{$json.body.total}}</h3>\n    </div>\n  </div>\n\n  <div style=\"text-align: center; margin-top: 30px; font-size: 12px; color: #9CA3AF;\">\n    <p>Este es un correo automático, por favor no lo respondas.</p>\n    <p>Enviado de forma ecológica desde Beauty CRM Cloud</p>\n  </div>\n</body>\n</html>",
+        "options": {}
+      },
+      "id": "2d8f95c2-1abc-4d9f-aef9-9892cb9a8c7b",
+      "name": "Send Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [
+        400,
+        240
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook_Recibo": {
+      "main": [
+        [
+          {
+            "node": "Send Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
