@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import DashboardHeader from '../components/layout/DashboardHeader';
-import { Building, Shield, Bell, User } from 'lucide-react';
+import { Building, Shield, Bell, User, Calculator } from 'lucide-react';
 import SettingsLink from '../components/settings/SettingsLink';
 import BrandConfigModal from '../components/settings/BrandConfigModal';
+import BillingConfigModal from '../components/settings/BillingConfigModal';
 import { APP_CONFIG } from '../config/brand';
 
 const Settings = () => {
   const [isBrandModalOpen, setIsBrandModalOpen] = useState(false);
+  const [isBillingModalOpen, setIsBillingModalOpen] = useState(false);
 
   return (
     <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -30,6 +32,13 @@ const Settings = () => {
                 description="Personaliza el nombre de tu negocio y el logotipo."
                 colorClass="bg-blue-50 text-blue-600"
                 onClick={() => setIsBrandModalOpen(true)}
+              />
+              <SettingsLink 
+                icon={Calculator}
+                title="Políticas de Facturación"
+                description="Configura el cálculo de comisiones (Bruto vs Neto)."
+                colorClass="bg-green-50 text-green-600"
+                onClick={() => setIsBillingModalOpen(true)}
               />
               <SettingsLink 
                 icon={Shield}
@@ -74,6 +83,10 @@ const Settings = () => {
       
       {isBrandModalOpen && (
         <BrandConfigModal onClose={() => setIsBrandModalOpen(false)} />
+      )}
+
+      {isBillingModalOpen && (
+        <BillingConfigModal onClose={() => setIsBillingModalOpen(false)} />
       )}
     </div>
   );

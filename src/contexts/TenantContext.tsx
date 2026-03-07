@@ -8,6 +8,7 @@ export interface TenantConfig {
   tagline: string;
   supportEmail?: string;
   logoUrl?: string;
+  commissionPolicy: 'gross' | 'net';
 }
 
 interface TenantContextType {
@@ -19,6 +20,7 @@ interface TenantContextType {
 const defaultConfig: TenantConfig = {
   brandName: APP_CONFIG.brandName,
   tagline: APP_CONFIG.tagline,
+  commissionPolicy: 'gross',
 };
 
 const defaultContext: TenantContextType = {

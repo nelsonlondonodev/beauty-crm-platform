@@ -183,7 +183,7 @@ CRM B2B moderno para el sector de la belleza (Peluquerías, Barberías, Spas).
 - [ ] **Documentación API:** Documentar los endpoints de Supabase y esquemas de tablas.
 
 ### Fase 4: SaaS Avanzado
-- [ ] **Configuración de Políticas de Facturación:** Implementar toggle en `/settings` para permitir a cada negocio elegir si las comisiones de los empleados se calculan sobre el precio bruto o el precio neto (después de bonos promocionales).
+- [x] **Configuración de Políticas de Facturación:** Implementar toggle en `/settings` para permitir a cada negocio elegir si las comisiones de los empleados se calculan sobre el precio bruto o el precio neto (después de bonos promocionales).
 - [ ] **Panel de Administrador Global:** Interfaz para gestionar todos los tenants desde una sola cuenta maestra.
 - [ ] **Onboarding Wizard:** Guía interactiva para que nuevos clientes configuren sus servicios y empleados.
 

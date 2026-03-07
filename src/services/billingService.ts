@@ -11,7 +11,8 @@ interface FacturaPayload {
   total: number;
   metodo_pago?: string;
   items: InvoiceItem[];
-  bono_id?: string; // ID del bono que será canjeado con la compra
+  bono_id?: string;
+  commissionPolicy?: 'gross' | 'net';
 }
 
 // --- Funciones Atómicas ---
@@ -66,12 +67,23 @@ async function createInvoice(payload: Omit<FacturaPayload, 'items' | 'bono_id'>)
 async function createInvoiceItems(
   facturaId: string, 
   items: InvoiceItem[], 
-  comisiones: Record<string, number>
+  comisiones: Record<string, number>,
+  subtotal: number,
+  total: number,
+  commissionPolicy: 'gross' | 'net' = 'gross'
 ) {
+  const itemPriceToCommissionRatio = (total / subtotal) || 1;
+
   const itemsToInsert = items.map((item) => {
     const comisionPorcentaje = item.empleado_id ? comisiones[item.empleado_id] || 0 : 0;
-    const precioTotal = item.price * item.quantity;
-    const comisionMonto = precioTotal * (comisionPorcentaje / 100);
+    const precioBrutoTotal = item.price * item.quantity;
+    
+    // Cálculo basado en política: Bruto (precio total) o Neto (después de descuento proporcional)
+    const precioBaseComision = commissionPolicy === 'net' 
+      ? precioBrutoTotal * itemPriceToCommissionRatio 
+      : precioBrutoTotal;
+
+    const comisionMonto = precioBaseComision * (comisionPorcentaje / 100);
 
     return {
       factura_id: facturaId,
@@ -79,7 +91,7 @@ async function createInvoiceItems(
       descripcion: item.description,
       cantidad: item.quantity,
       precio_unitario: item.price,
-      precio_total: precioTotal,
+      precio_total: precioBrutoTotal,
       comision_monto: comisionMonto,
     };
   });
@@ -124,7 +136,14 @@ export const procesarFactura = async (payload: FacturaPayload) => {
   const factura = await createInvoice(payload);
 
   // 3. Crear items de factura y procesar bonos de fidelización
-  await createInvoiceItems(factura.id, payload.items, comisiones);
+  await createInvoiceItems(
+    factura.id, 
+    payload.items, 
+    comisiones, 
+    payload.subtotal, 
+    payload.total, 
+    payload.commissionPolicy
+  );
   await redeemBonusIfExists(payload.bono_id);
 
   return factura;

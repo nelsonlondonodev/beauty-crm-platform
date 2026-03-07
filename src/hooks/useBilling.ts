@@ -4,10 +4,12 @@ import { procesarFactura } from '../services/billingService';
 import { validateBonoCode } from '../services/bonoService';
 import { useClients } from './useClients';
 import { useStaff } from './useStaff';
+import { useTenant } from '../contexts/TenantContext';
 
 export const useBilling = () => {
   const { clients, loading: clientsLoading } = useClients();
   const { staff } = useStaff();
+  const { config } = useTenant();
 
   // UI State
   const [searchTerm, setSearchTerm] = useState('');
@@ -85,6 +87,7 @@ export const useBilling = () => {
         total,
         items,
         bono_id: appliedBonus?.id,
+        commissionPolicy: config.commissionPolicy,
       });
 
       alert('¡Factura guardada con éxito!');

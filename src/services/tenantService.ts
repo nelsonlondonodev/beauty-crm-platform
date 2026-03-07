@@ -13,6 +13,7 @@ interface TenantDbRow {
   tagline: string | null;
   support_email: string | null;
   logo_url: string | null;
+  commission_policy: string | null;
   updated_at: string;
 }
 
@@ -27,6 +28,7 @@ function mapDbToTenantConfig(row: TenantDbRow): TenantConfig {
     tagline: row.tagline || 'Beauty Industry CRM',
     supportEmail: row.support_email || '',
     logoUrl: row.logo_url || '',
+    commissionPolicy: (row.commission_policy as 'gross' | 'net') || 'gross',
   };
 }
 
@@ -72,6 +74,7 @@ export const updateTenantConfig = async (
   if (updates.tagline !== undefined) dbUpdates.tagline = updates.tagline;
   if (updates.supportEmail !== undefined) dbUpdates.support_email = updates.supportEmail;
   if (updates.logoUrl !== undefined) dbUpdates.logo_url = updates.logoUrl;
+  if (updates.commissionPolicy !== undefined) dbUpdates.commission_policy = updates.commissionPolicy;
 
   const { error } = await fetchWithTimeout(
     supabase
