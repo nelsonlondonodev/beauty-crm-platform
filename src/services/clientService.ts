@@ -126,7 +126,7 @@ export const getClientById = async (id: string): Promise<Client> => {
 export const getClientFinancialHistory = async (clientId: string): Promise<Factura[]> => {
   const { data, error } = await supabase
     .from('facturas')
-    .select('*, facturas_items(*)')
+    .select('*, factura_items(*)')
     .eq('cliente_id', clientId)
     .order('fecha_venta', { ascending: false });
 
