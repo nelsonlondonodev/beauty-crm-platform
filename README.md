@@ -202,3 +202,4 @@ CRM B2B moderno para el sector de la belleza (Peluquerías, Barberías, Spas).
 
 ### Fase 5: Mantenimiento y Buenas Prácticas
 - [ ] **Limpieza de SQL Editor (Supabase):** Depurar los queries acumulados en el editor web de Supabase para mantener solo los estrictamente necesarios para operaciones diarias. Los queries estructurales ya están versionados en `database/migrations`. Esta tarea debe realizarse en un horario de bajo tráfico (ej. mañana) para evitar interrupciones.
+- [ ] **Módulo de Personal (Staff):** Refactorizar el componente para permitir la edición de datos de empleados (porcentajes de comisión) y su desactivación lógica, preservando así su historial de cobros y comisiones.
