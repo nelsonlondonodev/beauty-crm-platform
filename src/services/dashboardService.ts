@@ -96,7 +96,7 @@ async function fetchActiveBonuses(): Promise<number> {
   return count || 0;
 }
 
-async function fetchUpcomingBirthdays(): Promise<number> {
+export async function fetchUpcomingBirthdays(): Promise<number> {
   try {
     const { data, error } = await fetchWithTimeout(
       supabase
@@ -116,7 +116,7 @@ async function fetchUpcomingBirthdays(): Promise<number> {
   }
 }
 
-async function fetchExpiringBonuses(): Promise<number> {
+export async function fetchExpiringBonuses(): Promise<number> {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const nextWeek = addDays(today, 7);
@@ -265,7 +265,7 @@ async function fetchRecentBonuses(): Promise<ActivityItem[]> {
   });
 }
 
-async function fetchRecentActivity(): Promise<ActivityItem[]> {
+export async function fetchRecentActivity(): Promise<ActivityItem[]> {
   try {
     const results = await Promise.all([
       fetchRecentAppointments(),
