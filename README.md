@@ -178,6 +178,17 @@ CRM B2B moderno para el sector de la belleza (Peluquerías, Barberías, Spas).
 -   **Saneamiento Preventivo**: Implementación de validaciones defensivas en JavaScript (`.trim()`) en las llamadas a Supabase desde n8n, garantizando que espacios ocultos en los UUIDs no provoquen rechazos de base de datos.
 -   **Aislamiento Real**: Flujo End-to-End validado: el webhook capta al cliente, n8n asigna el Tenant ID de forma segura y Supabase aplica el Row Level Security (RLS) para mostrarlo instantáneamente en el Dashboard correcto.
 
+### 18. Perfil Detallado del Cliente y Valor de Vida (LTV)
+- **Vista de Perfil Individual (`/clients/:id`)**: Nueva interfaz dedicada que consolida toda la información de un cliente en un solo lugar.
+- **Métricas de Fidelidad (LTV)**: Cálculo automático del "Valor de Vida" (Total gastado), "Total de Visitas" y "Ticket Promedio" directamente desde el historial de facturas.
+- **Historial Financiero**: Pestaña dedicada para consultar todas las facturas pasadas asociadas al cliente, permitiendo un seguimiento preciso de sus preferencias y frecuencia.
+- **Gestión de Bonos Personalizada**: Visualización de los cupones activos del cliente con acceso rápido para canje.
+
+### 19. Historial de Ventas y Rendimiento de Colaboradores
+- **Módulo de Auditoría de Ventas (`/invoices`)**: Repositorio central de todas las transacciones realizadas en el salón. Permite buscar y auditar facturas por ID o nombre de cliente.
+- **Rendimiento de Colaboradores**: Cada integrante del staff cuenta con su propio historial de servicios prestados (`/staff/:id/sales`), permitiendo al administrador auditar su productividad, comisiones generadas y clientes atendidos.
+- **Filtros de Seguridad**: El sistema de facturación ahora filtra automáticamente al personal inactivo, evitando errores en el punto de venta sin perder la integridad de los datos históricos.
+
 ## 🗺️ Roadmap de Desarrollo (Pendientes)
 
 ### Fase 3: Calidad y Continuidad (SaaS)
@@ -188,10 +199,14 @@ CRM B2B moderno para el sector de la belleza (Peluquerías, Barberías, Spas).
 
 ### Fase 4: SaaS Avanzado e Inteligencia Financiera
 - [x] **Configuración de Políticas de Facturación:** Implementar toggle en `/settings` para permitir a cada negocio elegir si las comisiones de los empleados se calculan sobre el precio bruto o el precio neto (después de bonos promocionales).
-- [ ] **Historial Financiero del Cliente (LTV):** Implementar pestaña de "Facturación" en el perfil del cliente para visualizar su historial de pagos y valor de vida (B).
+- [x] **Historial Financiero del Cliente (LTV):** Implementar pestaña de "Facturación" en el perfil del cliente para visualizar su historial de pagos y valor de vida.
 - [ ] **Panel de Administrador Global (SuperAdmin):** Interfaz para gestionar todos los tenants desde una sola cuenta maestra (C).
-- [ ] **Sistema de Notificaciones (Toasts):** Reemplazar alertas nativas de navegador restantes por un sistema de notificaciones premium (Sonner/Toast) en toda la plataforma.
+- [x] **Sistema de Notificaciones (Toasts):** Reemplazar alertas nativas de navegador por un sistema de notificaciones premium (Sonner/Toast) en toda la plataforma.
 - [ ] **Onboarding Wizard:** Guía interactiva para que nuevos clientes configuren sus servicios y empleados.
+
+### Fase 5: Mantenimiento y Buenas Prácticas
+- [ ] **Limpieza de SQL Editor (Supabase):** Depurar los queries acumulados en el editor web de Supabase para mantener solo los estrictamente necesarios para operaciones diarias. Los queries estructurales ya están versionados en `database/migrations`. Esta tarea debe realizarse en un horario de bajo tráfico (ej. mañana) para evitar interrupciones.
+- [x] **Módulo de Personal (Staff):** Refactorizar el componente para permitir la edición de datos de empleados (porcentajes de comisión) y su desactivación lógica, preservando así su historial de cobros y comisiones.
 
 ## Comandos
 
@@ -200,6 +215,4 @@ CRM B2B moderno para el sector de la belleza (Peluquerías, Barberías, Spas).
 -   `npm run build`: Construir para producción
 -   `npx tsc --noEmit`: Verificación de tipos estricta
 
-### Fase 5: Mantenimiento y Buenas Prácticas
-- [ ] **Limpieza de SQL Editor (Supabase):** Depurar los queries acumulados en el editor web de Supabase para mantener solo los estrictamente necesarios para operaciones diarias. Los queries estructurales ya están versionados en `database/migrations`. Esta tarea debe realizarse en un horario de bajo tráfico (ej. mañana) para evitar interrupciones.
-- [ ] **Módulo de Personal (Staff):** Refactorizar el componente para permitir la edición de datos de empleados (porcentajes de comisión) y su desactivación lógica, preservando así su historial de cobros y comisiones.
+
