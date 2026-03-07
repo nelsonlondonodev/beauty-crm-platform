@@ -83,11 +83,15 @@ CRM B2B moderno para el sector de la belleza (Peluquerías, Barberías, Spas).
 -   **Migración Segura**: Uso de script SQL (`supabase_migracion_bonos.sql`) para transferir historial y limpiar tabla matriz.
 -   **Integración n8n Actualizada**: Todos los flujos conectados a la DB (`registro_cliente.json`, `notificaciones_bonos_cumpleanos.json`, `validacion_qr.json`) ahora apuntan a la arquitectura desacoplada. Tests *End-to-End* aprobados exitosamente.
 
-### 6. Punto de Venta (POS) y Facturación
--   **Interfaz Atómica**: Refactorización del componente principal `Billing.tsx` en subcomponentes modulares (`BillingClientSearch`, `BillingItemTable`, `BillingCheckoutSummary`).
--   **Tablas en Supabase**: Creación de la estructura relacional `facturas` y `factura_items`.
--   **Asignación de Servicios**: Capacidad de seleccionar al colaborador (empleado) que realizó cada servicio directamente en la caja, adaptando automáticamente la interfaz (`flex-grow`).
--   **Checkout Automático**: Botón interactivo "Liquidar y Cobrar" que calcula los totales, procesa y asigna las comisiones correspondientes a cada empleado, guardando todo de forma segura en la base de datos mediante `billingService.ts`.
+### 6. Punto de Venta (POS), Facturación y Recibos Ecológicos
+-   **Transaccionalidad Atómica (Reloj Suizo)**: Implementación de una función RPC en PostgreSQL (`procesar_factura_completa`) que procesa cobros, liquida ítems, redime bonos y calcula comisiones en una única transacción atómica, garantizando integridad absoluta de los datos financieros.
+-   **Cómputo de Comisiones Avanzado**: Motor de cálculo dinámico que respeta la política del tenante (`gross` vs `net`), calculando proporcionalmente las ganancias de los empleados incluso cuando se aplican bonos promocionales.
+-   **Fidelización Inteligente**: Aplicación automática de descuentos para bonos de "Cumpleaños" (15%) y "Bienvenida" (10%) durante el checkout, reduciendo el error humano en caja.
+-   **Recibo Digital Ecológico**: 
+    -   **Modal Premium**: Interfaz moderna con soporte de scroll y feedback visual de estado (Éxito/Error).
+    -   **Estrategia "Verde"**: Botones dedicados para envío instantáneo por **WhatsApp** y **Email Ecológico** (vía n8n), desincentivando el uso de papel.
+    -   **Impresión Optimizada**: Función de impresión inmaculada que genera tickets físicos limpios solo en caso estrictamente necesario.
+-   **Integración con Agenda**: Las facturas ahora se vinculan automáticamente con la tabla de `appointments`, permitiendo auditorías cruzadas entre citas y cobros reales.
 
 ### 7. Gestión de Personal (Staff) y Comisiones
 -   **Administración en Tiempo Real**: Vista conectada a Supabase para gestionar al equipo y sus ganancias (`staffService.ts` / `useStaff.ts`).
@@ -182,9 +186,11 @@ CRM B2B moderno para el sector de la belleza (Peluquerías, Barberías, Spas).
 - [ ] **Monitoreo Real:** Integrar el Logger con un servicio de captura de excepciones en producción.
 - [ ] **Documentación API:** Documentar los endpoints de Supabase y esquemas de tablas.
 
-### Fase 4: SaaS Avanzado
+### Fase 4: SaaS Avanzado e Inteligencia Financiera
 - [x] **Configuración de Políticas de Facturación:** Implementar toggle en `/settings` para permitir a cada negocio elegir si las comisiones de los empleados se calculan sobre el precio bruto o el precio neto (después de bonos promocionales).
-- [ ] **Panel de Administrador Global:** Interfaz para gestionar todos los tenants desde una sola cuenta maestra.
+- [ ] **Historial Financiero del Cliente (LTV):** Implementar pestaña de "Facturación" en el perfil del cliente para visualizar su historial de pagos y valor de vida (B).
+- [ ] **Panel de Administrador Global (SuperAdmin):** Interfaz para gestionar todos los tenants desde una sola cuenta maestra (C).
+- [ ] **Sistema de Notificaciones (Toasts):** Reemplazar alertas nativas de navegador restantes por un sistema de notificaciones premium (Sonner/Toast) en toda la plataforma.
 - [ ] **Onboarding Wizard:** Guía interactiva para que nuevos clientes configuren sus servicios y empleados.
 
 ## Comandos
