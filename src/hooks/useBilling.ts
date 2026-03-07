@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { Client } from '../types';
@@ -8,6 +8,7 @@ import { useClients } from './useClients';
 import { useStaff } from './useStaff';
 import { useTenant } from '../contexts/TenantContext';
 import { billingFormSchema, type BillingFormValues } from '../schemas/billingSchema';
+import type { InvoiceReceiptData } from '../components/billing/BillingReceiptModal';
 
 export const useBilling = () => {
   const { clients, loading: clientsLoading } = useClients();
@@ -19,6 +20,7 @@ export const useBilling = () => {
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [isSearching, setIsSearching] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [completedInvoice, setCompletedInvoice] = useState<InvoiceReceiptData | null>(null);
 
   // Zod & React Hook Form Initialization
   const form = useForm<BillingFormValues>({
@@ -74,6 +76,27 @@ export const useBilling = () => {
     return Math.max(0, subtotal - discount);
   }, [subtotal, discount]);
 
+  // Automatic discount calculator based on Bonus type
+  useEffect(() => {
+    if (appliedBonus) {
+      let percentage = 0;
+      const tipoLower = appliedBonus.tipo.toLowerCase();
+      if (tipoLower.includes('cumpleaños')) {
+        percentage = 15;
+      } else if (tipoLower.includes('bienvenida')) {
+        percentage = 10;
+      }
+
+      if (percentage > 0) {
+        const calculatedDiscount = (subtotal * percentage) / 100;
+        form.setValue('descuento_manual', calculatedDiscount);
+      }
+    } else {
+      // Si se remueve el bono, se reinicia el descuento
+      form.setValue('descuento_manual', 0);
+    }
+  }, [appliedBonus, subtotal, form]);
+
   // Handlers
   const handleSelectClient = (client: Client | null) => {
     setSelectedClient(client);
@@ -117,7 +140,7 @@ export const useBilling = () => {
   const onSubmit = async (data: BillingFormValues) => {
     setIsProcessing(true);
     try {
-      await procesarFactura({
+      const response = await procesarFactura({
         cliente_id: selectedClient?.id || null, // Priority to selectedClient to ensure sync
         subtotal,
         descuento: data.descuento_manual,
@@ -131,8 +154,18 @@ export const useBilling = () => {
         commissionPolicy: config.commissionPolicy,
       });
 
-      alert('¡Factura procesada con éxito!');
-      resetFormulario();
+      // Show receipt modal
+      setCompletedInvoice({
+        id: response.factura_id,
+        fecha: new Date().toISOString(),
+        cliente: selectedClient ? { nombre: selectedClient.nombre, telefono: selectedClient.telefono } : null,
+        metodo_pago: data.metodo_pago,
+        items: data.items.map(i => ({ description: i.description, quantity: Number(i.quantity), price: Number(i.price) })),
+        subtotal,
+        descuento: data.descuento_manual,
+        total
+      });
+
     } catch (error: unknown) {
       if (error instanceof Error) {
         alert(`Error al procesar el cobro: ${error.message}`);
@@ -207,5 +240,8 @@ export const useBilling = () => {
 
     // State
     isProcessing,
+    completedInvoice,
+    setCompletedInvoice,
+    resetFormulario,
   };
 };

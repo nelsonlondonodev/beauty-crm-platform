@@ -128,12 +128,13 @@ const BillingCheckoutSummary = ({
           <span className="font-medium">${subtotal.toLocaleString()}</span>
         </div>
         <div className="flex items-center justify-between text-gray-600">
-          <span>Descuento Manual</span>
+          <span>{appliedBonus ? 'Desc. Automático (Bono)' : 'Descuento Manual'}</span>
           <div className="flex items-center">
             <span className="mr-1">$</span>
             <input
               type="number"
-              className="focus:border-primary w-20 rounded border border-gray-300 px-2 py-1 text-right outline-none"
+              disabled={!!appliedBonus}
+              className="focus:border-primary w-24 rounded border border-gray-300 px-2 py-1 text-right outline-none disabled:bg-gray-100 disabled:text-gray-500"
               {...form.register('descuento_manual', { valueAsNumber: true })}
             />
           </div>
