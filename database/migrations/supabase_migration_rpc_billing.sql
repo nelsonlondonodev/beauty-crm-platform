@@ -15,6 +15,7 @@ CREATE OR REPLACE FUNCTION public.procesar_factura_completa(
 ) RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER -- Ejecuta con privilegios del creador (owner), previene bucles de RLS
+SET search_path = public
 AS $$
 DECLARE
     v_factura_id UUID;
