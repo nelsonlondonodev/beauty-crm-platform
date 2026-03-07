@@ -9,6 +9,7 @@ import { useStaff } from './useStaff';
 import { useTenant } from '../contexts/TenantContext';
 import { billingFormSchema, type BillingFormValues } from '../schemas/billingSchema';
 import type { InvoiceReceiptData } from '../components/billing/BillingReceiptModal';
+import { toast } from 'sonner';
 
 export const useBilling = () => {
   const { clients, loading: clientsLoading } = useClients();
@@ -172,9 +173,9 @@ export const useBilling = () => {
 
     } catch (error: unknown) {
       if (error instanceof Error) {
-        alert(`Error al procesar el cobro: ${error.message}`);
+        toast.error(`Error al procesar el cobro: ${error.message}`);
       } else {
-        alert('Ha ocurrido un error inesperado al procesar el cobro.');
+        toast.error('Ha ocurrido un error inesperado al procesar el cobro.');
       }
     } finally {
       setIsProcessing(false);
@@ -194,11 +195,11 @@ export const useBilling = () => {
         if (foundClient) handleSelectClient(foundClient);
       }
 
-      alert(`Cupón de ${bono.tipo} validado y aplicado.`);
+      toast.success(`Cupón de ${bono.tipo} validado y aplicado.`);
       setCouponCode('');
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : 'Error al validar cupón.';
-      alert(message);
+      toast.error(message);
     } finally {
       setValidatingCoupon(false);
     }

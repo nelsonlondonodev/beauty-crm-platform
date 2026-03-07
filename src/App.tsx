@@ -12,6 +12,7 @@ import Login from './pages/Login';
 import { AuthProvider } from './contexts/AuthContext';
 import { TenantProvider } from './contexts/TenantContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import { Toaster } from 'sonner';
 
 function App() {
   return (
@@ -109,6 +110,7 @@ function App() {
         </Routes>
         </TenantProvider>
       </AuthProvider>
+      <Toaster position="top-right" richColors />
     </Router>
   );
 }

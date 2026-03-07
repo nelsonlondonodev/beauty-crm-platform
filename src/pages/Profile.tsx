@@ -6,6 +6,7 @@ import { uploadAvatar, removeAvatar, updateUserInfo } from '../services/userServ
 import { getAvatarUrl } from '../lib/avatar';
 import { APP_CONFIG } from '../config/brand';
 import { logger } from '../lib/logger';
+import { toast } from 'sonner';
 
 const Profile = () => {
   const { user, role, signOut, refreshUser } = useAuth();
@@ -24,7 +25,7 @@ const Profile = () => {
     } catch (error) {
       logger.error('Error in handleAvatarUpload', error, 'Profile');
       const message = error instanceof Error ? error.message : 'Error al subir la imagen.';
-      alert(message);
+      toast.error(message);
     }
   };
 
@@ -35,7 +36,7 @@ const Profile = () => {
       await refreshUser();
     } catch (error) {
       logger.error('Error in handleAvatarRemove', error, 'Profile');
-      alert('Error al eliminar la imagen.');
+      toast.error('Error al eliminar la imagen.');
     }
   };
 
@@ -45,7 +46,7 @@ const Profile = () => {
       await refreshUser(); // Forzar actualización de metadata en la UI
     } catch (error) {
       logger.error('Error in handleUpdateName', error, 'Profile');
-      alert('Error al actualizar el nombre.');
+      toast.error('Error al actualizar el nombre.');
     }
   };
 

@@ -8,6 +8,8 @@ import { Navigate } from 'react-router-dom';
 import StaffModal from '../components/staff/StaffModal';
 import StaffTable from '../components/staff/StaffTable';
 import StaffOverview from '../components/staff/StaffOverview';
+import ConfirmDialog from '../components/ui/ConfirmDialog';
+import { toast } from 'sonner';
 
 const Staff = () => {
   const { staff, loading, error, payEmployee, payAllPending, addStaff, updateStaff } = useStaff();
@@ -15,40 +17,65 @@ const Staff = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingStaff, setEditingStaff] = useState<EmpleadoConSaldo | null>(null);
+  const [confirmState, setConfirmState] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    action: () => Promise<void>;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    action: async () => {},
+  });
 
   if (!canPerform(role, 'MANAGE_STAFF')) {
     return <Navigate to="/" replace />;
   }
 
-  const handlePayAll = async () => {
+  const handlePayAll = () => {
     const totalCommissions = staff.reduce((acc, emp) => acc + emp.saldo_pendiente, 0);
-    if (totalCommissions === 0) return alert('No hay comisiones pendientes por pagar.');
-    if (!window.confirm(`¿Estás seguro de liquidar $${totalCommissions.toLocaleString()} a todos los empleados pendientes?`)) return;
+    if (totalCommissions === 0) return toast.info('No hay comisiones pendientes por pagar.');
 
-    setIsProcessing(true);
-    const result = await payAllPending();
-    setIsProcessing(false);
+    setConfirmState({
+      isOpen: true,
+      title: 'Liquidar todas las comisiones',
+      message: `¿Estás seguro de liquidar $${totalCommissions.toLocaleString()} a todos los empleados pendientes?`,
+      action: async () => {
+        setIsProcessing(true);
+        const result = await payAllPending();
+        setIsProcessing(false);
+        setConfirmState((prev) => ({ ...prev, isOpen: false }));
 
-    if (result.success) {
-      alert('Pago masivo registrado con éxito.');
-    } else {
-      alert(`Error al registrar pagos: ${result.error}`);
-    }
+        if (result.success) {
+          toast.success('Pago masivo registrado con éxito.');
+        } else {
+          toast.error(`Error al registrar pagos: ${result.error}`);
+        }
+      },
+    });
   };
 
-  const handlePaySingle = async (empleadoId: string, monto: number, nombre: string) => {
-    if (monto === 0) return alert('No hay saldo pendiente para este empleado.');
-    if (!window.confirm(`¿Registrar pago de $${monto.toLocaleString()} a ${nombre}?`)) return;
+  const handlePaySingle = (empleadoId: string, monto: number, nombre: string) => {
+    if (monto === 0) return toast.info('No hay saldo pendiente para este empleado.');
 
-    setIsProcessing(true);
-    const result = await payEmployee(empleadoId, monto);
-    setIsProcessing(false);
+    setConfirmState({
+      isOpen: true,
+      title: `Liquidar comisión a ${nombre}`,
+      message: `¿Registrar pago de $${monto.toLocaleString()} a ${nombre}?`,
+      action: async () => {
+        setIsProcessing(true);
+        const result = await payEmployee(empleadoId, monto);
+        setIsProcessing(false);
+        setConfirmState((prev) => ({ ...prev, isOpen: false }));
 
-    if (result.success) {
-      alert('Pago registrado con éxito.');
-    } else {
-      alert(`Error al registrar pago: ${result.error}`);
-    }
+        if (result.success) {
+          toast.success('Pago registrado con éxito.');
+        } else {
+          toast.error(`Error al registrar pago: ${result.error}`);
+        }
+      },
+    });
   };
 
   const handleSaveStaff = async (data: any) => {
@@ -110,6 +137,17 @@ const Staff = () => {
         onClose={() => setIsModalOpen(false)}
         initialData={editingStaff}
         onSave={handleSaveStaff}
+      />
+
+      <ConfirmDialog
+        isOpen={confirmState.isOpen}
+        onClose={() => setConfirmState((prev) => ({ ...prev, isOpen: false }))}
+        onConfirm={confirmState.action}
+        title={confirmState.title}
+        message={confirmState.message}
+        confirmLabel="Sí, liquidar"
+        variant="warning"
+        isLoading={isProcessing}
       />
     </div>
   );

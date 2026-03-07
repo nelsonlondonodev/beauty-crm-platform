@@ -10,6 +10,7 @@ import { Search, Plus, Loader2 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import type { Client } from '../types';
 import { useSearchParams } from 'react-router-dom';
+import { toast } from 'sonner';
 
 const Clients = () => {
   const { clients, loading, addClient, updateClient, deleteClient } =
@@ -65,10 +66,10 @@ const Clients = () => {
   ) => {
     if (editingClient) {
       const result = await updateClient(editingClient.id, clientData);
-      if (!result.success) alert('Error al actualizar: ' + result.error);
+      if (!result.success) toast.error('Error al actualizar: ' + result.error);
     } else {
       const result = await addClient(clientData);
-      if (!result.success) alert('Error al guardar: ' + result.error);
+      if (!result.success) toast.error('Error al guardar: ' + result.error);
     }
     setEditingClient(null);
   };
