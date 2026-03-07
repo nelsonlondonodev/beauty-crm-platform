@@ -1,4 +1,4 @@
-import { Receipt, Trash2 } from 'lucide-react';
+import { Receipt, Trash2, Plus } from 'lucide-react';
 import type { InvoiceItem, Empleado } from '../../types';
 
 interface BillingItemTableProps {
@@ -37,8 +37,8 @@ const BillingItemTable = ({
 
       {/* Add Item Form */}
       <div className="mb-6 rounded-lg border border-gray-100 bg-gray-50 p-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4 items-end">
-          <div className="lg:col-span-3">
+        <div className="grid grid-cols-12 gap-4 items-end">
+          <div className="col-span-12 md:col-span-4 lg:col-span-3">
             <label className="mb-1 block text-xs font-medium text-gray-700">
               Colaborador
             </label>
@@ -60,7 +60,7 @@ const BillingItemTable = ({
             </select>
           </div>
           
-          <div className="lg:col-span-4">
+          <div className="col-span-12 md:col-span-8 lg:col-span-4">
             <label className="mb-1 block text-xs font-medium text-gray-700">
               Concepto / Servicio
             </label>
@@ -75,14 +75,14 @@ const BillingItemTable = ({
             />
           </div>
 
-          <div className="lg:col-span-2">
+          <div className="col-span-4 md:col-span-3 lg:col-span-2 text-center md:text-left">
             <label className="mb-1 block text-xs font-medium text-gray-700">
               Cant.
             </label>
             <input
               type="number"
               min="1"
-              className="focus:border-primary focus:ring-primary w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:ring-1 h-[38px]"
+              className="focus:border-primary focus:ring-primary w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:ring-1 h-[38px] text-center md:text-left"
               value={newItem.quantity}
               onChange={(e) =>
                 setNewItem({ ...newItem, quantity: Number(e.target.value) })
@@ -90,7 +90,7 @@ const BillingItemTable = ({
             />
           </div>
 
-          <div className="lg:col-span-2">
+          <div className="col-span-6 md:col-span-6 lg:col-span-2">
             <label className="mb-1 block text-xs font-medium text-gray-700">
               Precio Unit.
             </label>
@@ -105,13 +105,15 @@ const BillingItemTable = ({
             />
           </div>
 
-          <div className="lg:col-span-1">
+          <div className="col-span-2 md:col-span-3 lg:col-span-1">
             <button
               type="button"
               onClick={onAddItem}
-              className="h-[38px] w-full rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-800 flex items-center justify-center"
+              className="h-[38px] w-full rounded-md bg-gray-900 px-2 sm:px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-800 flex items-center justify-center"
+              title="Agregar Servicio"
             >
-              Agregar
+              <Plus className="h-5 w-5 sm:hidden" />
+              <span className="hidden sm:inline">Agregar</span>
             </button>
           </div>
         </div>
