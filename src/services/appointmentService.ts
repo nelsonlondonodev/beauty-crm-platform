@@ -154,24 +154,55 @@ export const deleteAppointment = async (id: string): Promise<void> => {
 // ── n8n Integration ─────────────────────────────────────────────────────────
 
 const notifyN8n = async (appointmentData: Appointment) => {
-  if (!N8N_WEBHOOK_URL || !appointmentData.client) return;
+  if (!N8N_WEBHOOK_URL) return;
+
+  // Si por alguna razón el join no vino (a veces pasa en inserts rápidos), 
+  // intentamos sacar los datos básicos si están disponibles.
+  let cliente_nombre = appointmentData.client?.nombre;
+  let cliente_email = appointmentData.client?.email;
+  let cliente_telefono = appointmentData.client?.whatsapp;
+
+  // Si no tenemos los datos del cliente pero tenemos el ID, intentamos una búsqueda rápida
+  // para no perder la notificación.
+  if (!cliente_nombre && appointmentData.client_id) {
+    try {
+      const { data: clientData } = await supabase
+        .from('clientes_fidelizacion')
+        .select('nombre, email, whatsapp')
+        .eq('id', appointmentData.client_id)
+        .single();
+      
+      if (clientData) {
+        cliente_nombre = clientData.nombre;
+        cliente_email = clientData.email;
+        cliente_telefono = clientData.whatsapp;
+      }
+    } catch (e) {
+      logger.error('Could not fetch client data for n8n notification', e, 'Appointments');
+    }
+  }
 
   const payload = {
     cita_id: appointmentData.id,
     fecha_cita: appointmentData.fecha_cita,
     servicio: appointmentData.servicio,
-    empleado_nombre: appointmentData.empleado?.nombre || null,
-    cliente_nombre: appointmentData.client.nombre,
-    cliente_email: appointmentData.client.email,
-    cliente_telefono: appointmentData.client.whatsapp,
+    empleado_nombre: appointmentData.empleado?.nombre || 'Personal de Narbo\'s',
+    cliente_nombre: cliente_nombre || 'Cliente',
+    cliente_email: cliente_email || null,
+    cliente_telefono: cliente_telefono || null,
+    notas: appointmentData.notas || '',
   };
 
   try {
-    await fetch(N8N_WEBHOOK_URL, {
+    const response = await fetch(N8N_WEBHOOK_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
+
+    if (!response.ok) {
+      throw new Error(`n8n webhook responded with status: ${response.status}`);
+    }
   } catch (error) {
     logger.error('Error sending webhook to n8n', error, 'Appointments');
   }

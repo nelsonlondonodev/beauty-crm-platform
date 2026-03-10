@@ -1,8 +1,3 @@
-[
-  {
-    "description": "Workflow empty structure"
-  }
-]
 {
   "name": "Confirmación de Cita - Beauty CRM",
   "nodes": [
@@ -24,10 +19,10 @@
     },
     {
       "parameters": {
-        "fromEmail": "Beauty CRM <tu-email-verificado@dominio.com>",
+        "fromEmail": "Narbo's Salón <contacto@narbossalon.com>",
         "toEmail": "={{ $json.cliente_email }}",
-        "subject": "Confirmación de Cita - Beauty CRM",
-        "html": "=Hola {{ $json.cliente_nombre }},<br><br>\nTu cita ha sido confirmada con éxito.<br><br>\n<b>Fecha:</b> {{ $json.fecha_legible }}<br>\n<b>Servicio:</b> {{ $json.servicio }}<br><br>\n¡Te esperamos!",
+        "subject": "Confirmación de Cita - Narbo's Salón",
+        "html": "=Hola <b>{{ $json.cliente_nombre }}</b>,<br><br>\nTu cita ha sido confirmada con éxito.<br><br>\n<b>Fecha:</b> {{ $json.fecha_legible }}<br>\n<b>Servicio:</b> {{ $json.servicio }}<br>\n<b>Especialista:</b> {{ $json.empleado_nombre }}<br><br>\n¡Te esperamos!",
         "options": {}
       },
       "name": "Enviar Email",
@@ -47,7 +42,7 @@
     },
     {
       "parameters": {
-        "functionCode": "// Obtener la fecha original\nconst fechaOriginal = $input.item.json.fecha_cita;\nconst fecha = new Date(fechaOriginal);\n\n// Opciones de formato\nconst opciones = { \n  weekday: 'long', \n  year: 'numeric', \n  month: 'long', \n  day: 'numeric', \n  hour: '2-digit', \n  minute: '2-digit',\n  hour12: true \n};\n\n// Crear nueva propiedad\n$input.item.json.fecha_legible = fecha.toLocaleDateString('es-ES', opciones);\n\n// Retornar TODO el item (incluyendo email, nombre, etc.)\nreturn $input.item;"
+        "functionCode": "// 1. Extraer los datos del body (donde llega el POST del CRM)\nconst body = $input.item.json.body || {};\n\n// 2. Obtener y formatear la fecha\nconst fechaOriginal = body.fecha_cita || $input.item.json.fecha_cita;\nconst fecha = new Date(fechaOriginal);\n\nconst opciones = { \n  weekday: 'long', \n  year: 'numeric', \n  month: 'long', \n  day: 'numeric', \n  hour: '2-digit', \n  minute: '2-digit',\n  hour12: true \n};\n\n// 3. Retornar un objeto plano con todos los campos en la raíz\n// Esto asegura que el nodo 'Enviar Email' vea 'cliente_email', 'servicio', etc.\nreturn {\n  json: {\n    ...body,\n    fecha_legible: isNaN(fecha.getTime()) ? 'Fecha pendiente de confirmación' : fecha.toLocaleDateString('es-CO', opciones)\n  }\n};"
       },
       "name": "Formatear Fecha",
       "type": "n8n-nodes-base.function",
