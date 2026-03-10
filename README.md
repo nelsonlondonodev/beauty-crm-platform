@@ -48,8 +48,8 @@ CRM B2B moderno para el sector de la belleza (Peluquerías, Barberías, Spas).
 -   **Funcionalidad:** CRUD completo (Crear, Leer, Actualizar, Eliminar) con soporte para IDs numéricos.
 
 ### 2. Agenda (Calendario)
--   **Tabla:** Nueva tabla `appointments` creada y vinculada mediante `client_id` (BigInt) a `clientes_fidelizacion`.
--   **Interfaz:** Calendario interactivo con vistas mensuales y gestión de citas por día.
+-   **Tabla:** Tabla `appointments` vinculada a `clientes_fidelizacion` y `empleados` mediante llaves foráneas.
+-   **Interfaz:** Calendario profesional con FullCalendar y múltiples vistas.
 -   **Características:**
     -   Visualización de citas programadas/completadas/canceladas.
     -   Creación de nuevas citas seleccionando clientes existentes.
@@ -189,6 +189,19 @@ CRM B2B moderno para el sector de la belleza (Peluquerías, Barberías, Spas).
 - **Rendimiento de Colaboradores**: Cada integrante del staff cuenta con su propio historial de servicios prestados (`/staff/:id/sales`), permitiendo al administrador auditar su productividad, comisiones generadas y clientes atendidos.
 - **Filtros de Seguridad**: El sistema de facturación ahora filtra automáticamente al personal inactivo, evitando errores en el punto de venta sin perder la integridad de los datos históricos.
 
+### 20. Agenda Profesional Multi-Colaborador (FullCalendar)
+-   **Motor de Calendario**: Migración completa del calendario artesanal a **FullCalendar** (`@fullcalendar/react`), ganando vistas profesionales (Mes, Semana, Día) con navegación fluida y locale en español.
+-   **Vista por Colaborador (Resources)**: Implementación de `resourceTimeGridDay` que muestra columnas paralelas por cada miembro del staff, permitiendo gestionar agendas individuales simultáneamente sin colisiones.
+-   **Filtro de Staff (`StaffFilter`)**: Panel lateral colapsable con paleta de colores determinística por colaborador (blue, purple, emerald, amber, etc.), permitiendo filtrar visualmente las citas por miembro del equipo.
+-   **Modal Unificado (`AppointmentModal`)**: Interfaz única para crear y editar citas con soporte para:
+    -   Asignación de **colaborador** responsable.
+    -   Selección de **duración** configurable (30min, 45min, 1h, 1h30, 2h).
+    -   Campo de **notas** (preparado para contexto de chatbot n8n).
+    -   **Cambio de estado** visual (Programada / Completada / Cancelada) con eliminación segura.
+-   **Theming Consistente (`calendarStyles.css`)**: Override estético completo de FullCalendar adaptado al design system del CRM (purple primary, Tailwind borders, shadows, responsive mobile).
+-   **Migración de Base de Datos**: Extensión de la tabla `appointments` con columnas `empleado_id` (FK a `empleados`), `duracion_minutos` y `notas`, incluyendo índice de rendimiento.
+-   **Preparación para n8n/Chatbot**: Webhook payload extendido con `empleado_nombre` e interfaz `CreateAppointmentPayload` lista para integración directa con flujos de automatización.
+
 ## 🗺️ Roadmap de Desarrollo (Pendientes)
 
 ### Fase 3: Calidad y Continuidad (SaaS)
@@ -203,6 +216,7 @@ CRM B2B moderno para el sector de la belleza (Peluquerías, Barberías, Spas).
 - [ ] **Panel de Administrador Global (SuperAdmin):** Interfaz para gestionar todos los tenants desde una sola cuenta maestra (C).
 - [x] **Sistema de Notificaciones (Toasts):** Reemplazar alertas nativas de navegador por un sistema de notificaciones premium (Sonner/Toast) en toda la plataforma.
 - [ ] **Onboarding Wizard:** Guía interactiva para que nuevos clientes configuren sus servicios y empleados.
+- [x] **Agenda Multi-Colaborador:** Implementar calendario profesional con FullCalendar, vistas por colaborador y preparación para integración con chatbot n8n.
 
 ### Fase 5: Mantenimiento y Buenas Prácticas
 - [ ] **Limpieza de SQL Editor (Supabase):** Depurar los queries acumulados en el editor web de Supabase para mantener solo los estrictamente necesarios para operaciones diarias. Los queries estructurales ya están versionados en `database/migrations`. Esta tarea debe realizarse en un horario de bajo tráfico (ej. mañana) para evitar interrupciones.
