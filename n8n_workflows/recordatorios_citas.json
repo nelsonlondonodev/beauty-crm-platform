@@ -242,14 +242,17 @@
     },
     {
       "parameters": {
-        "fieldsUi": {
-          "fieldValues": [
+        "assignments": {
+          "assignments": [
             {
-              "fieldId": "reminder_type",
-              "fieldValue": "24h"
+              "id": "assign-24h",
+              "name": "reminder_type",
+              "value": "24h",
+              "type": "string"
             }
           ]
-        }
+        },
+        "options": {}
       },
       "id": "eb3226db-e962-4cad-8c65-8db55df314eb",
       "name": "Etiqueta: 24h",
@@ -262,14 +265,17 @@
     },
     {
       "parameters": {
-        "fieldsUi": {
-          "fieldValues": [
+        "assignments": {
+          "assignments": [
             {
-              "fieldId": "reminder_type",
-              "fieldValue": "2h"
+              "id": "assign-2h",
+              "name": "reminder_type",
+              "value": "2h",
+              "type": "string"
             }
           ]
-        }
+        },
+        "options": {}
       },
       "id": "84478f7e-d30d-45e0-8208-a15d6c818818",
       "name": "Etiqueta: 2h",
