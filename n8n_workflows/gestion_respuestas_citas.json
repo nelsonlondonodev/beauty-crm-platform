@@ -3,7 +3,9 @@
   "nodes": [
     {
       "parameters": {
+        "httpMethod": "GET",
         "path": "confirmar-cita",
+        "responseMode": "responseNode",
         "options": {}
       },
       "name": "Webhook: Confirmar",
@@ -17,7 +19,9 @@
     },
     {
       "parameters": {
+        "httpMethod": "GET",
         "path": "cancelar-cita",
+        "responseMode": "responseNode",
         "options": {}
       },
       "name": "Webhook: Cancelar",
@@ -89,9 +93,9 @@
     },
     {
       "parameters": {
-        "options": {
-          "redirectUrl": "https://narbossalon.com/agradecimiento-cita"
-        }
+        "respondWith": "redirect",
+        "redirectUrl": "https://narbossalon.com/agradecimiento-cita",
+        "options": {}
       },
       "name": "Responder: Confirmación",
       "type": "n8n-nodes-base.respondToWebhook",
@@ -104,8 +108,17 @@
     },
     {
       "parameters": {
+        "respondWith": "text",
+        "responseBody": "<h1>Cita Cancelada</h1><p>Tu cita ha sido cancelada correctamente. Esperamos verte pronto en otra ocasión.</p>",
         "options": {
-          "body": "<h1>Cita Cancelada</h1><p>Tu cita ha sido cancelada correctamente. Esperamos verte pronto en otra ocasión.</p>"
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Content-Type",
+                "value": "text/html"
+              }
+            ]
+          }
         }
       },
       "name": "Responder: Cancelación",
