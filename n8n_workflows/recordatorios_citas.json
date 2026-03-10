@@ -1,0 +1,379 @@
+{
+  "name": "Recordatorios de Citas - Beauty CRM",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 30
+            }
+          ]
+        }
+      },
+      "name": "Cron (Cada 30 min)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [
+        260,
+        340
+      ],
+      "id": "cron-recordatorios"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "appointments",
+        "returnAll": true,
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "estado",
+              "condition": "eq",
+              "keyValue": "programada"
+            }
+          ]
+        }
+      },
+      "name": "Supabase: Buscar Citas Próximas",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        480,
+        340
+      ],
+      "id": "buscar-citas",
+      "credentials": {
+        "supabaseApi": {
+          "id": "5hkYuZVAhznvx7lf",
+          "name": "Supabase Fidelizacion Narbo's Pro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "cond-24h",
+              "leftValue": "={{ (new Date($json.fecha_cita).getTime() - new Date().getTime()) / 36e5 }}",
+              "rightValue": "24.5",
+              "operator": {
+                "type": "number",
+                "operation": "smaller"
+              }
+            },
+            {
+              "id": "cond-24h-min",
+              "leftValue": "={{ (new Date($json.fecha_cita).getTime() - new Date().getTime()) / 36e5 }}",
+              "rightValue": "23",
+              "operator": {
+                "type": "number",
+                "operation": "larger"
+              }
+            },
+            {
+              "id": "cond-not-sent",
+              "leftValue": "={{ $json.reminder_24h_sent }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "boolean",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "name": "Filter: ¿Faltan 24h?",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        700,
+        240
+      ],
+      "id": "filter-24h"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "cond-2h",
+              "leftValue": "={{ (new Date($json.fecha_cita).getTime() - new Date().getTime()) / 36e5 }}",
+              "rightValue": "2.5",
+              "operator": {
+                "type": "number",
+                "operation": "smaller"
+              }
+            },
+            {
+              "id": "cond-2h-min",
+              "leftValue": "={{ (new Date($json.fecha_cita).getTime() - new Date().getTime()) / 36e5 }}",
+              "rightValue": "1.5",
+              "operator": {
+                "type": "number",
+                "operation": "larger"
+              }
+            },
+            {
+              "id": "cond-not-sent-2h",
+              "leftValue": "={{ $json.reminder_2h_sent }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "boolean",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "name": "Filter: ¿Faltan 2h?",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        700,
+        440
+      ],
+      "id": "filter-2h"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "clientes_fidelizacion",
+        "limit": 1,
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $json.client_id }}"
+            }
+          ]
+        }
+      },
+      "name": "Supabase: Datos Cliente",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        340
+      ],
+      "id": "datos-cliente",
+      "credentials": {
+        "supabaseApi": {
+          "id": "5hkYuZVAhznvx7lf",
+          "name": "Supabase Fidelizacion Narbo's Pro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "Narbo's Salón <contacto@narbossalon.com>",
+        "toEmail": "={{ $json.email }}",
+        "subject": "⏰ Recordatorio de tu cita en Narbo's",
+        "html": "=<!DOCTYPE html>\n<html>\n<body style=\"font-family: 'Montserrat', Arial, sans-serif; line-height: 1.6; color: #333; background-color: #f7f7f7; padding: 20px;\">\n    <div style=\"max-width: 600px; margin: 0 auto; padding: 40px 20px; border-radius: 12px; background-color: #ffffff; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center;\">\n        <img src=\"https://narbossalon.com/images/brand/logo_narbos.png\" alt=\"Narbo's Salón\" width=\"180\" style=\"margin-bottom: 20px;\">\n        <h2 style=\"color: #6B755A; font-family: 'Playfair Display', serif;\">¡Te esperamos pronto! ⏰</h2>\n        <p style=\"font-size: 16px;\">Hola <b>{{ $json.nombre }}</b>,</p>\n        <p>Este es un recordatorio de tu cita agendada en <b>Narbo's Salón Spa</b>:</p>\n        \n        <div style=\"background: #f9f9f9; padding: 25px; border-radius: 20px; border: 1px solid #6B755A; display: inline-block; margin: 20px 0; text-align: left;\">\n            <p style=\"margin: 5px 0;\">✨ <b>Servicio:</b> {{ $node['Supabase: Buscar Citas Próximas'].json.servicio }}</p>\n            <p style=\"margin: 5px 0;\">📅 <b>Fecha:</b> {{ new Date($node['Supabase: Buscar Citas Próximas'].json.fecha_cita).toLocaleString('es-ES', { dateStyle: 'full', timeStyle: 'short' }) }}</p>\n        </div>\n\n        <p style=\"font-weight: 600; margin-top: 20px;\">¿Confirmas tu asistencia?</p>\n        <div style=\"margin-top: 25px;\">\n            <a href=\"https://n8n.srv1033442.hstgr.cloud/webhook/confirmar-cita?id={{ $node['Supabase: Buscar Citas Próximas'].json.id }}\" style=\"background: #6B755A; color: white; padding: 14px 28px; text-decoration: none; border-radius: 30px; margin: 5px; display: inline-block; font-weight: 600;\">✅ Sí, allí estaré</a>\n            <br><br>\n            <a href=\"https://wa.me/573123462618?text=Hola%20Narbo's!%20Me%20gustaría%20reprogramar%20mi%20cita%20de%20{{ $node['Supabase: Buscar Citas Próximas'].json.servicio }}.\" style=\"background: #5B4636; color: white; padding: 10px 20px; text-decoration: none; border-radius: 30px; margin: 5px; display: inline-block; font-size: 14px;\">📅 Reprogramar</a>\n            <a href=\"https://n8n.srv1033442.hstgr.cloud/webhook/cancelar-cita?id={{ $node['Supabase: Buscar Citas Próximas'].json.id }}\" style=\"background: #cc0000; color: white; padding: 10px 20px; text-decoration: none; border-radius: 30px; margin: 5px; display: inline-block; font-size: 14px;\">❌ Cancelar cita</a>\n        </div>\n        <p style=\"font-size: 12px; color: #999; margin-top: 30px;\">Si necesitas cambiar algo, por favor avísanos con tiempo. ¡Gracias!</p>\n    </div>\n</body>\n</html>"
+      },
+      "name": "Enviar Email Recordatorio",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1340,
+        340
+      ],
+      "id": "email-recordatorio",
+      "credentials": {
+        "smtp": {
+          "id": "lHxckxi50jQr6fuv",
+          "name": "Correo: contacto@narbossalon.com"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "appointments",
+        "id": "={{ $node['Supabase: Buscar Citas Próximas'].json.id }}",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "reminder_24h_sent",
+              "fieldValue": "={{ $node['Etiqueta: 24h'].json.reminder_type === '24h' || $node['Supabase: Buscar Citas Próximas'].json.reminder_24h_sent }}"
+            },
+            {
+              "fieldId": "reminder_2h_sent",
+              "fieldValue": "={{ $node['Etiqueta: 2h'].json.reminder_type === '2h' || $node['Supabase: Buscar Citas Próximas'].json.reminder_2h_sent }}"
+            }
+          ]
+        }
+      },
+      "name": "Supabase: Marcar como Enviado",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1560,
+        340
+      ],
+      "id": "marcar-enviado",
+      "credentials": {
+        "supabaseApi": {
+          "id": "5hkYuZVAhznvx7lf",
+          "name": "Supabase Fidelizacion Narbo's Pro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "reminder_type",
+              "fieldValue": "24h"
+            }
+          ]
+        }
+      },
+      "id": "eb3226db-e962-4cad-8c65-8db55df314eb",
+      "name": "Etiqueta: 24h",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.2,
+      "position": [
+        920,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "reminder_type",
+              "fieldValue": "2h"
+            }
+          ]
+        }
+      },
+      "id": "84478f7e-d30d-45e0-8208-a15d6c818818",
+      "name": "Etiqueta: 2h",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.2,
+      "position": [
+        920,
+        440
+      ]
+    }
+  ],
+  "connections": {
+    "Cron (Cada 30 min)": {
+      "main": [
+        [
+          {
+            "node": "Supabase: Buscar Citas Próximas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase: Buscar Citas Próximas": {
+      "main": [
+        [
+          {
+            "node": "Filter: ¿Faltan 24h?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Filter: ¿Faltan 2h?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter: ¿Faltan 24h?": {
+      "main": [
+        [
+          {
+            "node": "Etiqueta: 24h",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter: ¿Faltan 2h?": {
+      "main": [
+        [
+          {
+            "node": "Etiqueta: 2h",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Etiqueta: 24h": {
+      "main": [
+        [
+          {
+            "node": "Supabase: Datos Cliente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Etiqueta: 2h": {
+      "main": [
+        [
+          {
+            "node": "Supabase: Datos Cliente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase: Datos Cliente": {
+      "main": [
+        [
+          {
+            "node": "Enviar Email Recordatorio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar Email Recordatorio": {
+      "main": [
+        [
+          {
+            "node": "Supabase: Marcar como Enviado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

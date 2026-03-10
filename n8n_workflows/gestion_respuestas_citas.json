@@ -1,0 +1,167 @@
+{
+  "name": "Gestión de Respuestas de Citas - Beauty CRM",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "confirmar-cita",
+        "options": {}
+      },
+      "name": "Webhook: Confirmar",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        100,
+        100
+      ],
+      "id": "webhook-confirmar"
+    },
+    {
+      "parameters": {
+        "path": "cancelar-cita",
+        "options": {}
+      },
+      "name": "Webhook: Cancelar",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        100,
+        300
+      ],
+      "id": "webhook-cancelar"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "appointments",
+        "id": "={{ $json.query.id }}",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "estado",
+              "fieldValue": "confirmada"
+            }
+          ]
+        }
+      },
+      "name": "Supabase: Confirmar Cita",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        400,
+        100
+      ],
+      "id": "db-confirmar",
+      "credentials": {
+        "supabaseApi": {
+          "id": "5hkYuZVAhznvx7lf",
+          "name": "Supabase Fidelizacion Narbo's Pro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "appointments",
+        "id": "={{ $json.query.id }}",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "estado",
+              "fieldValue": "cancelada"
+            }
+          ]
+        }
+      },
+      "name": "Supabase: Cancelar Cita",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        400,
+        300
+      ],
+      "id": "db-cancelar",
+      "credentials": {
+        "supabaseApi": {
+          "id": "5hkYuZVAhznvx7lf",
+          "name": "Supabase Fidelizacion Narbo's Pro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "redirectUrl": "https://narbossalon.com/agradecimiento-cita"
+        }
+      },
+      "name": "Responder: Confirmación",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        700,
+        100
+      ],
+      "id": "resp-confirmar"
+    },
+    {
+      "parameters": {
+        "options": {
+          "body": "<h1>Cita Cancelada</h1><p>Tu cita ha sido cancelada correctamente. Esperamos verte pronto en otra ocasión.</p>"
+        }
+      },
+      "name": "Responder: Cancelación",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        700,
+        300
+      ],
+      "id": "resp-cancelar"
+    }
+  ],
+  "connections": {
+    "Webhook: Confirmar": {
+      "main": [
+        [
+          {
+            "node": "Supabase: Confirmar Cita",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook: Cancelar": {
+      "main": [
+        [
+          {
+            "node": "Supabase: Cancelar Cita",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase: Confirmar Cita": {
+      "main": [
+        [
+          {
+            "node": "Responder: Confirmación",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase: Cancelar Cita": {
+      "main": [
+        [
+          {
+            "node": "Responder: Cancelación",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
