@@ -51,11 +51,33 @@ export interface ClientDbRow {
 export interface Appointment {
   id: string;
   user_id?: string;
-  cliente_id: string;
+  client_id: string;
+  empleado_id?: string | null;
   fecha_cita: string;
+  hora_inicio?: string;
+  duracion_minutos?: number;
   servicio: string;
+  notas?: string;
   estado: 'programada' | 'completada' | 'cancelada';
   pago_estado: 'pagado' | 'pendiente';
+  // Joined relations (read-only)
+  client?: { nombre: string; email: string; whatsapp: string };
+  empleado?: { id: string; nombre: string } | null;
+}
+
+/** Appointment mapped to FullCalendar event format */
+export interface CalendarEvent {
+  id: string;
+  title: string;
+  start: string;
+  end: string;
+  resourceId?: string;
+  extendedProps: {
+    appointment: Appointment;
+    clientName: string;
+    staffName: string;
+    status: Appointment['estado'];
+  };
 }
 
 // ── Facturación ───────────────────────────────────────────────────────────

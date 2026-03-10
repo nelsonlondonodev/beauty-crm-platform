@@ -1,158 +1,191 @@
-import {
-  format,
-  startOfMonth,
-  endOfMonth,
-  startOfWeek,
-  endOfWeek,
-  eachDayOfInterval,
-  isSameMonth,
-  isSameDay,
-  addMonths,
-  subMonths,
-} from 'date-fns';
-import { es } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
-import type { Appointment } from '../../types';
+import { useRef, useEffect, useMemo } from 'react';
+import FullCalendar from '@fullcalendar/react';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import timeGridPlugin from '@fullcalendar/timegrid';
+import interactionPlugin from '@fullcalendar/interaction';
+import resourceTimeGridPlugin from '@fullcalendar/resource-timegrid';
+import type { EventClickArg, DateSelectArg, DatesSetArg } from '@fullcalendar/core';
+import type { CalendarEvent, Empleado } from '../../types';
+import { getStaffHexColor } from './StaffFilter';
+import './calendarStyles.css';
+
+// ── Types ───────────────────────────────────────────────────────────────────
+
+type ViewType = 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'resourceTimeGridDay';
 
 interface CalendarViewProps {
-  currentDate: Date;
-  onDateChange: (date: Date) => void;
-  appointments: Appointment[];
-  onAddAppointment: (date: Date) => void;
+  events: CalendarEvent[];
+  staff: Empleado[];
+  selectedStaffIds: string[];
+  currentView: ViewType;
+  onViewChange: (view: ViewType) => void;
+  onDateRangeChange: (date: Date, view: ViewType) => void;
+  onEventClick: (appointmentId: string) => void;
+  onDateSelect: (start: Date, end: Date, staffId?: string) => void;
 }
 
+// ── Helpers ─────────────────────────────────────────────────────────────────
+
+const buildResources = (staff: Empleado[], selectedIds: string[]) =>
+  staff
+    .filter((s) => s.activo && selectedIds.includes(s.id))
+    .map((s, index) => ({
+      id: s.id,
+      title: s.nombre,
+      eventColor: getStaffHexColor(index),
+    }));
+
+const STATUS_COLORS: Record<string, string> = {
+  programada: '#3b82f6',
+  completada: '#22c55e',
+  cancelada: '#ef4444',
+};
+
+const buildEvents = (events: CalendarEvent[], selectedIds: string[], staffList: Empleado[]) =>
+  events
+    .filter((e) => {
+      // If no staff assigned, show for all
+      if (!e.resourceId) return true;
+      return selectedIds.includes(e.resourceId);
+    })
+    .map((e) => {
+      const staffIndex = staffList.findIndex((s) => s.id === e.resourceId);
+      const hasStaffColor = staffIndex >= 0;
+
+      return {
+        ...e,
+        backgroundColor: hasStaffColor
+          ? getStaffHexColor(staffIndex)
+          : STATUS_COLORS[e.extendedProps.status] || '#3b82f6',
+        borderColor: 'transparent',
+        textColor: '#1f2937',
+        classNames: [`fc-event--${e.extendedProps.status}`],
+      };
+    });
+
+// ── Component ───────────────────────────────────────────────────────────────
+
 const CalendarView = ({
-  currentDate,
-  onDateChange,
-  appointments,
-  onAddAppointment,
+  events,
+  staff,
+  selectedStaffIds,
+  currentView,
+  onViewChange,
+  onDateRangeChange,
+  onEventClick,
+  onDateSelect,
 }: CalendarViewProps) => {
-  const monthStart = startOfMonth(currentDate);
-  const monthEnd = endOfMonth(monthStart);
-  const startDate = startOfWeek(monthStart, { weekStartsOn: 1 }); // Monday start
-  const endDate = endOfWeek(monthEnd, { weekStartsOn: 1 });
+  const calendarRef = useRef<FullCalendar>(null);
 
-  const dateFormat = 'd';
+  const isResourceView = currentView === 'resourceTimeGridDay';
 
-  const nextMonth = () => onDateChange(addMonths(currentDate, 1));
-  const prevMonth = () => onDateChange(subMonths(currentDate, 1));
+  // Sync external view changes to FullCalendar API
+  useEffect(() => {
+    const api = calendarRef.current?.getApi();
+    if (api && api.view.type !== currentView) {
+      api.changeView(currentView);
+    }
+  }, [currentView]);
 
-  const weekDays = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+  const resources = useMemo(
+    () => buildResources(staff, selectedStaffIds),
+    [staff, selectedStaffIds]
+  );
 
-  // Generate days
-  const allDays = eachDayOfInterval({
-    start: startDate,
-    end: endDate,
-  });
+  const mappedEvents = useMemo(
+    () => buildEvents(events, selectedStaffIds, staff),
+    [events, selectedStaffIds, staff]
+  );
+
+  // ── Handlers ────────────────────────────────────────────────────────────
+
+  const handleEventClick = (info: EventClickArg) => {
+    onEventClick(info.event.id);
+  };
+
+  const handleDateSelect = (info: DateSelectArg) => {
+    const resourceId = (info as DateSelectArg & { resource?: { id: string } }).resource?.id;
+    onDateSelect(info.start, info.end, resourceId);
+  };
+
+  const handleDatesSet = (info: DatesSetArg) => {
+    const midDate = new Date((info.start.getTime() + info.end.getTime()) / 2);
+    const viewType = info.view.type as ViewType;
+    onDateRangeChange(midDate, viewType);
+  };
+
+  const handleViewChange = (info: { view: { type: string } }) => {
+    onViewChange(info.view.type as ViewType);
+  };
+
+  // ── Render ──────────────────────────────────────────────────────────────
 
   return (
     <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-      {/* Header */}
-      <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
-        <h2 className="text-lg font-semibold text-gray-800 capitalize">
-          {format(currentDate, 'MMMM yyyy', { locale: es })}
-        </h2>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={prevMonth}
-            className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </button>
-          <button
-            onClick={() => onDateChange(new Date())}
-            className="text-primary hover:bg-primary/5 rounded-md px-3 py-1 text-sm font-medium transition-colors"
-          >
-            Hoy
-          </button>
-          <button
-            onClick={nextMonth}
-            className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
-          >
-            <ChevronRight className="h-5 w-5" />
-          </button>
-        </div>
-      </div>
-
-      {/* Days Header */}
-      <div className="grid grid-cols-7 border-b border-gray-100 bg-gray-50/50">
-        {weekDays.map((d) => (
-          <div
-            key={d}
-            className="py-2 text-center text-xs font-semibold tracking-wider text-gray-500 uppercase"
-          >
-            {d}
-          </div>
-        ))}
-      </div>
-
-      {/* Calendar Grid */}
-      <div className="grid auto-rows-fr grid-cols-7 gap-px border-b border-gray-200 bg-gray-200">
-        {allDays.map((dayItem) => {
-          const isCurrentMonth = isSameMonth(dayItem, monthStart);
-          const isToday = isSameDay(dayItem, new Date());
-
-          // Filter appointments for this day
-          const dayAppointments = appointments.filter((apt) =>
-            isSameDay(new Date(apt.fecha_cita), dayItem)
-          );
-
+      <FullCalendar
+        ref={calendarRef}
+        plugins={[
+          dayGridPlugin,
+          timeGridPlugin,
+          interactionPlugin,
+          resourceTimeGridPlugin,
+        ]}
+        initialView={currentView}
+        locale="es"
+        firstDay={1}
+        headerToolbar={{
+          left: 'prev,today,next',
+          center: 'title',
+          right: 'dayGridMonth,timeGridWeek,timeGridDay',
+        }}
+        buttonText={{
+          today: 'Hoy',
+          month: 'Mes',
+          week: 'Semana',
+          day: 'Día',
+        }}
+        /* Resources */
+        resources={isResourceView ? resources : undefined}
+        /* Events */
+        events={mappedEvents}
+        /* Interaction */
+        editable={false}
+        selectable={true}
+        selectMirror={true}
+        select={handleDateSelect}
+        eventClick={handleEventClick}
+        /* Date navigation */
+        datesSet={handleDatesSet}
+        viewDidMount={handleViewChange}
+        /* Time config */
+        slotMinTime="07:00:00"
+        slotMaxTime="22:00:00"
+        slotDuration="00:30:00"
+        allDaySlot={false}
+        nowIndicator={true}
+        /* Display */
+        dayMaxEvents={3}
+        eventDisplay="block"
+        height="auto"
+        contentHeight="auto"
+        stickyHeaderDates={true}
+        /* Event content */
+        eventContent={(arg) => {
+          const { status, clientName } = arg.event.extendedProps as CalendarEvent['extendedProps'];
+          const isCancelled = status === 'cancelada';
           return (
             <div
-              key={dayItem.toString()}
-              className={`group relative flex min-h-[120px] flex-col gap-1 bg-white p-2 transition-colors hover:bg-gray-50 ${
-                !isCurrentMonth
-                  ? 'bg-gray-50/30 text-gray-400'
-                  : 'text-gray-900'
+              className={`flex flex-col gap-0.5 overflow-hidden px-1 py-0.5 ${
+                isCancelled ? 'line-through opacity-60' : ''
               }`}
-              onClick={() => onAddAppointment(dayItem)}
             >
-              <div className="flex items-start justify-between">
-                <span
-                  className={`flex h-7 w-7 items-center justify-center rounded-full text-sm font-medium ${
-                    isToday ? 'bg-primary text-white shadow-sm' : ''
-                  }`}
-                >
-                  {format(dayItem, dateFormat)}
-                </span>
-                <button
-                  className="hover:bg-primary/10 text-primary rounded p-1 opacity-0 transition-opacity group-hover:opacity-100"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onAddAppointment(dayItem);
-                  }}
-                >
-                  <Plus className="h-3 w-3" />
-                </button>
-              </div>
-
-              <div className="scrollbar-thin flex max-h-[80px] flex-1 flex-col gap-1 overflow-y-auto">
-                {dayAppointments.map((apt) => (
-                  <div
-                    key={apt.id}
-                    className={`cursor-pointer truncate rounded border border-l-2 p-1.5 text-xs shadow-sm transition-transform hover:scale-[1.02] ${
-                      apt.estado === 'completada'
-                        ? 'border-green-200 border-l-green-500 bg-green-50 text-green-700'
-                        : apt.estado === 'cancelada'
-                          ? 'decoration-line-through border-red-200 border-l-red-500 bg-red-50 text-red-700 opacity-70'
-                          : 'border-blue-200 border-l-blue-500 bg-blue-50 text-blue-700'
-                    }`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                    }}
-                    title={`${format(new Date(apt.fecha_cita), 'HH:mm')} - ${apt.servicio}`}
-                  >
-                    <span className="font-semibold">
-                      {format(new Date(apt.fecha_cita), 'HH:mm')}
-                    </span>{' '}
-                    {apt.servicio}
-                  </div>
-                ))}
-              </div>
+              <span className="text-[11px] font-semibold">{arg.timeText}</span>
+              <span className="truncate text-[11px] font-medium">{arg.event.title}</span>
+              <span className="truncate text-[10px] opacity-75">{clientName}</span>
             </div>
           );
-        })}
-      </div>
+        }}
+      />
     </div>
   );
 };
