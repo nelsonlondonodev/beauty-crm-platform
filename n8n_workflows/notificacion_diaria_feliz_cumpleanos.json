@@ -15,7 +15,10 @@
       "name": "Cron Diario (9 AM)",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1,
-      "position": [1360, 420]
+      "position": [
+        1360,
+        420
+      ]
     },
     {
       "parameters": {
@@ -28,7 +31,10 @@
       "name": "Supabase: Buscar Clientes",
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
-      "position": [1616, 192],
+      "position": [
+        1616,
+        192
+      ],
       "credentials": {
         "supabaseApi": {
           "id": "5hkYuZVAhznvx7lf",
@@ -63,7 +69,10 @@
       },
       "type": "n8n-nodes-base.filter",
       "typeVersion": 2.3,
-      "position": [1824, 192],
+      "position": [
+        1824,
+        192
+      ],
       "id": "5db1cf12-7768-4147-ad49-63c5438e8f7b",
       "name": "Filtrar Cumpleaños Hoy"
     },
@@ -90,7 +99,10 @@
       },
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
-      "position": [2048, 192],
+      "position": [
+        2032,
+        192
+      ],
       "id": "d02e24ba-21ca-42c3-847a-b545359cae5f",
       "name": "Supabase: Verificar Estado Bono",
       "credentials": {
@@ -112,13 +124,12 @@
           },
           "conditions": [
             {
-              "id": "f38bac5b-b02b-41f6-ba0b-59865e2a188e",
-              "leftValue": "={{ $json.estado }}",
-              "rightValue": "Canjeado",
+              "id": "f38bac5b-b02b-41f6-ba0b-59865e2a188f",
+              "leftValue": "={{ $json.id ? 'EXISTE' : 'NO-EXISTE' }}",
+              "rightValue": "EXISTE",
               "operator": {
                 "type": "string",
-                "operation": "equals",
-                "name": "filter.operator.equals"
+                "operation": "equals"
               }
             }
           ],
@@ -128,9 +139,45 @@
       },
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
-      "position": [2256, 192],
-      "id": "5721598a-bb0f-4821-aa88-66fc4ea15874",
-      "name": "¿Bono ya Canjeado?"
+      "position": [
+        2256,
+        192
+      ],
+      "id": "if-tiene-bono",
+      "name": "¿Ya tiene Bono?"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "f38bac5b-b02b-41f6-ba0b-59865e2a188e",
+              "leftValue": "={{ $json.estado }}",
+              "rightValue": "Canjeado",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2480,
+        96
+      ],
+      "id": "if-bono-canjeado",
+      "name": "¿Bono Canjeado?"
     },
     {
       "parameters": {
@@ -145,7 +192,10 @@
       "name": "Email: Felicitación (Bono ya usado)",
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2,
-      "position": [2496, 96],
+      "position": [
+        2720,
+        0
+      ],
       "webhookId": "cf036a87-e453-40c9-9c77-a0af663ce681",
       "credentials": {
         "smtp": {
@@ -160,14 +210,17 @@
         "toEmail": "={{ $('Filtrar Cumpleaños Hoy').item.json.email }}",
         "subject": "¡Feliz Cumpleaños! Tu bono te espera 🎂🎁",
         "emailFormat": "html",
-        "html": "=<!DOCTYPE html>\n<html lang=\"es\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n</head>\n<body style=\"margin: 0; padding: 0; font-family: 'Montserrat', sans-serif; background-color: #f7f7f7;\">\n    <div style=\"max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05);\">\n        <div style=\"background-color: #6B755A; padding: 40px 20px; text-align: center;\">\n            <img src=\"https://narbossalon.com/images/brand/logo_narbos.png\" alt=\"Narbo's Salón\" width=\"200\" style=\"height: auto; max-width: 200px; margin-bottom: 20px;\">\n            <h1 style=\"font-family: 'Playfair Display', serif; color: #ffffff; margin: 0; font-size: 24px;\">¡Tu día especial merece brillar! 🎂</h1>\n        </div>\n        <div style=\"padding: 40px 30px; text-align: center;\">\n            <p style=\"font-size: 16px; line-height: 1.6; color: #666666; margin-bottom: 30px;\">\n                Hola <b>{{ $('Filtrar Cumpleaños Hoy').item.json[\"nombre\"] }}</b>,<br><br>\n                En Narbo's Salón Spa queremos celebrar tu vida. ¡Hoy es tu día y queremos recordarte que tienes un <b>bono de cumpleaños</b> esperándote!\n            </p>\n            <div style=\"background-color: #f9f9f9; padding: 25px; border-radius: 20px; border: 2px solid #6B755A; display: inline-block; margin-bottom: 30px;\">\n                <p style=\"margin: 0; font-size: 14px; color: #888888; text-transform: uppercase;\">🎁 Bono de 15% de descuento</p>\n                <p style=\"margin: 10px 0 0 0; font-size: 18px; font-weight: 600; color: #5B4636;\">Código: {{ $json[\"codigo\"] }}</p>\n                <div style=\"margin-top: 15px; text-align: center;\">\n                    <div style=\"display: inline-block; padding: 15px; background-color: #ffffff; border: 1px solid #eeeeee; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);\">\n                        <img src=\"https://api.qrserver.com/v1/create-qr-code/?data={{ encodeURIComponent('https://n8n.srv1033442.hstgr.cloud/webhook/canje-QR?code=' + $json['codigo']) }}&size=200x200&format=png&bgcolor=ffffff&qzone=1\" alt=\"Código QR de tu Bono\" width=\"200\" height=\"200\" style=\"display: block; border: 0; outline: none; text-decoration: none;\">\n                    </div>\n                    <p style=\"font-size: 13px; color: #999999; margin-top: 10px;\">Escanea este código en el salón</p>\n                </div>\n            </div>\n            <p style=\"font-size: 14px; color: #999999; margin-bottom: 30px;\">Válido durante todo tu mes de cumpleaños en cualquiera de nuestros servicios.</p>\n            <a href=\"https://wa.me/573123462618?text=Hola%20Narbo's!%20Hoy%20cumplo%20a%C3%B1os%20y%20me%20gustar%C3%ADa%20reservar%20mi%20cita%20con%20el%20bono%20de%20regalo.\" style=\"display: inline-block; background-color: #6B755A; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 30px; font-weight: 600;\">Reclamar mi regalo de cumple</a>\n        </div>\n        <div style=\"background-color: #333333; color: #ffffff; padding: 20px; text-align: center; font-size: 11px;\">\n            <p><strong>*Condiciones:</strong> Válido para 1 solo uso. No acumulable con otras promociones o cupones.</p>\n            <p style=\"margin-top: 5px;\">© 2026 Narbo's Salón Spa &bull; Chía, Cundinamarca.</p>\n        </div>\n    </div>\n</body>\n</html>\n",
+        "html": "=<!DOCTYPE html>\n<html lang=\"es\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n</head>\n<body style=\"margin: 0; padding: 0; font-family: 'Montserrat', sans-serif; background-color: #f7f7f7;\">\n    <div style=\"max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05);\">\n        <div style=\"background-color: #6B755A; padding: 40px 20px; text-align: center;\">\n            <img src=\"https://narbossalon.com/images/brand/logo_narbos.png\" alt=\"Narbo's Salón\" width=\"200\" style=\"height: auto; max-width: 200px; margin-bottom: 20px;\">\n            <h1 style=\"font-family: 'Playfair Display', serif; color: #ffffff; margin: 0; font-size: 24px;\">¡Tu día especial merece brillar! 🎂</h1>\n        </div>\n        <div style=\"padding: 40px 30px; text-align: center;\">\n            <p style=\"font-size: 16px; line-height: 1.6; color: #666666; margin-bottom: 30px;\">\n                Hola <b>{{ $('Filtrar Cumpleaños Hoy').item.json[\"nombre\"] }}</b>,<br><br>\n                En Narbo's Salón Spa queremos celebrar tu vida. ¡Hoy es tu día y queremos recordarte que tienes un <b>bono de cumpleaños</b> esperándote!\n            </p>\n            <div style=\"background-color: #f9f9f9; padding: 25px; border-radius: 20px; border: 2px solid #6B755A; display: inline-block; margin-bottom: 30px;\">\n                <p style=\"margin: 0; font-size: 14px; color: #888888; text-transform: uppercase;\">🎁 Bono de 15% de descuento</p>\n                <p style=\"margin: 10px 0 0 0; font-size: 18px; font-weight: 600; color: #5B4636;\">Código: {{ $json[\"codigo\"] }}</p>\n                <div style=\"margin-top: 15px; text-align: center;\">\n                    <div style=\"display: inline-block; padding: 15px; background-color: #ffffff; border: 1px solid #eeeeee; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);\">\n                        <img src=\"https://api.qrserver.com/v1/create-qr-code/?data={{ encodeURIComponent('https://n8n.srv1033442.hstgr.cloud/webhook/canje-QR?code=' + $json['codigo']) }}&size=200x200&format=png&bgcolor=ffffff&qzone=1\" alt=\"Código QR de tu Bono\" width=\"200\" height=\"200\" style=\"display: block; border: 0; outline: none; text-decoration: none;\">\n                    </div>\n                    <p style=\"font-size: 13px; color: #999999; margin-top: 10px;\">Escanea este código en el salón</p>\n                </div>\n            </div>\n            <p style=\"font-size: 14px; color: #999999; margin-bottom: 30px;\">Válido hasta el <b>{{ $now.endOf('month').toFormat('dd/MM/yyyy') }}</b> en cualquiera de nuestros servicios.</p>\n            <a href=\"https://wa.me/573123462618?text=Hola%20Narbo's!%20Hoy%20cumplo%20a%C3%B1os%20y%20me%20gustar%C3%ADa%20reservar%20mi%20cita%20con%20el%20bono%20de%20regalo.\" style=\"display: inline-block; background-color: #6B755A; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 30px; font-weight: 600;\">Reclamar mi regalo de cumple</a>\n        </div>\n        <div style=\"background-color: #333333; color: #ffffff; padding: 20px; text-align: center; font-size: 11px;\">\n            <p><strong>*Condiciones:</strong> Válido para 1 solo uso hasta el {{ $now.endOf('month').toFormat('dd/MM/yyyy') }}. No acumulable con otras promociones o cupones.</p>\n            <p style=\"margin-top: 5px;\">© 2026 Narbo's Salón Spa &bull; Chía, Cundinamarca.</p>\n        </div>\n    </div>\n</body>\n</html>\n",
         "options": {}
       },
       "id": "df0cfd35-22f2-4889-a080-b77b14f68df2",
       "name": "Email: Recordatorio Bono Pendiente",
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2,
-      "position": [2496, 320],
+      "position": [
+        2720,
+        200
+      ],
       "webhookId": "cf036a87-e453-40c9-9c77-a0af663ce681",
       "credentials": {
         "smtp": {
@@ -201,7 +254,10 @@
       "name": "Supabase: Buscar Bonos Pendientes",
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
-      "position": [1616, 640],
+      "position": [
+        1616,
+        640
+      ],
       "credentials": {
         "supabaseApi": {
           "id": "5hkYuZVAhznvx7lf",
@@ -236,7 +292,10 @@
       },
       "type": "n8n-nodes-base.filter",
       "typeVersion": 2.3,
-      "position": [1824, 640],
+      "position": [
+        1824,
+        640
+      ],
       "id": "0d9cf67f-07f8-4453-96bf-42cfc53470e0",
       "name": "Filtrar Vencimiento 5 Meses"
     },
@@ -258,7 +317,10 @@
       },
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
-      "position": [2048, 640],
+      "position": [
+        2048,
+        640
+      ],
       "id": "b1e2f3a4-5678-90ab-cdef-1234567890ab",
       "name": "Supabase: Buscar Cliente del Bono",
       "credentials": {
@@ -278,11 +340,14 @@
         "html": "=<!DOCTYPE html>\n<html lang=\"es\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n</head>\n<body style=\"margin: 0; padding: 0; font-family: 'Montserrat', sans-serif; background-color: #f7f7f7;\">\n    <div style=\"max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05);\">\n        <div style=\"background-color: #6B755A; padding: 40px 20px; text-align: center;\">\n            <img src=\"https://narbossalon.com/images/brand/logo_narbos.png\" alt=\"Narbo's Salón\" width=\"200\" style=\"height: auto; max-width: 200px; margin-bottom: 20px;\">\n            <h1 style=\"font-family: 'Playfair Display', serif; color: #ffffff; margin: 0; font-size: 24px;\">¡No dejes que expire tu beneficio! ⏳</h1>\n        </div>\n        <div style=\"padding: 40px 30px; text-align: center;\">\n            <p style=\"font-size: 16px; line-height: 1.6; color: #666666; margin-bottom: 30px;\">\n                Hola <b>{{ $json[\"nombre\"] }}</b>,<br><br>\n                Notamos que aún tienes pendiente tu cupón de bienvenida. Te escribimos para recordarte que <b>le queda poco tiempo de vigencia</b>.\n            </p>\n            <div style=\"background-color: #FFF9F5; padding: 25px; border-radius: 20px; border: 1px solid #E5D5C6; display: inline-block; margin-bottom: 30px;\">\n                <p style=\"margin: 0; font-size: 14px; color: #888888;\">Tu cupón de 10% OFF vence pronto.</p>\n                <p style=\"margin: 10px 0 0 0; font-size: 18px; font-weight: 600; color: #5B4636;\">Código: {{ $('Filtrar Vencimiento 5 Meses').item.json[\"codigo\"] }}</p>\n                <div style=\"margin-top: 15px; text-align: center;\">\n                    <div style=\"display: inline-block; padding: 15px; background-color: #ffffff; border: 1px solid #eeeeee; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);\">\n                        <img src=\"https://api.qrserver.com/v1/create-qr-code/?data={{ encodeURIComponent('https://n8n.srv1033442.hstgr.cloud/webhook/canje-QR?code=' + $('Filtrar Vencimiento 5 Meses').item.json['codigo']) }}&size=200x200&format=png&bgcolor=ffffff&qzone=1\" alt=\"Código QR de tu Bono\" width=\"200\" height=\"200\" style=\"display: block; border: 0; outline: none; text-decoration: none;\">\n                    </div>\n                    <p style=\"font-size: 13px; color: #999999; margin-top: 10px;\">Escanea este código en el salón</p>\n                </div>\n            </div>\n            <p style=\"font-size: 14px; color: #999999; margin-bottom: 30px;\">Visítanos antes de que expire y vive la experiencia que mereces.</p>\n            <a href=\"https://wa.me/573123462618\" style=\"display: inline-block; background-color: #6B755A; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 30px; font-weight: 600;\">Agendar mi cita ahora</a>\n        </div>\n        <div style=\"background-color: #333333; color: #ffffff; padding: 20px; text-align: center; font-size: 11px;\">\n            <p><strong>*Condiciones:</strong> Válido para 1 solo uso. No acumulable con otras promociones o cupones.</p>\n            <p style=\"margin-top: 5px;\">© 2026 Narbo's Salón Spa &bull; Chía, Cundinamarca.</p>\n        </div>\n    </div>\n</body>\n</html>\n",
         "options": {}
       },
-      "id": "38c79adf-9bf3-4b2a-b802-63a85380b12c",
+      "id": "email-reminder-vencimiento",
       "name": "Email: Enviar Recordatorio Vencimiento",
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2,
-      "position": [2256, 640],
+      "position": [
+        2256,
+        640
+      ],
       "webhookId": "fc2df3b6-3e3b-4369-850a-ce87c4d9cd22",
       "credentials": {
         "smtp": {
@@ -293,29 +358,68 @@
     },
     {
       "parameters": {
-        "content": "## 🎁 Rama Cumpleaños (Diaria)\n1. Busca TODOS los clientes.\n2. Filtra los que cumplen HOY (mes-día). Null-safe para clientes sin birthday.\n3. Verifica si YA tiene bono de cumpleaños en tabla `bonos`.\n4. Si bono **Canjeado** → Solo felicitación (NO crea bono nuevo).\n5. Si bono **Pendiente** → Recordatorio con QR existente (NO crea bono nuevo).\n\n⚠️ El bono se CREA solo en `campana_mes_cumpleanos.json` al inicio del mes.",
-        "height": 230,
-        "width": 1200,
-        "color": 2
+        "tableId": "bonos",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "client_id",
+              "fieldValue": "={{ $json[\"id\"].trim() }}"
+            },
+            {
+              "fieldId": "tipo",
+              "fieldValue": "Cumpleaños"
+            },
+            {
+              "fieldId": "estado",
+              "fieldValue": "Pendiente"
+            },
+            {
+              "fieldId": "codigo",
+              "fieldValue": "=NARBO-HB{{ $now.toFormat('yyyy') }}-{{ Math.random().toString(36).substring(2,6).toUpperCase() }}"
+            },
+            {
+              "fieldId": "user_id",
+              "fieldValue": "={{ $json[\"user_id\"] }}"
+            },
+            {
+              "fieldId": "fecha_vencimiento",
+              "fieldValue": "={{ $now.endOf('month').toFormat('yyyy-MM-dd HH:mm:ss') }}"
+            }
+          ]
+        }
       },
-      "id": "99e1bf9b-0b9c-43d9-afab-631957740526",
-      "name": "Sticky Note",
-      "type": "n8n-nodes-base.stickyNote",
+      "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
-      "position": [1552, -40]
+      "position": [
+        2480,
+        360
+      ],
+      "id": "crear-bono-emergencia",
+      "name": "Supabase: Guardar Bono (Emergencia)"
     },
     {
       "parameters": {
-        "content": "## ⏳ Rama Vencimiento Bono Bienvenida (5 Meses)\n1. Busca bonos de **Bienvenida** con estado **Pendiente** en tabla `bonos`.\n2. Filtra los creados hace exactamente 150 días.\n3. Busca datos del cliente (nombre, email) para personalizar el correo.\n4. Envía email recordatorio con QR del bono existente.\n\n**Fix:** Ahora consulta tabla `bonos` (antes usaba columna `canjeado` eliminada de `clientes_fidelizacion`).",
-        "height": 230,
-        "width": 900,
-        "color": 6
+        "fromEmail": "contacto@narbossalon.com",
+        "toEmail": "={{ $('Filtrar Cumpleaños Hoy').item.json.email }}",
+        "subject": "¡Feliz Cumpleaños! Tu regalo sorpresa te espera 🎂🎁",
+        "emailFormat": "html",
+        "html": "=<!DOCTYPE html>\n<html lang=\"es\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n</head>\n<body style=\"margin: 0; padding: 0; font-family: 'Montserrat', sans-serif; background-color: #f7f7f7;\">\n    <div style=\"max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05);\">\n        <div style=\"background-color: #6B755A; padding: 40px 20px; text-align: center;\">\n            <img src=\"https://narbossalon.com/images/brand/logo_narbos.png\" alt=\"Narbo's Salón\" width=\"200\" style=\"height: auto; max-width: 200px; margin-bottom: 20px;\">\n            <h1 style=\"font-family: 'Playfair Display', serif; color: #ffffff; margin: 0; font-size: 24px;\">¡Feliz Cumpleaños! 🎂</h1>\n        </div>\n        <div style=\"padding: 40px 30px; text-align: center;\">\n            <p style=\"font-size: 16px; line-height: 1.6; color: #666666; margin-bottom: 30px;\">\n                Hola <b>{{ $('Filtrar Cumpleaños Hoy').item.json[\"nombre\"] }}</b>,<br><br>\n                ¡Qué alegría que hoy sea tu día! Aunque te registraste hace poco en nuestro club, no queríamos que pasaras tu cumple sin un regalo especial de Narbo's.\n            </p>\n            <div style=\"background-color: #f9f9f9; padding: 25px; border-radius: 20px; border: 2px solid #6B755A; display: inline-block; margin-bottom: 30px;\">\n                <p style=\"margin: 0; font-size: 14px; color: #888888; text-transform: uppercase;\">🎁 Tu Regalo de Cumpleaños: 15% OFF</p>\n                <p style=\"margin: 10px 0 0 0; font-size: 18px; font-weight: 600; color: #5B4636;\">Código: {{ $json[\"codigo\"] }}</p>\n                <div style=\"margin-top: 15px; text-align: center;\">\n                    <div style=\"display: inline-block; padding: 15px; background-color: #ffffff; border: 1px solid #eeeeee; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);\">\n                        <img src=\"https://api.qrserver.com/v1/create-qr-code/?data={{ encodeURIComponent('https://n8n.srv1033442.hstgr.cloud/webhook/canje-QR?code=' + $json['codigo']) }}&size=200x200&format=png&bgcolor=ffffff&qzone=1\" alt=\"Código QR de tu Bono\" width=\"200\" height=\"200\" style=\"display: block; border: 0; outline: none; text-decoration: none;\">\n                    </div>\n                    <p style=\"font-size: 13px; color: #999999; margin-top: 10px;\">Escanea este código en el salón</p>\n                </div>\n            </div>\n            <p style=\"font-size: 14px; color: #999999; margin-bottom: 30px;\">Válido hasta el <b>{{ $now.endOf('month').toFormat('dd/MM/yyyy') }}</b>.</p>\n            <a href=\"https://wa.me/573123462618?text=Hola%20Narbo's!%20Hoy%20cumplo%20a%C3%B1os%20y%20me%20gustar%C3%ADa%20reservar%20mi%20cita%20con%20el%20bono%20especial%20de%20regalo.\" style=\"display: inline-block; background-color: #6B755A; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 30px; font-weight: 600;\">Reclamar mi regalo de cumple</a>\n        </div>\n        <div style=\"background-color: #333333; color: #ffffff; padding: 20px; text-align: center; font-size: 11px;\">\n            <p>© 2026 Narbo's Salón Spa &bull; Chía, Cundinamarca.</p>\n        </div>\n    </div>\n</body>\n</html>\n",
+        "options": {}
       },
-      "id": "ad7e10ca-5593-4335-9589-002dbae6738f",
-      "name": "Sticky Note 2",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [1552, 464]
+      "id": "email-nuevo-bono-emergencia",
+      "name": "Email: Enviar Regalo (Nuevo Bono)",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [
+        2720,
+        360
+      ],
+      "credentials": {
+        "smtp": {
+          "id": "lHxckxi50jQr6fuv",
+          "name": "Correo: contacto@narbossalon.com"
+        }
+      }
     }
   ],
   "pinData": {},
@@ -362,14 +466,32 @@
       "main": [
         [
           {
-            "node": "¿Bono ya Canjeado?",
+            "node": "¿Ya tiene Bono?",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "¿Bono ya Canjeado?": {
+    "¿Ya tiene Bono?": {
+      "main": [
+        [
+          {
+            "node": "¿Bono Canjeado?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "crear-bono-emergencia",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Bono Canjeado?": {
       "main": [
         [
           {
@@ -414,6 +536,17 @@
         [
           {
             "node": "Email: Enviar Recordatorio Vencimiento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "crear-bono-emergencia": {
+      "main": [
+        [
+          {
+            "node": "Email: Enviar Regalo (Nuevo Bono)",
             "type": "main",
             "index": 0
           }
