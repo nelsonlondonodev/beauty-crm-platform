@@ -363,7 +363,7 @@
           "fieldValues": [
             {
               "fieldId": "client_id",
-              "fieldValue": "={{ $json[\"id\"].trim() }}"
+              "fieldValue": "={{ $('Filtrar Cumpleaños Hoy').item.json.id }}"
             },
             {
               "fieldId": "tipo",
@@ -379,7 +379,7 @@
             },
             {
               "fieldId": "user_id",
-              "fieldValue": "={{ $json[\"user_id\"] }}"
+              "fieldValue": "={{ $('Filtrar Cumpleaños Hoy').item.json.user_id }}"
             },
             {
               "fieldId": "fecha_vencimiento",
