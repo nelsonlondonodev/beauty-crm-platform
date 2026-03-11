@@ -7,6 +7,7 @@ import {
   type ValidatedBono,
 } from '../services/bonoService';
 import { emitCrmEvent, CRM_EVENTS } from '../lib/events';
+import RedemptionHistory from '../components/bonuses/RedemptionHistory';
 
 const Bonuses = () => {
   const [couponCode, setCouponCode] = useState('');
@@ -191,6 +192,8 @@ const Bonuses = () => {
 
         </div>
       </div>
+
+      <RedemptionHistory />
     </div>
   );
 };
