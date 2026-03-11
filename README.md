@@ -198,9 +198,15 @@ CRM B2B moderno para el sector de la belleza (Peluquerías, Barberías, Spas).
     -   Selección de **duración** configurable (30min, 45min, 1h, 1h30, 2h).
     -   Campo de **notas** (preparado para contexto de chatbot n8n).
     -   **Cambio de estado** visual (Programada / Completada / Cancelada) con eliminación segura.
--   **Theming Consistente (`calendarStyles.css`)**: Override estético completo de FullCalendar adaptado al design system del CRM (purple primary, Tailwind borders, shadows, responsive mobile).
+-   **Theming Consistente (`calendarStyles.css`)**: Override estético completo de FullCalendar adaptado al design system del CRM (purple primary, Tailwind borders, shadows, responsive mobile). Incluye limpieza visual de advertencias de licencia para un acabado 100% profesional.
 -   **Migración de Base de Datos**: Extensión de la tabla `appointments` con columnas `empleado_id` (FK a `empleados`), `duracion_minutos` y `notas`, incluyendo índice de rendimiento.
 -   **Preparación para n8n/Chatbot**: Webhook payload extendido con `empleado_nombre` e interfaz `CreateAppointmentPayload` lista para integración directa con flujos de automatización.
+
+### 21. Auditoría de Bonos y Control de Caja (UX Avanzada)
+-   **Historial Detallado**: Nuevo módulo de auditoría integrado directamente en la pantalla de "Validar Bonos" para facilitar el flujo operativo.
+-   **Filtros de Datos Inteligentes**: Sistema de filtrado por rango temporal (Día, Mes, Año, Histórico) y por tipo de campaña (Bienvenida, Cumpleaños, Reactivación, Especial).
+-   **Sincronización Atómica**: El historial se actualiza en tiempo real sin recargar la página gracias a un sistema de eventos reactivo (`BONO_REDEEMED`).
+-   **Control de Caja**: Incorporación de un resumen rápido de canjes y botón de reporte de impresión para el cuadre de cuentas diario del personal administrativo.
 
 ## 🗺️ Roadmap de Desarrollo (Pendientes)
 
@@ -213,6 +219,7 @@ CRM B2B moderno para el sector de la belleza (Peluquerías, Barberías, Spas).
 ### Fase 4: SaaS Avanzado e Inteligencia Financiera
 - [x] **Configuración de Políticas de Facturación:** Implementar toggle en `/settings` para permitir a cada negocio elegir si las comisiones de los empleados se calculan sobre el precio bruto o el precio neto (después de bonos promocionales).
 - [x] **Historial Financiero del Cliente (LTV):** Implementar pestaña de "Facturación" en el perfil del cliente para visualizar su historial de pagos y valor de vida.
+- [x] **Auditoría de Bonos y Control de Caja:** Implementar filtros avanzados y reporte de canjes para operativa diaria.
 - [ ] **Panel de Administrador Global (SuperAdmin):** Interfaz para gestionar todos los tenants desde una sola cuenta maestra (C).
 - [x] **Sistema de Notificaciones (Toasts):** Reemplazar alertas nativas de navegador por un sistema de notificaciones premium (Sonner/Toast) en toda la plataforma.
 - [ ] **Onboarding Wizard:** Guía interactiva para que nuevos clientes configuren sus servicios y empleados.
