@@ -4,6 +4,18 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
+  // 🛡️ Safelist: Protege estas clases para que no sean eliminadas durante el build.
+  // Es vital para clases generadas dinámicamente o usadas en formatters.ts
+  safelist: [
+    {
+      pattern: /(bg|text|border|ring)-(green|blue|red|yellow|purple|gray)-(50|100|200|500|600|700|800)/,
+    },
+    'line-through',
+    'opacity-60',
+    'fc-event--programada',
+    'fc-event--completada',
+    'fc-event--cancelada'
+  ],
   theme: {
     extend: {
       colors: {
