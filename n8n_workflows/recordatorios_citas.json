@@ -33,6 +33,16 @@
               "keyName": "estado",
               "condition": "eq",
               "keyValue": "programada"
+            },
+            {
+              "keyName": "fecha_cita",
+              "condition": "gt",
+              "keyValue": "={{ new Date(Date.now() - 3600000).toISOString() }}"
+            },
+            {
+              "keyName": "fecha_cita",
+              "condition": "lt",
+              "keyValue": "={{ new Date(Date.now() + 93600000).toISOString() }}"
             }
           ]
         }
@@ -64,26 +74,26 @@
           "conditions": [
             {
               "id": "cond-24h",
-              "leftValue": "={{ (new Date($json.fecha_cita).getTime() - new Date().getTime()) / 36e5 }}",
-              "rightValue": "24.5",
+              "leftValue": "={{ (new Date($json.fecha_cita).getTime() - Date.now()) / 3600000 }}",
+              "rightValue": 25.5,
               "operator": {
                 "type": "number",
-                "operation": "smaller"
+                "operation": "smallerOrEqual"
               }
             },
             {
               "id": "cond-24h-min",
-              "leftValue": "={{ (new Date($json.fecha_cita).getTime() - new Date().getTime()) / 36e5 }}",
-              "rightValue": "23",
+              "leftValue": "={{ (new Date($json.fecha_cita).getTime() - Date.now()) / 3600000 }}",
+              "rightValue": 23.5,
               "operator": {
                 "type": "number",
-                "operation": "larger"
+                "operation": "largerOrEqual"
               }
             },
             {
               "id": "cond-not-sent",
               "leftValue": "={{ $json.reminder_24h_sent }}",
-              "rightValue": "true",
+              "rightValue": true,
               "operator": {
                 "type": "boolean",
                 "operation": "notEquals"
@@ -115,26 +125,26 @@
           "conditions": [
             {
               "id": "cond-2h",
-              "leftValue": "={{ (new Date($json.fecha_cita).getTime() - new Date().getTime()) / 36e5 }}",
-              "rightValue": "2.5",
+              "leftValue": "={{ (new Date($json.fecha_cita).getTime() - Date.now()) / 3600000 }}",
+              "rightValue": 2.6,
               "operator": {
                 "type": "number",
-                "operation": "smaller"
+                "operation": "smallerOrEqual"
               }
             },
             {
               "id": "cond-2h-min",
-              "leftValue": "={{ (new Date($json.fecha_cita).getTime() - new Date().getTime()) / 36e5 }}",
-              "rightValue": "1.5",
+              "leftValue": "={{ (new Date($json.fecha_cita).getTime() - Date.now()) / 3600000 }}",
+              "rightValue": 1.4,
               "operator": {
                 "type": "number",
-                "operation": "larger"
+                "operation": "largerOrEqual"
               }
             },
             {
               "id": "cond-not-sent-2h",
               "leftValue": "={{ $json.reminder_2h_sent }}",
-              "rightValue": "true",
+              "rightValue": true,
               "operator": {
                 "type": "boolean",
                 "operation": "notEquals"
@@ -216,11 +226,11 @@
           "fieldValues": [
             {
               "fieldId": "reminder_24h_sent",
-              "fieldValue": "={{ $node['Etiqueta: 24h'].json.reminder_type === '24h' || $node['Supabase: Buscar Citas Próximas'].json.reminder_24h_sent }}"
+              "fieldValue": "={{ $json.reminder_type === '24h' || $json.reminder_24h_sent }}"
             },
             {
               "fieldId": "reminder_2h_sent",
-              "fieldValue": "={{ $node['Etiqueta: 2h'].json.reminder_type === '2h' || $node['Supabase: Buscar Citas Próximas'].json.reminder_2h_sent }}"
+              "fieldValue": "={{ $json.reminder_type === '2h' || $json.reminder_2h_sent }}"
             }
           ]
         }
