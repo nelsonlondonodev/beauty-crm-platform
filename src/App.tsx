@@ -19,6 +19,7 @@ const Bonuses = lazy(() => import('./pages/Bonuses'));
 const Login = lazy(() => import('./pages/Login'));
 const Invoices = lazy(() => import('./pages/Invoices'));
 const StaffSales = lazy(() => import('./pages/StaffSales'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 
 // ── Shared Loading Component ────────────────────────────────────────────────
 const PageLoader = () => (
@@ -53,6 +54,14 @@ function App() {
                           element={
                             <ProtectedRoute allowedRoles={['owner', 'admin']}>
                               <Dashboard />
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
+                          path="/admin"
+                          element={
+                            <ProtectedRoute allowedRoles={['superadmin']}>
+                              <AdminDashboard />
                             </ProtectedRoute>
                           }
                         />

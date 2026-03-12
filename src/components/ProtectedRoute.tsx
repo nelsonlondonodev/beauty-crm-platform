@@ -16,6 +16,8 @@ const getFallbackRoute = (role: AppRole | null): string => {
   if (!role) return '/login';
 
   switch (role) {
+    case 'superadmin':
+      return '/admin'; // Dashboard global
     case 'staff':
       return '/calendar'; // Vista ideal para empleados base
     case 'admin':

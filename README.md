@@ -206,13 +206,30 @@ CRM B2B moderno para el sector de la belleza (Peluquerías, Barberías, Spas).
 -   **Historial Detallado**: Nuevo módulo de auditoría integrado directamente en la pantalla de "Validar Bonos" para facilitar el flujo operativo.
 -   **Filtros de Datos Inteligentes**: Sistema de filtrado por rango temporal (Día, Mes, Año, Histórico) y por tipo de campaña (Bienvenida, Cumpleaños, Reactivación, Especial).
 -   **Sincronización Atómica**: El historial se actualiza en tiempo real sin recargar la página gracias a un sistema de eventos reactivo (`BONO_REDEEMED`).
--   **Control de Caja**: Incorporación de un resumen rápido de canjes y botón de reporte de impresión para el cuadre de cuentas diario del personal administrativo.
+-   **Módulo de Personal (Staff):** Refactorizar el componente para permitir la edición de datos de empleados (porcentajes de comisión) y su desactivación lógica, preservando así su historial de cobros y comisiones.
+
+### 22. Optimización de Rendimiento y Cimientos SaaS (SuperAdmin)
+-   **Optimización de Recordatorios (n8n)**:
+    -   Refactorización del flujo `recordatorios_citas.json` para usar lógica de tiempo robusta en UTC.
+    -   Saneamiento de tipos de datos en filtros (eliminación de comillas en valores numéricos y booleanos).
+    -   **Server-side Filtering**: Optimización del nodo de búsqueda en Supabase para filtrar citas directamente en la base de datos (ventana de 26h), eliminando latencia y mejorando la escalabilidad.
+-   **Tailwind CSS "Clean Code"**:
+    -   Implementación de `safelist` mediante patrones `regex` para proteger dinámicamente las clases de colores de estados (Staff, Bonos, Alertas) y evitar que sean eliminadas durante el purgado del build.
+-   **Performance (Code Splitting)**:
+    -   Migración completa a **Carga Perezosa (`React.lazy`)** y **Suspense** en el enrutador principal.
+    -   Reducción drástica del bundle inicial de JavaScript de **1.4MB a ~530KB** (reducción del 60%).
+    -   Inclusión de un `PageLoader` premium con micro-animaciones para transiciones fluidas de página.
+-   **Infraestructura SuperAdmin (Multitenancy Avanzado)**:
+    -   Extensión del sistema de roles (RBAC) para incluir el rol **`superadmin`**.
+    -   Creación del centro de mando global (`/admin`) con métricas de plataforma.
+    -   Actualización de la lógica del Sidebar y `ProtectedRoute` para aislamiento de privilegios.
 
 ## 🗺️ Roadmap de Desarrollo (Pendientes)
 
 ### Fase 3: Calidad y Continuidad (SaaS)
 - [x] **Tests Automatizados:** Implementar Vitest (17 tests) para servicios críticos (Fechas, Roles, Comisiones).
 - [x] **Despliegue a Producción:** Deploy en Vercel con CI/CD automático desde `main`.
+- [x] **Optimización de Bundle:** Implementar Code Splitting para mejorar tiempos de carga (60% más ligero).
 - [ ] **Monitoreo Real:** Integrar el Logger con un servicio de captura de excepciones en producción.
 - [ ] **Documentación API:** Documentar los endpoints de Supabase y esquemas de tablas.
 
@@ -220,7 +237,7 @@ CRM B2B moderno para el sector de la belleza (Peluquerías, Barberías, Spas).
 - [x] **Configuración de Políticas de Facturación:** Implementar toggle en `/settings` para permitir a cada negocio elegir si las comisiones de los empleados se calculan sobre el precio bruto o el precio neto (después de bonos promocionales).
 - [x] **Historial Financiero del Cliente (LTV):** Implementar pestaña de "Facturación" en el perfil del cliente para visualizar su historial de pagos y valor de vida.
 - [x] **Auditoría de Bonos y Control de Caja:** Implementar filtros avanzados y reporte de canjes para operativa diaria.
-- [ ] **Panel de Administrador Global (SuperAdmin):** Interfaz para gestionar todos los tenants desde una sola cuenta maestra (C).
+- [x] **Cimientos de Administrador Global (SuperAdmin):** Estructura RBAC y Dashboard global implementados (Pendiente migración SQL de roles).
 - [x] **Sistema de Notificaciones (Toasts):** Reemplazar alertas nativas de navegador por un sistema de notificaciones premium (Sonner/Toast) en toda la plataforma.
 - [ ] **Onboarding Wizard:** Guía interactiva para que nuevos clientes configuren sus servicios y empleados.
 - [x] **Agenda Multi-Colaborador:** Implementar calendario profesional con FullCalendar, vistas por colaborador y preparación para integración con chatbot n8n.

@@ -8,6 +8,7 @@ import {
   Receipt,
   Briefcase,
   Gift,
+  ShieldCheck,
   type LucideIcon,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
@@ -29,6 +30,12 @@ interface NavItem {
 const DASHBOARD_PATH = '/';
 
 const NAV_ITEMS: NavItem[] = [
+  {
+    icon: ShieldCheck,
+    label: 'Panel Admin',
+    path: '/admin',
+    allowedRoles: ['superadmin'],
+  },
   {
     icon: LayoutDashboard,
     label: 'Dashboard',

@@ -12,7 +12,7 @@ import { fetchWithTimeout } from '../lib/utils';
 import { logger } from '../lib/logger';
 
 // Tipos de roles soportados
-export type AppRole = 'owner' | 'admin' | 'staff';
+export type AppRole = 'superadmin' | 'owner' | 'admin' | 'staff';
 
 interface AuthContextType {
   session: Session | null;

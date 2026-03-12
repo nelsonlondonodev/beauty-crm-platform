@@ -12,6 +12,8 @@ export type AppAction =
   | 'REDEEM_BONUS'
   | 'VIEW_BILLING'
   | 'VIEW_CALENDAR'
+  | 'VIEW_GLOBAL_STATS'
+  | 'MANAGE_TENANTS'
   | 'EDIT_SETTINGS';
 
 /**
@@ -19,6 +21,19 @@ export type AppAction =
  * Centraliza la lógica de negocio sobre quién puede hacer qué.
  */
 const ROLE_PERMISSIONS: Record<AppRole, AppAction[]> = {
+  superadmin: [
+    'VIEW_DASHBOARD',
+    'MANAGE_STAFF',
+    'VIEW_CLIENTS',
+    'MANAGE_CLIENTS',
+    'DELETE_CLIENT',
+    'REDEEM_BONUS',
+    'VIEW_BILLING',
+    'VIEW_CALENDAR',
+    'VIEW_GLOBAL_STATS',
+    'MANAGE_TENANTS',
+    'EDIT_SETTINGS'
+  ],
   owner: [
     'VIEW_DASHBOARD',
     'MANAGE_STAFF',
