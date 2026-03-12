@@ -1,21 +1,31 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from './components/layout/Layout';
-import Dashboard from './pages/Dashboard';
-import Clients from './pages/Clients';
-import Calendar from './pages/Calendar';
-import Settings from './pages/Settings';
-import Profile from './pages/Profile';
-import ClientProfile from './pages/ClientProfile';
-import Staff from './pages/Staff';
-import Billing from './pages/Billing';
-import Bonuses from './pages/Bonuses';
-import Login from './pages/Login';
-import Invoices from './pages/Invoices';
-import StaffSales from './pages/StaffSales';
 import { AuthProvider } from './contexts/AuthContext';
 import { TenantProvider } from './contexts/TenantContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import { Toaster } from 'sonner';
+
+// ── Lazy Loaded Pages ───────────────────────────────────────────────────────
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Clients = lazy(() => import('./pages/Clients'));
+const Calendar = lazy(() => import('./pages/Calendar'));
+const Settings = lazy(() => import('./pages/Settings'));
+const Profile = lazy(() => import('./pages/Profile'));
+const ClientProfile = lazy(() => import('./pages/ClientProfile'));
+const Staff = lazy(() => import('./pages/Staff'));
+const Billing = lazy(() => import('./pages/Billing'));
+const Bonuses = lazy(() => import('./pages/Bonuses'));
+const Login = lazy(() => import('./pages/Login'));
+const Invoices = lazy(() => import('./pages/Invoices'));
+const StaffSales = lazy(() => import('./pages/StaffSales'));
+
+// ── Shared Loading Component ────────────────────────────────────────────────
+const PageLoader = () => (
+  <div className="flex h-64 w-full items-center justify-center">
+    <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+  </div>
+);
 
 function App() {
   return (
@@ -23,114 +33,123 @@ function App() {
       <AuthProvider>
         <TenantProvider>
           <Routes>
-            <Route path="/login" element={<Login />} />
+            <Route
+              path="/login"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <Login />
+                </Suspense>
+              }
+            />
             <Route
               path="/*"
               element={
                 <ProtectedRoute>
                   <Layout>
-                    <Routes>
-                      <Route
-                        path="/"
-                        element={
-                          <ProtectedRoute allowedRoles={['owner', 'admin']}>
-                            <Dashboard />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="/clients"
-                        element={
-                          <ProtectedRoute
-                            allowedRoles={['owner', 'admin', 'staff']}
-                          >
-                            <Clients />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="/clients/:id"
-                        element={
-                          <ProtectedRoute
-                            allowedRoles={['owner', 'admin', 'staff']}
-                          >
-                            <ClientProfile />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="/bonuses"
-                        element={
-                          <ProtectedRoute
-                            allowedRoles={['owner', 'admin', 'staff']}
-                          >
-                            <Bonuses />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="/calendar"
-                        element={
-                          <ProtectedRoute
-                            allowedRoles={['owner', 'admin', 'staff']}
-                          >
-                            <Calendar />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="/settings"
-                        element={
-                          <ProtectedRoute allowedRoles={['owner', 'admin']}>
-                            <Settings />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="/profile"
-                        element={
-                          <ProtectedRoute
-                            allowedRoles={['owner', 'admin', 'staff']}
-                          >
-                            <Profile />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="/staff"
-                        element={
-                          <ProtectedRoute allowedRoles={['owner', 'admin']}>
-                            <Staff />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="/staff/:id/sales"
-                        element={
-                          <ProtectedRoute allowedRoles={['owner', 'admin']}>
-                            <StaffSales />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="/billing"
-                        element={
-                          <ProtectedRoute
-                            allowedRoles={['owner', 'admin', 'staff']}
-                          >
-                            <Billing />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="/invoices"
-                        element={
-                          <ProtectedRoute allowedRoles={['owner', 'admin']}>
-                            <Invoices />
-                          </ProtectedRoute>
-                        }
-                      />
-                    </Routes>
+                    <Suspense fallback={<PageLoader />}>
+                      <Routes>
+                        <Route
+                          path="/"
+                          element={
+                            <ProtectedRoute allowedRoles={['owner', 'admin']}>
+                              <Dashboard />
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
+                          path="/clients"
+                          element={
+                            <ProtectedRoute
+                              allowedRoles={['owner', 'admin', 'staff']}
+                            >
+                              <Clients />
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
+                          path="/clients/:id"
+                          element={
+                            <ProtectedRoute
+                              allowedRoles={['owner', 'admin', 'staff']}
+                            >
+                              <ClientProfile />
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
+                          path="/bonuses"
+                          element={
+                            <ProtectedRoute
+                              allowedRoles={['owner', 'admin', 'staff']}
+                            >
+                              <Bonuses />
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
+                          path="/calendar"
+                          element={
+                            <ProtectedRoute
+                              allowedRoles={['owner', 'admin', 'staff']}
+                            >
+                              <Calendar />
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
+                          path="/settings"
+                          element={
+                            <ProtectedRoute allowedRoles={['owner', 'admin']}>
+                              <Settings />
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
+                          path="/profile"
+                          element={
+                            <ProtectedRoute
+                              allowedRoles={['owner', 'admin', 'staff']}
+                            >
+                              <Profile />
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
+                          path="/staff"
+                          element={
+                            <ProtectedRoute allowedRoles={['owner', 'admin']}>
+                              <Staff />
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
+                          path="/staff/:id/sales"
+                          element={
+                            <ProtectedRoute allowedRoles={['owner', 'admin']}>
+                              <StaffSales />
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
+                          path="/billing"
+                          element={
+                            <ProtectedRoute
+                              allowedRoles={['owner', 'admin', 'staff']}
+                            >
+                              <Billing />
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
+                          path="/invoices"
+                          element={
+                            <ProtectedRoute allowedRoles={['owner', 'admin']}>
+                              <Invoices />
+                            </ProtectedRoute>
+                          }
+                        />
+                      </Routes>
+                    </Suspense>
                   </Layout>
                 </ProtectedRoute>
               }
