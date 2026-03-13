@@ -48,10 +48,17 @@ export const fetchRoleFromDB = async (
     const response = await fetchWithTimeout(request as unknown as Promise<{ data: { role: AppRole } | null; error: PostgrestError | null }>, 5000);
     const { data, error } = response;
 
-    if (error || !data) {
-      logger.warn('Rol no encontrado o error fetching', error?.message || 'Sin rol', 'Auth');
+    if (error) {
+      logger.error('Error fetching role', error.message, 'Auth');
       return null;
     }
+
+    if (!data) {
+      logger.warn('Usuario sin rol asignado en DB', userId, 'Auth');
+      return null;
+    }
+
+    logger.info(`Rol detectado en DB: ${data.role} para el usuario ${userId}`, 'Auth');
     return data.role as AppRole;
   } catch (err) {
     logger.error('Excepción resolviendo rol', err, 'Auth');
