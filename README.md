@@ -248,10 +248,11 @@ CRM B2B moderno para el sector de la belleza (Peluquerías, Barberías, Spas).
 - [ ] **Onboarding Wizard:** Guía interactiva para que nuevos clientes configuren sus servicios y empleados.
 - [x] **Agenda Multi-Colaborador:** Implementar calendario profesional con FullCalendar, vistas por colaborador y preparación para integración con chatbot n8n.
 
-### Fase 5: Mantenimiento y Buenas Prácticas
-- [ ] **Gestión de Staff y Tenants:** Crear interfaz administrativa para que el Owner pueda asignar nuevos empleados a su salón (Tenant ID) sin intervención manual en base de datos.
-- [ ] **Dashboard de Propietario Multilocal:** Vista consolidada para Owners que poseen más de un salón en la plataforma.
-- [ ] **Depuración de Consultas (Supabase):** Revisar y limpiar queries acumulados en el editor web.
+### 22. Estabilización SaaS y Refactorización (v0.3.0)
+- **Dashboard SuperAdmin corregido**: Reparación de la integridad referencial (FK) entre `user_roles` y `tenant_config`, eliminando errores 400.
+- **Visibilidad Multi-tenant (n8n)**: Saneamiento de flujos de automatización para eliminar IDs obsoletos e inyectar correctamente el `tenant_id`, asegurando que los nuevos clientes sean visibles inmediatamente para sus respectivos dueños.
+- **Refactorización de Servicios**: Estandarización de `clientService`, `billingService`, `appointmentService` y `dashboardService` bajo TypeScript estricto, eliminando tipos `any` y aplicando `fetchWithTimeout` para máxima resiliencia.
+- **Auditoría n8n**: Repositorio de flujos (`n8n_workflows/`) actualizado con la lógica de segregación masiva para escalar a múltiples salones.
 
 ## Comandos
 
