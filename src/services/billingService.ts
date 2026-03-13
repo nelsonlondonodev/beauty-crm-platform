@@ -1,6 +1,8 @@
 import { supabase } from '../lib/supabase';
 import type { InvoiceItem, Factura, FacturaItem } from '../types';
 import { logger } from '../lib/logger';
+import { fetchWithTimeout } from '../lib/utils';
+import type { PostgrestError } from '@supabase/supabase-js';
 
 // --- Interfaces ---
 
@@ -27,15 +29,18 @@ export const procesarFactura = async (payload: FacturaPayload) => {
   }));
 
   // Llamada a la función transaccional (RPC) en Supabase
-  const { data, error } = await supabase.rpc('procesar_factura_completa', {
-    p_cliente_id: payload.cliente_id || null,
-    p_subtotal: payload.subtotal,
-    p_descuento: payload.descuento,
-    p_total: payload.total,
-    p_metodo_pago: payload.metodo_pago || 'Efectivo',
-    p_items: itemsJson,
-    p_bono_id: payload.bono_id || null,
-  });
+  const { data, error } = await fetchWithTimeout(
+    supabase.rpc('procesar_factura_completa', {
+      p_cliente_id: payload.cliente_id || null,
+      p_subtotal: payload.subtotal,
+      p_descuento: payload.descuento,
+      p_total: payload.total,
+      p_metodo_pago: payload.metodo_pago || 'Efectivo',
+      p_items: itemsJson,
+      p_bono_id: payload.bono_id || null,
+    }) as unknown as Promise<{ data: { success: boolean, factura_id: string } | null; error: PostgrestError | null }>,
+    10000 // Timeout extendido para transacciones
+  );
 
   if (error) {
     logger.error('Error procesando factura RPC', error.message, 'BillingService');
@@ -47,42 +52,49 @@ export const procesarFactura = async (payload: FacturaPayload) => {
 };
 
 export const getFacturas = async (): Promise<Factura[]> => {
-  const { data, error } = await supabase
-    .from('facturas')
-    .select('*, clientes_fidelizacion(nombre)')
-    .order('fecha_venta', { ascending: false });
+  const { data, error } = await fetchWithTimeout(
+    supabase
+      .from('facturas')
+      .select('*, clientes_fidelizacion(nombre)')
+      .order('fecha_venta', { ascending: false }) as unknown as Promise<{ data: Factura[] | null; error: PostgrestError | null }>
+  );
 
   if (error) {
     logger.error('Error fetching facturas', error.message, 'BillingService');
     throw new Error(error.message);
   }
-  return data;
+  return data || [];
 };
 
 export const getFacturaById = async (id: string): Promise<Factura & { factura_items: FacturaItem[] }> => {
-  const { data, error } = await supabase
-    .from('facturas')
-    .select('*, factura_items(*), clientes_fidelizacion(nombre, whatsapp, email)')
-    .eq('id', id)
-    .single();
+  const { data, error } = await fetchWithTimeout(
+    supabase
+      .from('facturas')
+      .select('*, factura_items(*), clientes_fidelizacion(nombre, whatsapp, email)')
+      .eq('id', id)
+      .single() as unknown as Promise<{ data: Factura & { factura_items: FacturaItem[] } | null; error: PostgrestError | null }>
+  );
 
   if (error) {
     logger.error(`Error fetching factura ${id}`, error.message, 'BillingService');
     throw new Error(error.message);
   }
+  if (!data) throw new Error('Cita no encontrada');
   return data;
 };
 
 export const getFacturasByEmpleado = async (empleadoId: string): Promise<FacturaItem[]> => {
-  const { data, error } = await supabase
-    .from('factura_items')
-    .select('*, facturas(*, clientes_fidelizacion(nombre))')
-    .eq('empleado_id', empleadoId)
-    .order('created_at', { ascending: false });
+  const { data, error } = await fetchWithTimeout(
+    supabase
+      .from('factura_items')
+      .select('*, facturas(*, clientes_fidelizacion(nombre))')
+      .eq('empleado_id', empleadoId)
+      .order('created_at', { ascending: false }) as unknown as Promise<{ data: FacturaItem[] | null; error: PostgrestError | null }>
+  );
 
   if (error) {
     logger.error(`Error fetching facturas for empleado ${empleadoId}`, error.message, 'BillingService');
     throw new Error(error.message);
   }
-  return data;
+  return data || [];
 };

@@ -45,6 +45,14 @@ export const getPlatformStats = async (): Promise<PlatformStats> => {
   }
 };
 
+interface RawTenantData {
+  user_id: string;
+  brand_name: string | null;
+  user_roles: {
+    user_id: string;
+  }[];
+}
+
 /**
  * Obtiene la lista de todos los inquilinos (tenants) registrados.
  */
@@ -56,8 +64,8 @@ export const getTenantsList = async (): Promise<TenantInfo[]> => {
         .select(`
           user_id,
           brand_name,
-          owner:user_roles!inner(user_id)
-        `) as unknown as Promise<{ data: any[] | null; error: PostgrestError | null }>
+          user_roles!inner(user_id)
+        `) as unknown as Promise<{ data: RawTenantData[] | null; error: PostgrestError | null }>
     );
 
     if (error || !data) throw new Error(error?.message || 'No data found');
@@ -65,7 +73,7 @@ export const getTenantsList = async (): Promise<TenantInfo[]> => {
     return data.map(t => ({
       id: t.user_id,
       name: t.brand_name || 'Sin nombre',
-      owner: 'Propietario', // Podríamos mejorar el join para sacar el email si es necesario
+      owner: t.user_roles?.[0]?.user_id || 'Propietario',
       status: 'Activo',
       plan: 'Premium'
     }));

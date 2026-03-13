@@ -58,7 +58,10 @@ interface BonoWithClient {
 
 // --- Funciones Atómicas de Métricas ---
 
-async function fetchStatsHead(table: string, filter?: (query: any) => any): Promise<number> {
+async function fetchStatsHead(
+  table: string, 
+  filter?: (query: any) => any
+): Promise<number> {
   let query = supabase.from(table).select('*', { count: 'exact', head: true });
   if (filter) query = filter(query);
   

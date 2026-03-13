@@ -1,4 +1,6 @@
 import { supabase } from '../lib/supabase';
+import { fetchWithTimeout } from '../lib/utils';
+import type { PostgrestError } from '@supabase/supabase-js';
 import type {
   Client,
   BonusStatus,
@@ -95,10 +97,12 @@ const mapDbToClient = (row: ClientDbRow): Client => {
 // --- Funciones de Servicio ---
 
 export const getClients = async (): Promise<Client[]> => {
-  const { data, error } = await supabase
-    .from('clientes_fidelizacion')
-    .select('*, bonos(*)')
-    .order('created_at', { ascending: false });
+  const { data, error } = await fetchWithTimeout(
+    supabase
+      .from('clientes_fidelizacion')
+      .select('*, bonos(*)')
+      .order('created_at', { ascending: false }) as unknown as Promise<{ data: ClientDbRow[] | null; error: PostgrestError | null }>
+  );
 
   if (error) {
     logger.error('Error fetching clients', error, 'ClientService');
@@ -109,26 +113,30 @@ export const getClients = async (): Promise<Client[]> => {
 };
 
 export const getClientById = async (id: string): Promise<Client> => {
-  const { data, error } = await supabase
-    .from('clientes_fidelizacion')
-    .select('*, bonos(*)')
-    .eq('id', id)
-    .single();
+  const { data, error } = await fetchWithTimeout(
+    supabase
+      .from('clientes_fidelizacion')
+      .select('*, bonos(*)')
+      .eq('id', id)
+      .single() as unknown as Promise<{ data: ClientDbRow | null; error: PostgrestError | null }>
+  );
 
-  if (error) {
+  if (error || !data) {
     logger.error(`Error fetching client ${id}`, error, 'ClientService');
-    throw new Error(error.message);
+    throw new Error(error?.message || 'Cliente no encontrado');
   }
 
   return mapDbToClient(data);
 };
 
 export const getClientFinancialHistory = async (clientId: string): Promise<Factura[]> => {
-  const { data, error } = await supabase
-    .from('facturas')
-    .select('*, factura_items(*)')
-    .eq('cliente_id', clientId)
-    .order('fecha_venta', { ascending: false });
+  const { data, error } = await fetchWithTimeout(
+    supabase
+      .from('facturas')
+      .select('*, factura_items(*)')
+      .eq('cliente_id', clientId)
+      .order('fecha_venta', { ascending: false }) as unknown as Promise<{ data: Factura[] | null; error: PostgrestError | null }>
+  );
 
   if (error) {
     logger.error(`Error fetching financial history for client ${clientId}`, error, 'ClientService');
@@ -141,16 +149,18 @@ export const getClientFinancialHistory = async (clientId: string): Promise<Factu
 export const createClient = async (
   clientData: Omit<Client, 'id' | 'bono_estado' | 'bono_fecha_vencimiento'>
 ): Promise<Client> => {
-  const { data, error } = await supabase
-    .from('clientes_fidelizacion')
-    .insert([{
-      nombre: clientData.nombre,
-      email: clientData.email,
-      whatsapp: clientData.telefono,
-      birthday: clientData.fecha_nacimiento,
-    }])
-    .select('*, bonos(*)')
-    .single();
+  const { data, error } = await fetchWithTimeout(
+    supabase
+      .from('clientes_fidelizacion')
+      .insert([{
+        nombre: clientData.nombre,
+        email: clientData.email,
+        whatsapp: clientData.telefono,
+        birthday: clientData.fecha_nacimiento,
+      }])
+      .select('*, bonos(*)')
+      .single() as unknown as Promise<{ data: ClientDbRow | null; error: PostgrestError | null }>
+  );
 
   if (error) throw new Error(error.message);
   return mapDbToClient(data);
@@ -160,12 +170,14 @@ export const createClient = async (
  * Redime el bono activo de un cliente si este solicita marcarlo como reclamado.
  */
 async function redeemActiveBonusForClient(clientId: string): Promise<void> {
-  const { data: bonos } = await supabase
-    .from('bonos')
-    .select('id')
-    .eq('client_id', clientId)
-    .eq('estado', 'Pendiente')
-    .limit(1);
+  const { data: bonos } = await fetchWithTimeout(
+    supabase
+      .from('bonos')
+      .select('id')
+      .eq('client_id', clientId)
+      .eq('estado', 'Pendiente')
+      .limit(1) as unknown as Promise<{ data: { id: string }[] | null; error: PostgrestError | null }>
+  );
 
   if (bonos && bonos.length > 0) {
     const { error } = await supabase
@@ -202,11 +214,13 @@ export const updateClient = async (id: string, updates: Partial<Client>): Promis
   }
 
   // 3. Recuperar y mapear el registro actualizado final
-  const { data, error } = await supabase
-    .from('clientes_fidelizacion')
-    .select('*, bonos(*)')
-    .eq('id', id)
-    .single();
+  const { data, error } = await fetchWithTimeout(
+    supabase
+      .from('clientes_fidelizacion')
+      .select('*, bonos(*)')
+      .eq('id', id)
+      .single() as unknown as Promise<{ data: ClientDbRow | null; error: PostgrestError | null }>
+  );
 
   if (error) throw new Error(error.message);
   return mapDbToClient(data);

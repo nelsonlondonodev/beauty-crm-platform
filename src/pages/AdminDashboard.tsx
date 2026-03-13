@@ -79,7 +79,7 @@ const AdminDashboard = () => {
           <AdminStats stats={stats} />
 
           <TenantTable 
-            tenants={tenants as any} 
+            tenants={tenants} 
             onManage={(tenant) => console.log('Gestionar tenant:', tenant)}
             onViewAll={() => console.log('Ver todos')}
           />

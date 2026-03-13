@@ -9,7 +9,7 @@ export interface AdminStat {
 }
 
 export interface Tenant {
-  id: number;
+  id: string | number;
   name: string;
   owner: string;
   status: string;
