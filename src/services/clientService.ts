@@ -162,7 +162,7 @@ export const createClient = async (
       .single() as unknown as Promise<{ data: ClientDbRow | null; error: PostgrestError | null }>
   );
 
-  if (error) throw new Error(error.message);
+  if (error || !data) throw new Error(error?.message || 'Error al crear cliente');
   return mapDbToClient(data);
 };
 
@@ -222,7 +222,7 @@ export const updateClient = async (id: string, updates: Partial<Client>): Promis
       .single() as unknown as Promise<{ data: ClientDbRow | null; error: PostgrestError | null }>
   );
 
-  if (error) throw new Error(error.message);
+  if (error || !data) throw new Error(error?.message || 'No se pudo recuperar el registro actualizado');
   return mapDbToClient(data);
 };
 
