@@ -95,6 +95,10 @@
             {
               "fieldId": "user_id",
               "fieldValue": "={{ $json[\"user_id\"] }}"
+            },
+            {
+              "fieldId": "tenant_id",
+              "fieldValue": "={{ $json[\"tenant_id\"] || $json[\"user_id\"] }}"
             }
           ]
         }

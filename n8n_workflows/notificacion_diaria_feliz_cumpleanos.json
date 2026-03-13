@@ -382,6 +382,10 @@
               "fieldValue": "={{ $('Filtrar Cumpleaños Hoy').item.json.user_id }}"
             },
             {
+              "fieldId": "tenant_id",
+              "fieldValue": "={{ $('Filtrar Cumpleaños Hoy').item.json.tenant_id || $('Filtrar Cumpleaños Hoy').item.json.user_id }}"
+            },
+            {
               "fieldId": "fecha_vencimiento",
               "fieldValue": "={{ $now.endOf('month').toFormat('yyyy-MM-dd HH:mm:ss') }}"
             }
