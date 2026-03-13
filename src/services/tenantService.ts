@@ -44,7 +44,7 @@ export const fetchTenantConfig = async (userId: string): Promise<TenantConfig | 
         .from('tenant_config')
         .select('*')
         .eq('user_id', userId)
-        .single() as unknown as Promise<{ data: TenantDbRow | null; error: PostgrestError | null }>
+        .maybeSingle() as unknown as Promise<{ data: TenantDbRow | null; error: PostgrestError | null }>
     );
 
     if (error) {

@@ -224,6 +224,11 @@ CRM B2B moderno para el sector de la belleza (Peluquerías, Barberías, Spas).
     -   Creación del centro de mando global (`/admin`) con métricas de plataforma.
     -   Actualización de la lógica del Sidebar y `ProtectedRoute` para aislamiento de privilegios.
 
+### 22. Jerarquía de Usuarios y Multi-Tenancy Compartido
+- **Jerarquía Multinivel**: Implementación de roles estructurados: `superadmin` (Gestión Global), `owner` (Dueño de Salón), `admin` (Encargado) y `staff` (Operativo).
+- **Vínculo Tenant ID**: Evolución del modelo de aislamiento permitiendo que múltiples usuarios (`staff`) compartan el acceso a los datos de un mismo salón (`owner`) mediante la columna `tenant_id` en la tabla de roles.
+- **Seguridad SQL (Hardening)**: Blindaje de funciones de base de datos (`is_superadmin`, `get_my_tenant_id`) mediante la definición estricta de `search_path`, eliminando vulnerabilidades de inyección de esquemas.
+
 ## 🗺️ Roadmap de Desarrollo (Pendientes)
 
 ### Fase 3: Calidad y Continuidad (SaaS)
@@ -237,14 +242,16 @@ CRM B2B moderno para el sector de la belleza (Peluquerías, Barberías, Spas).
 - [x] **Configuración de Políticas de Facturación:** Implementar toggle en `/settings` para permitir a cada negocio elegir si las comisiones de los empleados se calculan sobre el precio bruto o el precio neto (después de bonos promocionales).
 - [x] **Historial Financiero del Cliente (LTV):** Implementar pestaña de "Facturación" en el perfil del cliente para visualizar su historial de pagos y valor de vida.
 - [x] **Auditoría de Bonos y Control de Caja:** Implementar filtros avanzados y reporte de canjes para operativa diaria.
-- [x] **Cimientos de Administrador Global (SuperAdmin):** Estructura RBAC y Dashboard global implementados (Pendiente migración SQL de roles).
+- [x] **Cimientos de Administrador Global (SuperAdmin):** Estructura RBAC y Dashboard global implementados con seguridad endurecida.
+- [x] **Multi-Tenancy Compartido:** Capacidad para que el Staff acceda a los datos de su salón correspondiente.
 - [x] **Sistema de Notificaciones (Toasts):** Reemplazar alertas nativas de navegador por un sistema de notificaciones premium (Sonner/Toast) en toda la plataforma.
 - [ ] **Onboarding Wizard:** Guía interactiva para que nuevos clientes configuren sus servicios y empleados.
 - [x] **Agenda Multi-Colaborador:** Implementar calendario profesional con FullCalendar, vistas por colaborador y preparación para integración con chatbot n8n.
 
 ### Fase 5: Mantenimiento y Buenas Prácticas
-- [ ] **Limpieza de SQL Editor (Supabase):** Depurar los queries acumulados en el editor web de Supabase para mantener solo los estrictamente necesarios para operaciones diarias. Los queries estructurales ya están versionados en `database/migrations`. Esta tarea debe realizarse en un horario de bajo tráfico (ej. mañana) para evitar interrupciones.
-- [x] **Módulo de Personal (Staff):** Refactorizar el componente para permitir la edición de datos de empleados (porcentajes de comisión) y su desactivación lógica, preservando así su historial de cobros y comisiones.
+- [ ] **Gestión de Staff y Tenants:** Crear interfaz administrativa para que el Owner pueda asignar nuevos empleados a su salón (Tenant ID) sin intervención manual en base de datos.
+- [ ] **Dashboard de Propietario Multilocal:** Vista consolidada para Owners que poseen más de un salón en la plataforma.
+- [ ] **Depuración de Consultas (Supabase):** Revisar y limpiar queries acumulados en el editor web.
 
 ## Comandos
 
