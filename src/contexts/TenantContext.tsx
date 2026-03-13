@@ -32,7 +32,7 @@ const defaultContext: TenantContextType = {
 const TenantContext = createContext<TenantContextType>(defaultContext);
 
 export const TenantProvider = ({ children }: { children: React.ReactNode }) => {
-  const { user } = useAuth();
+  const { user, tenantId } = useAuth();
   const [config, setConfig] = useState<TenantConfig>(defaultConfig);
   const [loading, setLoading] = useState(true);
 
@@ -44,8 +44,9 @@ export const TenantProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     setLoading(true);
-    // Delega la obtención de datos al servicio modularizado
-    const tenantData = await fetchTenantConfig(user.id);
+    // Usar el tenantId del contexto de autenticación si existe, si no fallback al user.id (para owners antiguos)
+    const targetId = tenantId || user.id;
+    const tenantData = await fetchTenantConfig(targetId);
     
     if (tenantData) {
       setConfig(tenantData);

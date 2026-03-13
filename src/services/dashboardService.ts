@@ -56,44 +56,34 @@ interface BonoWithClient {
   client: { nombre: string } | { nombre: string }[] | null;
 }
 
-// --- Funciones de obtención de estadísticas básicas ---
+// --- Funciones Atómicas de Métricas ---
+
+async function fetchStatsHead(table: string, filter?: (query: any) => any): Promise<number> {
+  let query = supabase.from(table).select('*', { count: 'exact', head: true });
+  if (filter) query = filter(query);
+  
+  const { count, error } = await fetchWithTimeout(
+    query as unknown as Promise<{ count: number | null; error: PostgrestError | null }>
+  );
+  if (error) {
+    logger.error(`Error fetching stats for ${table}`, error.message, 'Dashboard');
+    return 0;
+  }
+  return count || 0;
+}
 
 async function fetchTotalClients(): Promise<number> {
-  const { count, error } = await fetchWithTimeout(
-    supabase
-      .from('clientes_fidelizacion')
-      .select('*', { count: 'exact', head: true }) as unknown as Promise<{ count: number | null; error: PostgrestError | null }>
-  );
-  if (error) throw new Error(`Error fetching total clients: ${error.message}`);
-  return count || 0;
+  return fetchStatsHead('clientes_fidelizacion');
 }
 
 async function fetchNewClientsThisMonth(): Promise<number> {
   const start = startOfMonth(new Date()).toISOString();
   const end = endOfMonth(new Date()).toISOString();
-
-  const { count, error } = await fetchWithTimeout(
-    supabase
-      .from('clientes_fidelizacion')
-      .select('*', { count: 'exact', head: true })
-      .gte('created_at', start)
-      .lte('created_at', end) as unknown as Promise<{ count: number | null; error: PostgrestError | null }>
-  );
-
-  if (error) throw new Error(`Error fetching new clients: ${error.message}`);
-  return count || 0;
+  return fetchStatsHead('clientes_fidelizacion', q => q.gte('created_at', start).lte('created_at', end));
 }
 
 async function fetchActiveBonuses(): Promise<number> {
-  const { count, error } = await fetchWithTimeout(
-    supabase
-      .from('bonos')
-      .select('*', { count: 'exact', head: true })
-      .eq('estado', 'Pendiente') as unknown as Promise<{ count: number | null; error: PostgrestError | null }>
-  );
-
-  if (error) throw new Error(`Error fetching active bonuses: ${error.message}`);
-  return count || 0;
+  return fetchStatsHead('bonos', q => q.eq('estado', 'Pendiente'));
 }
 
 export async function fetchUpcomingBirthdays(): Promise<number> {
@@ -105,11 +95,8 @@ export async function fetchUpcomingBirthdays(): Promise<number> {
         .not('birthday', 'is', null) as unknown as Promise<{ data: { birthday: string | null }[] | null, error: PostgrestError | null }>
     );
 
-    if (error) throw new Error(error.message);
-    if (!data) return 0;
-    
+    if (error || !data) return 0;
     return data.filter(client => isBirthdayInRange(client.birthday)).length;
-    
   } catch (err) {
     logger.error('Error fetching birthdays', err, 'Dashboard');
     return 0;
@@ -121,21 +108,11 @@ export async function fetchExpiringBonuses(): Promise<number> {
   today.setHours(0, 0, 0, 0);
   const nextWeek = addDays(today, 7);
 
-  try {
-    const { count } = await fetchWithTimeout(
-      supabase
-        .from('bonos')
-        .select('*', { count: 'exact', head: true })
-        .eq('estado', 'Pendiente')
-        .gte('fecha_vencimiento', today.toISOString())
-        .lte('fecha_vencimiento', nextWeek.toISOString()) as unknown as Promise<{ count: number | null; error: PostgrestError | null }>,
-      3000
-    );
-    return count || 0;
-  } catch (err) {
-    logger.error('Error fetching expiring bonuses', err, 'Dashboard');
-    return 0;
-  }
+  return fetchStatsHead('bonos', q => 
+    q.eq('estado', 'Pendiente')
+     .gte('fecha_vencimiento', today.toISOString())
+     .lte('fecha_vencimiento', nextWeek.toISOString())
+  );
 }
 
 // --- Funciones de Ingresos ---

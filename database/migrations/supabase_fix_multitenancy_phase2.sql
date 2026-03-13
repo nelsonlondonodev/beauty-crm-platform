@@ -1,9 +1,26 @@
--- =========================================================================================
--- FUNCIÓN RPC TRANSACCIONAL: procesar_factura_completa
--- =========================================================================================
--- Propósito: Garantizar atomicidad (Todo o Nada) al guardar una factura, sus items y el canje
--- de bono en una sola transacción SQL. Previene estados corruptos si la conexión falla a la mitad.
+-- ==============================================================================
+-- PARCHE FINAL DE MULTI-TENANCY: FASE 2 (RPC y CONFIGURACIÓN)
+-- Objetivo: Refinar el RPC de facturación y las políticas de tenant_config
+-- para asegurar que el personal (Staff) tenga acceso a la configuración del salón.
+-- ==============================================================================
 
+-- 1. ACTUALIZAR RLS PARA tenant_config
+-- Permitir que cualquier usuario vea la configuración si su tenant_id coincide con el user_id de la config.
+ALTER TABLE public.tenant_config ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Tenant config access" ON public.tenant_config;
+CREATE POLICY "Tenant config access" ON public.tenant_config
+    FOR ALL TO authenticated
+    USING (public.is_superadmin() OR user_id = public.get_my_tenant_id())
+    WITH CHECK (public.is_superadmin() OR user_id = public.get_my_tenant_id());
+
+-- 2. ACTUALIZAR RLS PARA user_roles
+DROP POLICY IF EXISTS "Usuarios pueden ver su propio rol" ON public.user_roles;
+CREATE POLICY "Usuarios pueden ver su propio rol" ON public.user_roles
+    FOR SELECT TO authenticated
+    USING (auth.uid() = user_id OR tenant_id = public.get_my_tenant_id());
+
+-- 3. ACTUALIZAR RPC DE FACTURACIÓN (Asegurar que sea Multi-Tenant)
 CREATE OR REPLACE FUNCTION public.procesar_factura_completa(
     p_cliente_id UUID,
     p_subtotal NUMERIC,
@@ -14,7 +31,7 @@ CREATE OR REPLACE FUNCTION public.procesar_factura_completa(
     p_bono_id UUID DEFAULT NULL
 ) RETURNS JSONB
 LANGUAGE plpgsql
-SECURITY DEFINER -- Ejecuta con privilegios del creador (owner), previene bucles de RLS
+SECURITY DEFINER
 SET search_path = public
 AS $$
 DECLARE
@@ -29,23 +46,19 @@ DECLARE
     v_precio_bruto_total NUMERIC;
     v_precio_base_comision NUMERIC;
 BEGIN
-    -- 0. Obtener el tenant actual (del salón)
     v_my_tenant_id := public.get_my_tenant_id();
     IF v_my_tenant_id IS NULL THEN
         RAISE EXCEPTION 'No se pudo identificar el Tenant del usuario.';
     END IF;
 
-    -- Obtener la política de facturación (gross o net) del tenant
     SELECT commission_policy INTO v_commission_policy
     FROM public.tenant_config
     WHERE user_id = v_my_tenant_id;
     
-    -- Manejo por defecto por si no existe
     IF v_commission_policy IS NULL THEN
         v_commission_policy := 'gross';
     END IF;
 
-    -- 1. Crear la cabecera de la factura
     INSERT INTO public.facturas (
         user_id,
         tenant_id,
@@ -55,8 +68,8 @@ BEGIN
         total,
         metodo_pago
     ) VALUES (
-        auth.uid(),      -- Quién lo creó (Staff/Owner)
-        v_my_tenant_id,  -- A qué salón pertenece
+        auth.uid(),
+        v_my_tenant_id,
         p_cliente_id,
         p_subtotal,
         p_descuento,
@@ -64,32 +77,27 @@ BEGIN
         COALESCE(p_metodo_pago, 'Efectivo')
     ) RETURNING id INTO v_factura_id;
 
-    -- Calcular el ratio para prorratear descuentos (para política 'net')
     IF p_subtotal > 0 THEN
         v_ratio := p_total / p_subtotal;
     ELSE
         v_ratio := 1;
     END IF;
 
-    -- 2. Recorrer e Insertar cada Ítem de Factura
     FOR v_item IN SELECT * FROM jsonb_array_elements(p_items)
     LOOP
-        -- Extraer el ID del empleado desde el JSON (si hay)
         v_empleado_id := (v_item->>'empleado_id')::UUID;
         v_comision_porcentaje := 0;
 
-        -- Si hay empleado, buscar su porcentaje (solo en el scope del tenant actual)
         IF v_empleado_id IS NOT NULL THEN
             SELECT comision_porcentaje INTO v_comision_porcentaje
             FROM public.empleados
             WHERE id = v_empleado_id AND tenant_id = v_my_tenant_id;
             
             IF v_comision_porcentaje IS NULL THEN
-                 v_comision_porcentaje := 0; -- Fallback si el empleado fue alterado / es de otro tenant
+                 v_comision_porcentaje := 0;
             END IF;
         END IF;
 
-        -- Matemáticas de Comisiones
         v_precio_bruto_total := (v_item->>'price')::NUMERIC * (v_item->>'quantity')::NUMERIC;
         
         IF v_commission_policy = 'net' THEN
@@ -100,7 +108,6 @@ BEGIN
 
         v_comision_monto := v_precio_base_comision * (v_comision_porcentaje / 100);
 
-        -- Insertar el ítem
         INSERT INTO public.factura_items (
             user_id,
             tenant_id,
@@ -124,23 +131,16 @@ BEGIN
         );
     END LOOP;
 
-    -- 3. Canjear el Bono (Si existe)
     IF p_bono_id IS NOT NULL THEN
         UPDATE public.bonos
         SET estado = 'Canjeado',
             fecha_canje = timezone('utc'::text, now())
-        WHERE id = p_bono_id AND client_id = p_cliente_id; -- Seguridad adicional
+        WHERE id = p_bono_id AND client_id = p_cliente_id;
     END IF;
 
-    -- Retornar el ID de la factura creada como confirmación
-    RETURN jsonb_build_object(
-        'success', true,
-        'factura_id', v_factura_id
-    );
-
+    RETURN jsonb_build_object('success', true, 'factura_id', v_factura_id);
 EXCEPTION
     WHEN OTHERS THEN
-        -- Cualquier error hará un ROLLBACK automático de todo lo anterior
         RAISE EXCEPTION 'Error al procesar la factura: %', SQLERRM;
 END;
 $$;

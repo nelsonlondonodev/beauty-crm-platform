@@ -18,6 +18,7 @@ interface AuthContextType {
   session: Session | null;
   user: User | null;
   role: AppRole | null;
+  tenantId: string | null;
   loading: boolean;
   signOut: () => Promise<void>;
   refreshUser: () => Promise<void>;
@@ -27,25 +28,31 @@ const AuthContext = createContext<AuthContextType>({
   session: null,
   user: null,
   role: null,
+  tenantId: null,
   loading: true,
   signOut: async () => {},
   refreshUser: async () => {},
 });
+
+interface RoleData {
+  role: AppRole;
+  tenant_id: string | null;
+}
 
 /**
  * Función pura para obtener el rol desde Supabase.
  */
 export const fetchRoleFromDB = async (
   userId: string
-): Promise<AppRole | null> => {
+): Promise<RoleData | null> => {
   try {
     const request = supabase
       .from('user_roles')
-      .select('role')
+      .select('role, tenant_id')
       .eq('user_id', userId)
       .maybeSingle();
 
-    const response = await fetchWithTimeout(request as unknown as Promise<{ data: { role: AppRole } | null; error: PostgrestError | null }>, 5000);
+    const response = await fetchWithTimeout(request as unknown as Promise<{ data: RoleData | null; error: PostgrestError | null }>, 5000);
     const { data, error } = response;
 
     if (error) {
@@ -58,8 +65,8 @@ export const fetchRoleFromDB = async (
       return null;
     }
 
-    logger.info(`Rol detectado en DB: ${data.role} para el usuario ${userId}`, 'Auth');
-    return data.role as AppRole;
+    logger.info(`Rol detectado en DB: ${data.role} (Tenant: ${data.tenant_id}) para el usuario ${userId}`, 'Auth');
+    return data;
   } catch (err) {
     logger.error('Excepción resolviendo rol', err, 'Auth');
     return null;
@@ -70,6 +77,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [role, setRole] = useState<AppRole | null>(null);
+  const [tenantId, setTenantId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   const activeUserIdRef = useRef<string | null>(null);
@@ -84,6 +92,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setSession(null);
       setUser(null);
       setRole(null);
+      setTenantId(null);
       activeUserIdRef.current = null;
     }
   }, []);
@@ -138,12 +147,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           const { data: { user: currentUser }, error: userError } = await fetchWithTimeout(supabase.auth.getUser(), 5000);
           const validUser = (!userError && currentUser) ? currentUser : currentSession.user;
 
-          const userRole = await fetchRoleFromDB(validUser.id);
-
+          const userData = await fetchRoleFromDB(validUser.id);
+          
           if (mounted) {
             setSession(currentSession);
             setUser(validUser);
-            setRole(userRole);
+            setRole(userData?.role || null);
+            setTenantId(userData?.tenant_id || null);
             activeUserIdRef.current = validUser.id;
           }
         } catch (err) {
@@ -165,6 +175,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setSession(null);
       setUser(null);
       setRole(null);
+      setTenantId(null);
       activeUserIdRef.current = null;
       await fetchWithTimeout(supabase.auth.signOut(), 3000);
     } catch (error) {
@@ -173,7 +184,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ session, user, role, loading, signOut, refreshUser }}>
+    <AuthContext.Provider value={{ session, user, role, tenantId, loading, signOut, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );
