@@ -58,7 +58,7 @@ const NAV_ITEMS: NavItem[] = [
     icon: Briefcase,
     label: 'Personal',
     path: '/staff',
-    allowedRoles: ['owner', 'admin'],
+    allowedRoles: ['owner'],
   },
   {
     icon: Receipt,
@@ -67,10 +67,10 @@ const NAV_ITEMS: NavItem[] = [
     allowedRoles: ['owner', 'admin', 'staff'],
   },
   {
-    icon: Receipt, // We can reuse Receipt Icon
+    icon: Receipt,
     label: 'Historial de Ventas',
     path: '/invoices',
-    allowedRoles: ['owner', 'admin'],
+    allowedRoles: ['owner'],
   },
   {
     icon: Calendar,

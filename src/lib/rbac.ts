@@ -14,7 +14,8 @@ export type AppAction =
   | 'VIEW_CALENDAR'
   | 'VIEW_GLOBAL_STATS'
   | 'MANAGE_TENANTS'
-  | 'EDIT_SETTINGS';
+  | 'EDIT_SETTINGS'
+  | 'VIEW_REVENUE';
 
 /**
  * Mapa de permisos por rol. 
@@ -32,7 +33,8 @@ const ROLE_PERMISSIONS: Record<AppRole, AppAction[]> = {
     'VIEW_CALENDAR',
     'VIEW_GLOBAL_STATS',
     'MANAGE_TENANTS',
-    'EDIT_SETTINGS'
+    'EDIT_SETTINGS',
+    'VIEW_REVENUE'
   ],
   owner: [
     'VIEW_DASHBOARD',
@@ -43,18 +45,16 @@ const ROLE_PERMISSIONS: Record<AppRole, AppAction[]> = {
     'REDEEM_BONUS',
     'VIEW_BILLING',
     'VIEW_CALENDAR',
-    'EDIT_SETTINGS'
+    'EDIT_SETTINGS',
+    'VIEW_REVENUE'
   ],
   admin: [
     'VIEW_DASHBOARD',
-    'MANAGE_STAFF',
     'VIEW_CLIENTS',
     'MANAGE_CLIENTS',
-    'DELETE_CLIENT',
     'REDEEM_BONUS',
     'VIEW_BILLING',
-    'VIEW_CALENDAR',
-    'EDIT_SETTINGS'
+    'VIEW_CALENDAR'
   ],
   staff: [
     'VIEW_CLIENTS',
