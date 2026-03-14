@@ -229,6 +229,18 @@ CRM B2B moderno para el sector de la belleza (Peluquerías, Barberías, Spas).
 - **Vínculo Tenant ID**: Evolución del modelo de aislamiento permitiendo que múltiples usuarios (`staff`) compartan el acceso a los datos de un mismo salón (`owner`) mediante la columna `tenant_id` en la tabla de roles.
 - **Seguridad SQL (Hardening)**: Blindaje de funciones de base de datos (`is_superadmin`, `get_my_tenant_id`) mediante la definición estricta de `search_path`, eliminando vulnerabilidades de inyección de esquemas.
 
+### 23. Rol de Admin (Cajero) y Mejoras POS (v0.4.0)
+-   **Rol de Administrador Restringido (Cajero)**:
+    -   Implementación de perfil intermedio entre `owner` y `staff`.
+    -   **Privacidad Financiera**: El sistema oculta automáticamente gráficos de ingresos totales y listas de empleados a este rol, permitiéndole enfocarse exclusivamente en la operación.
+    -   **RBAC Dinámico**: Actualización de `rbac.ts` y `Sidebar.tsx` para filtrar permisos de forma granular.
+-   **Evolución del Punto de Venta (POS)**:
+    -   **Selector de Medios de Pago**: Nuevo componente modular `PaymentMethodSelector.tsx` que permite alternar entre **Efectivo** y **Tarjeta** con un diseño táctil premium.
+    -   **Arquitectura de Código Limpio**: Refactorización del hook `useBilling.ts` mediante la extracción de lógica de mapeo (`mapInvoiceToReceipt`) y desacople de componentes de UI, eliminando funciones monolíticas y mejorando la testabilidad.
+-   **Robustez en Automatización (Marca Blanca)**:
+    -   **Sincronización n8n**: Ajuste de los flujos de registro para asegurar la inyección mandatoria de `tenant_id` tanto en clientes como en bonos, garantizando visibilidad inmediata en el salón correspondiente.
+    -   **Depuración de Base de Datos**: Saneamiento de registros "huérfanos" (con `tenant_id` NULL) mediante scripts SQL recursivos.
+
 ## 🗺️ Roadmap de Desarrollo (Pendientes)
 
 ### Fase 3: Calidad y Continuidad (SaaS)
@@ -239,12 +251,14 @@ CRM B2B moderno para el sector de la belleza (Peluquerías, Barberías, Spas).
 - [ ] **Documentación API:** Documentar los endpoints de Supabase y esquemas de tablas.
 
 ### Fase 4: SaaS Avanzado e Inteligencia Financiera
-- [x] **Configuración de Políticas de Facturación:** Implementar toggle en `/settings` para permitir a cada negocio elegir si las comisiones de los empleados se calculan sobre el precio bruto o el precio neto (después de bonos promocionales).
+- [x] **Configuración de Políticas de Facturación:** Implementar toggle en `/settings` para permitir a cada negocio elegir si las comisiones de los empleados se calculan sobre el precio bruto o el precio neto.
 - [x] **Historial Financiero del Cliente (LTV):** Implementar pestaña de "Facturación" en el perfil del cliente para visualizar su historial de pagos y valor de vida.
 - [x] **Auditoría de Bonos y Control de Caja:** Implementar filtros avanzados y reporte de canjes para operativa diaria.
 - [x] **Cimientos de Administrador Global (SuperAdmin):** Estructura RBAC y Dashboard global implementados con seguridad endurecida.
 - [x] **Multi-Tenancy Compartido:** Capacidad para que el Staff acceda a los datos de su salón correspondiente.
-- [x] **Sistema de Notificaciones (Toasts):** Reemplazar alertas nativas de navegador por un sistema de notificaciones premium (Sonner/Toast) en toda la plataforma.
+- [x] **Notificaciones Premium:** Implementar sistema de toasts `sonner` para feedback de acciones.
+- [x] **Rol de Administrador Reestringido:** Perfil orientado a cajeros con protección de datos sensibles.
+- [x] **Selector de Métodos de Pago:** Integración de pagos con tarjeta y efectivo en el flujo de facturación.
 - [ ] **Onboarding Wizard:** Guía interactiva para que nuevos clientes configuren sus servicios y empleados.
 - [x] **Agenda Multi-Colaborador:** Implementar calendario profesional con FullCalendar, vistas por colaborador y preparación para integración con chatbot n8n.
 
