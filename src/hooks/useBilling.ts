@@ -146,6 +146,7 @@ export const useBilling = () => {
         subtotal,
         descuento: data.descuento_manual,
         total,
+        metodo_pago: data.metodo_pago,
         items: data.items.map(item => ({
           ...item,
           id: item.id || Math.random().toString(36).substr(2, 9),
@@ -154,6 +155,10 @@ export const useBilling = () => {
         bono_id: appliedBonus?.id || undefined,
         commissionPolicy: config.commissionPolicy,
       });
+
+      if (!response) {
+        throw new Error('No se recibió confirmación del servidor al procesar la factura.');
+      }
 
       // Show receipt modal
       setCompletedInvoice({

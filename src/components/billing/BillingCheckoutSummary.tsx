@@ -1,4 +1,4 @@
-import { DollarSign } from 'lucide-react';
+import { DollarSign, Banknote, CreditCard } from 'lucide-react';
 import type { UseFormReturn } from 'react-hook-form';
 import type { Client, InvoiceItem } from '../../types';
 import { cn } from '../../lib/utils';
@@ -138,6 +138,40 @@ const BillingCheckoutSummary = ({
               {...form.register('descuento_manual', { valueAsNumber: true })}
             />
           </div>
+        </div>
+      </div>
+
+      {/* Payment Method Selection */}
+      <div className="mb-6">
+        <label className="mb-3 block text-sm font-semibold text-gray-700">Método de Pago</label>
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            type="button"
+            onClick={() => form.setValue('metodo_pago', 'efectivo')}
+            className={cn(
+              "flex flex-col items-center justify-center gap-2 rounded-xl border-2 py-3 transition-all",
+              form.watch('metodo_pago') === 'efectivo'
+                ? "border-primary bg-primary/5 text-primary shadow-sm"
+                : "border-gray-100 bg-gray-50 text-gray-400 hover:border-gray-200 hover:bg-gray-100"
+            )}
+          >
+            <Banknote className="h-6 w-6" />
+            <span className="text-xs font-bold uppercase tracking-wider">Efectivo</span>
+          </button>
+          
+          <button
+            type="button"
+            onClick={() => form.setValue('metodo_pago', 'tarjeta')}
+            className={cn(
+              "flex flex-col items-center justify-center gap-2 rounded-xl border-2 py-3 transition-all",
+              form.watch('metodo_pago') === 'tarjeta'
+                ? "border-primary bg-primary/5 text-primary shadow-sm"
+                : "border-gray-100 bg-gray-50 text-gray-400 hover:border-gray-200 hover:bg-gray-100"
+            )}
+          >
+            <CreditCard className="h-6 w-6" />
+            <span className="text-xs font-bold uppercase tracking-wider">Tarjeta</span>
+          </button>
         </div>
       </div>
 
