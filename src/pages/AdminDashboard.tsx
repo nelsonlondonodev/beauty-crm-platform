@@ -3,6 +3,7 @@ import { LayoutDashboard, Users, Store, Activity } from 'lucide-react';
 import AdminHeader from '../components/admin/AdminHeader';
 import AdminStats from '../components/admin/AdminStats';
 import TenantTable from '../components/admin/TenantTable';
+import NewTenantModal from '../components/admin/NewTenantModal';
 import { getPlatformStats, getTenantsList, type PlatformStats, type TenantInfo } from '../services/adminService';
 import type { AdminStat } from '../components/admin/types';
 import { logger } from '../lib/logger';
@@ -11,23 +12,25 @@ const AdminDashboard = () => {
   const [platformStats, setPlatformStats] = useState<PlatformStats | null>(null);
   const [tenants, setTenants] = useState<TenantInfo[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const [statsData, tenantsData] = await Promise.all([
+        getPlatformStats(),
+        getTenantsList()
+      ]);
+      setPlatformStats(statsData);
+      setTenants(tenantsData);
+    } catch (err) {
+      logger.error('Error loading admin dashboard data', err, 'AdminDashboard');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        setLoading(true);
-        const [statsData, tenantsData] = await Promise.all([
-          getPlatformStats(),
-          getTenantsList()
-        ]);
-        setPlatformStats(statsData);
-        setTenants(tenantsData);
-      } catch (err) {
-        logger.error('Error loading admin dashboard data', err, 'AdminDashboard');
-      } finally {
-        setLoading(false);
-      }
-    };
     loadData();
   }, []);
 
@@ -73,7 +76,7 @@ const AdminDashboard = () => {
           <AdminHeader 
             title="Narbo's Salón Spa | Plataforma" 
             subtitle="Gestión y monitoreo de la plataforma Londy para su salón." 
-            onRegisterNew={() => console.log('Registrar nuevo salón')}
+            onRegisterNew={() => setIsModalOpen(true)}
           />
 
           <AdminStats stats={stats} />
@@ -82,6 +85,12 @@ const AdminDashboard = () => {
             tenants={tenants} 
             onManage={(tenant) => console.log('Gestionar tenant:', tenant)}
             onViewAll={() => console.log('Ver todos')}
+          />
+
+          <NewTenantModal 
+            isOpen={isModalOpen} 
+            onClose={() => setIsModalOpen(false)} 
+            onSuccess={loadData}
           />
         </>
       )}

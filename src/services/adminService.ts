@@ -18,6 +18,12 @@ export interface TenantInfo {
   plan: string;
 }
 
+export interface CreateTenantPayload {
+  brandName: string;
+  ownerId: string;
+  plan: string;
+}
+
 /**
  * Obtiene estadísticas globales del sistema para el SuperAdmin.
  * Refactorizado para asegurar consistencia con la lista de salones reales.
@@ -80,6 +86,42 @@ export const getTenantsList = async (): Promise<TenantInfo[]> => {
   } catch (err) {
     logger.error('Error fetching tenants list', err, 'AdminService');
     return [];
+  }
+};
+
+/**
+ * Crea un nuevo salón (Tenant) y asigna el rol de dueño al usuario correspondiente.
+ */
+export const createTenant = async (payload: CreateTenantPayload): Promise<{ success: boolean; error?: string }> => {
+  try {
+    // 1. Crear la configuración del salón
+    const { error: configError } = await fetchWithTimeout(
+      supabase.from('tenant_config').insert({
+        user_id: payload.ownerId,
+        brand_name: payload.brandName,
+        commission_policy: 'gross'
+      }) as unknown as Promise<{ error: PostgrestError | null }>
+    );
+
+    if (configError) throw new Error(`Error en tenant_config: ${configError.message}`);
+
+    // 2. Asignar el rol de owner y establecer el tenant_id
+    // Nota: En este sistema, el user_id del salón es el tenant_id
+    const { error: roleError } = await fetchWithTimeout(
+      supabase.from('user_roles').upsert({
+        user_id: payload.ownerId,
+        role: 'owner',
+        tenant_id: payload.ownerId
+      }, { onConflict: 'user_id' }) as unknown as Promise<{ error: PostgrestError | null }>
+    );
+
+    if (roleError) throw new Error(`Error en user_roles: ${roleError.message}`);
+
+    return { success: true };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Error desconocido al crear salón';
+    logger.error('Error creating tenant', err, 'AdminService');
+    return { success: false, error: message };
   }
 };
 
