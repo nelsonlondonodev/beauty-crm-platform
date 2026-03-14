@@ -137,6 +137,26 @@ export const useBilling = () => {
     setAppliedBonus(null);
   };
 
+  // Helpers internos para mantener funciones pequeñas
+  const mapInvoiceToReceipt = (invoiceId: string, data: BillingFormValues): InvoiceReceiptData => ({
+    id: invoiceId,
+    fecha: new Date().toISOString(),
+    cliente: selectedClient ? { 
+      nombre: selectedClient.nombre, 
+      telefono: selectedClient.telefono,
+      email: selectedClient.email 
+    } : null,
+    metodo_pago: data.metodo_pago,
+    items: data.items.map(i => ({ 
+      description: i.description, 
+      quantity: Number(i.quantity), 
+      price: Number(i.price) 
+    })),
+    subtotal,
+    descuento: data.descuento_manual,
+    total
+  });
+
   // Submit Handler
   const onSubmit = async (data: BillingFormValues) => {
     setIsProcessing(true);
@@ -161,20 +181,7 @@ export const useBilling = () => {
       }
 
       // Show receipt modal
-      setCompletedInvoice({
-        id: response.factura_id,
-        fecha: new Date().toISOString(),
-        cliente: selectedClient ? { 
-          nombre: selectedClient.nombre, 
-          telefono: selectedClient.telefono,
-          email: selectedClient.email 
-        } : null,
-        metodo_pago: data.metodo_pago,
-        items: data.items.map(i => ({ description: i.description, quantity: Number(i.quantity), price: Number(i.price) })),
-        subtotal,
-        descuento: data.descuento_manual,
-        total
-      });
+      setCompletedInvoice(mapInvoiceToReceipt(response.factura_id, data));
 
     } catch (error: unknown) {
       if (error instanceof Error) {
