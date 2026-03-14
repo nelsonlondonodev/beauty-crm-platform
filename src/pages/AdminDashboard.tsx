@@ -71,8 +71,8 @@ const AdminDashboard = () => {
       ) : (
         <>
           <AdminHeader 
-            title="Centro de Mando Global" 
-            subtitle="Monitoreo de plataforma y gestión de inquilinos (Tenants)." 
+            title="Narbo's Salón Spa | Plataforma" 
+            subtitle="Gestión y monitoreo de la plataforma Londy para su salón." 
             onRegisterNew={() => console.log('Registrar nuevo salón')}
           />
 

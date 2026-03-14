@@ -20,18 +20,18 @@ export interface TenantInfo {
 
 /**
  * Obtiene estadísticas globales del sistema para el SuperAdmin.
+ * Refactorizado para asegurar consistencia con la lista de salones reales.
  */
 export const getPlatformStats = async (): Promise<PlatformStats> => {
   try {
-    const [salonsCount, usersCount] = await Promise.all([
-      fetchCount('tenant_config'),
-      fetchCount('user_roles')
-    ]);
+    // Obtenemos los datos reales para asegurar coherencia
+    const tenants = await getTenantsList();
+    const usersCount = await fetchCount('user_roles');
 
     return {
-      totalSalons: salonsCount,
+      totalSalons: tenants.length,
       totalUsers: usersCount,
-      activeSubscriptions: salonsCount, // Por ahora 1:1
+      activeSubscriptions: tenants.length, // Basado solo en salones operativos
       systemUptime: '99.99%',
     };
   } catch (err) {
