@@ -276,3 +276,29 @@ CRM B2B moderno para el sector de la belleza (Peluquerías, Barberías, Spas).
 -   `npx tsc --noEmit`: Verificación de tipos estricta
 
 
+## 🏗️ Arquitectura de Entornos (v0.4.0)
+
+Este proyecto utiliza una separación estricta para garantizar la estabilidad de producción:
+
+- **Desarrollo (Frankfurt)**: Proyecto `Londy Dev` en Supabase.
+  - Se activa automáticamente con `npm run dev` usando `.env.development`.
+  - Servidor: `Central EU (Frankfurt)` para mínima latencia desde España.
+- **Producción**: Proyecto `Fidelizacion Narbo's Pro` en Supabase.
+  - Se activa con `npm run build` usando `.env.production`.
+
+---
+
+## 🚀 Estado de la Sesión (2026-03-19)
+
+### Logros:
+1. **Recuperación de Producción**: Se restauraron los roles y políticas RLS en el proyecto principal tras un fallo masivo de timeouts.
+2. **Setup de Desarrollo**: 
+   - Nuevo proyecto Supabase creado y configurado.
+   - Esquema de base de datos (`supabase_fresh_install.sql`) ejecutado con éxito.
+   - Google OAuth configurado para el entorno local.
+   - Variables de entorno segregadas en `.env.development` y `.env.production`.
+
+### ⚠️ Tarea Pendiente (Próxima Sesión):
+Quedó pendiente terminar el sembrado de roles en el proyecto de desarrollo.
+- **Error actual**: El script falla porque falta insertar el registro de `tenant_config` para el usuario `superadmin` antes de asignarle el rol.
+- **Dato clave**: El UUID del superadmin en el nuevo proyecto es `3bdd196d-ea6a-4495-a76f-58afbd1959f5`.
