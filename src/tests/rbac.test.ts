@@ -16,8 +16,8 @@ describe('RBAC (Role Based Access Control)', () => {
       });
     });
 
-    it('debe permitir al "admin" gestionar el personal (MANAGE_STAFF)', () => {
-      expect(canPerform('admin', 'MANAGE_STAFF')).toBe(true);
+    it('no debe permitir al "admin" (cajero) gestionar el personal (MANAGE_STAFF)', () => {
+      expect(canPerform('admin', 'MANAGE_STAFF')).toBe(false);
     });
 
     it('no debe permitir al "staff" borrar clientes (DELETE_CLIENT)', () => {
