@@ -288,17 +288,15 @@ Este proyecto utiliza una separación estricta para garantizar la estabilidad de
 
 ---
 
-## 🚀 Estado de la Sesión (2026-03-19)
+## 🚀 Estado de la Sesión (2026-03-20)
 
 ### Logros:
-1. **Recuperación de Producción**: Se restauraron los roles y políticas RLS en el proyecto principal tras un fallo masivo de timeouts.
-2. **Setup de Desarrollo**: 
-   - Nuevo proyecto Supabase creado y configurado.
-   - Esquema de base de datos (`supabase_fresh_install.sql`) ejecutado con éxito.
-   - Google OAuth configurado para el entorno local.
-   - Variables de entorno segregadas en `.env.development` y `.env.production`.
+1. **Sembrado de Roles de Desarrollo (Frankfurt)**: Se completó la asignación de roles y vinculación de tenants para SuperAdmin, Owner, Admin y Staff usando UUIDs verificados.
+2. **Corrección de Integridad**: Se resolvió el error de llave foránea (FK) identificando una discrepancia de un carácter en uno de los IDs de los usuarios.
+3. **Estabilización Multi-Tenant**: Se configuró con éxito el salón de pruebas ("Londy Demo Salon") y la consola de SuperAdmin, logrando un entorno de desarrollo funcional y aislado de producción.
+4. **Estrategia n8n**: Se definió la necesidad de separar los flujos de automatización para evitar contaminación de datos entre entornos.
 
 ### ⚠️ Tarea Pendiente (Próxima Sesión):
-Quedó pendiente terminar el sembrado de roles en el proyecto de desarrollo.
-- **Error actual**: El script falla porque falta insertar el registro de `tenant_config` para el usuario `superadmin` antes de asignarle el rol.
-- **Dato clave**: El UUID del superadmin en el nuevo proyecto es `3bdd196d-ea6a-4495-a76f-58afbd1959f5`.
+1. **Sincronización n8n - Desarrollo**: Duplicar los flujos de n8n relevantes y actualizarlos con las credenciales de `Londy Dev` para pruebas de automatización seguras.
+2. **Plan de Limpieza (Go-Live)**: Evaluar la ejecución del script de limpieza en el proyecto de producción (Narbo's) para eliminar rastro de pruebas antes de su uso real.
+3. **Prueba de Roles en Incógnito**: Verificar visualmente en el navegador cómo reacciona el Dashboard ante los 4 roles recién configurados.
