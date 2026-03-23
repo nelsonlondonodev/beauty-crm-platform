@@ -12,13 +12,17 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { session } = useAuth();
+  const { session, role, loading: authLoading } = useAuth();
 
   useEffect(() => {
-    if (session) {
-      navigate('/');
+    if (session && !authLoading) {
+      if (role === 'superadmin') {
+        navigate('/admin');
+      } else {
+        navigate('/');
+      }
     }
-  }, [session, navigate]);
+  }, [session, role, authLoading, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
