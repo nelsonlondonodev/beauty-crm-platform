@@ -78,12 +78,12 @@ const Staff = () => {
     });
   };
 
-  const handleSaveStaff = async (data: any) => {
+  const handleSaveStaff = async (data: Partial<EmpleadoConSaldo>) => {
     if (editingStaff) {
       const res = await updateStaff(editingStaff.id, data);
       if (!res.success) throw new Error(res.error);
     } else {
-      const res = await addStaff(data);
+      const res = await addStaff(data as { nombre: string; rol: string; comision_porcentaje: number; activo: boolean });
       if (!res.success) throw new Error(res.error);
     }
   };
