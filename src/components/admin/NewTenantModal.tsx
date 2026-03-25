@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Store, User, CreditCard, AlertCircle, Loader2 } from 'lucide-react';
 import { createTenant, type CreateTenantPayload } from '../../services/adminService';
+import { toast } from 'sonner';
 
 interface NewTenantModalProps {
   isOpen: boolean;
@@ -23,15 +24,17 @@ const NewTenantModal = ({ isOpen, onClose, onSuccess }: NewTenantModalProps) => 
     e.preventDefault();
     setError(null);
 
-    // Validación básica de UUID (formato simplificado)
+    // Validación básica de UUID (v4 estándar)
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
     if (!uuidRegex.test(formData.ownerId)) {
-      setError('El ID del Propietario debe ser un UUID válido de Supabase.');
+      setError('El ID del Propietario debe ser un UUID válido (ej: 550e8400-e29b-41d4-a716-446655440000).');
+      toast.error('ID del Propietario inválido');
       return;
     }
 
     if (formData.brandName.trim().length < 3) {
       setError('El nombre del salón debe tener al menos 3 caracteres.');
+      toast.error('Nombre del salón demasiado corto');
       return;
     }
 
@@ -39,15 +42,18 @@ const NewTenantModal = ({ isOpen, onClose, onSuccess }: NewTenantModalProps) => 
     try {
       const result = await createTenant(formData);
       if (result.success) {
+        toast.success(`¡Salón "${formData.brandName}" registrado con éxito!`);
         onSuccess();
         onClose();
-        // Reset form
         setFormData({ brandName: '', ownerId: '', plan: 'Premium' });
       } else {
-        setError(result.error || 'Ocurrió un error al registrar el salón.');
+        const errorMsg = result.error || 'Ocurrió un error al registrar el salón.';
+        setError(errorMsg);
+        toast.error(errorMsg);
       }
     } catch (err) {
       setError('Error de conexión con el servidor.');
+      toast.error('Error de conexión.');
     } finally {
       setLoading(false);
     }
