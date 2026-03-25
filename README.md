@@ -259,7 +259,8 @@ CRM B2B moderno para el sector de la belleza (Peluquerías, Barberías, Spas).
 - [x] **Notificaciones Premium:** Implementar sistema de toasts `sonner` para feedback de acciones.
 - [x] **Rol de Administrador Reestringido:** Perfil orientado a cajeros con protección de datos sensibles.
 - [x] **Selector de Métodos de Pago:** Integración de pagos con tarjeta y efectivo en el flujo de facturación.
-- [ ] **Onboarding Wizard:** Guía interactiva para que nuevos clientes configuren sus servicios y empleados.
+- [x] **Onboarding Wizard:** Guía interactiva automátizada (3 pasos) integrada al frontend para que nuevos dueños configuren su marca, política de cobro y Staff inicial.
+- [x] **Landing Page Premium:** Entrada pública con diseño SaaS, Glassmorphism y animaciones modernas que vende los features del CRM antes del acceso.
 - [x] **Agenda Multi-Colaborador:** Implementar calendario profesional con FullCalendar, vistas por colaborador y preparación para integración con chatbot n8n.
 
 ### 22. Estabilización SaaS y Refactorización (v0.3.0)
@@ -288,15 +289,14 @@ Este proyecto utiliza una separación estricta para garantizar la estabilidad de
 
 ---
 
-## 🚀 Estado de la Sesión (2026-03-20)
+## 🚀 Estado de la Sesión (2026-03-25)
 
-### Logros:
-1. **Sembrado de Roles de Desarrollo (Frankfurt)**: Se completó la asignación de roles y vinculación de tenants para SuperAdmin, Owner, Admin y Staff usando UUIDs verificados.
-2. **Corrección de Integridad**: Se resolvió el error de llave foránea (FK) identificando una discrepancia de un carácter en uno de los IDs de los usuarios.
-3. **Estabilización Multi-Tenant**: Se configuró con éxito el salón de pruebas ("Londy Demo Salon") y la consola de SuperAdmin, logrando un entorno de desarrollo funcional y aislado de producción.
-4. **Estrategia n8n**: Se definió la necesidad de separar los flujos de automatización para evitar contaminación de datos entre entornos.
+### Logros (Sprint de UX, Calidad y Retención):
+1. **Tipado Estricto (Staff)**: Se refactorizó la lógica de Guardado de Personal (`handleSaveStaff`) para cumplir con `strict: true` en TypeScript (`Partial<EmpleadoConSaldo>`), elevando la seguridad del código.
+2. **Landing Page Externa (Wow Effect)**: Se desarrolló una pantalla de aterrizaje en la ruta raíz (`/`) con gradientes interactivos, bento boxes animados, diseño responsive y UX premium, moviendo el acceso privado al `/dashboard`.
+3. **Onboarding Wizard Autónomo**: Se diseñó e inyectó un componente de configuración inicial de tres pasos (Setup visual, Políticas de comisiones y Alta de primer empleado) que intercepta de forma segura a nuevos Salones "Vírgenes" antes de permitir su ingreso real al CRM.
+4. **Diseño a prueba de Fallos**: El Wizard respeta los Strict-Types de React y de la Base de Datos conectada.
 
-### ⚠️ Tarea Pendiente (Próxima Sesión):
-1. **Sincronización n8n - Desarrollo**: Duplicar los flujos de n8n relevantes y actualizarlos con las credenciales de `Londy Dev` para pruebas de automatización seguras.
-2. **Plan de Limpieza (Go-Live)**: Evaluar la ejecución del script de limpieza en el proyecto de producción (Narbo's) para eliminar rastro de pruebas antes de su uso real.
-3. **Prueba de Roles en Incógnito**: Verificar visualmente en el navegador cómo reacciona el Dashboard ante los 4 roles recién configurados.
+### ⚠️ Próximos Pasos en la Retaguardia:
+1. **Dashboard y Tabla Genérica**: Proceder a evaluar arquitectónicamente el módulo `<DataTable />` genérico para unificar el sistema de tablas y ordenamiento de todo el proyecto.
+2. **Setup de Observabilidad Sentry/LogRocket**: Conectar el Logger personalizado a los servicios analíticos para cacería pasiva de bugs frente a la expansión del SaaS.
