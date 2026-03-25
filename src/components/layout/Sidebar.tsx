@@ -27,7 +27,7 @@ interface NavItem {
 
 // ── Configuración de navegación ─────────────────────────────────────────────
 
-const DASHBOARD_PATH = '/';
+const DASHBOARD_PATH = '/dashboard';
 
 const NAV_ITEMS: NavItem[] = [
   {

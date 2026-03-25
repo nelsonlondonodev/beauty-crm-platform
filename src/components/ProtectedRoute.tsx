@@ -1,7 +1,7 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth, type AppRole } from '../contexts/AuthContext';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Lock } from 'lucide-react';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -22,7 +22,7 @@ const getFallbackRoute = (role: AppRole | null): string => {
       return '/calendar'; // Vista ideal para empleados base
     case 'admin':
     case 'owner':
-      return '/'; // El dashboard es su base de operaciones
+      return '/dashboard'; // El dashboard es su base de operaciones
     default:
       return '/calendar';
   }

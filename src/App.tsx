@@ -7,6 +7,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { Toaster } from 'sonner';
 
 // ── Lazy Loaded Pages ───────────────────────────────────────────────────────
+const Landing = lazy(() => import('./pages/Landing'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Clients = lazy(() => import('./pages/Clients'));
 const Calendar = lazy(() => import('./pages/Calendar'));
@@ -43,6 +44,14 @@ function App() {
               }
             />
             <Route
+              path="/"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <Landing />
+                </Suspense>
+              }
+            />
+            <Route
               path="/*"
               element={
                 <ProtectedRoute>
@@ -50,7 +59,7 @@ function App() {
                     <Suspense fallback={<PageLoader />}>
                       <Routes>
                         <Route
-                          path="/"
+                          path="/dashboard"
                           element={
                             <ProtectedRoute allowedRoles={['owner', 'admin']}>
                               <Dashboard />

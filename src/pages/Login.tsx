@@ -19,7 +19,7 @@ const Login = () => {
       if (role === 'superadmin') {
         navigate('/admin');
       } else {
-        navigate('/');
+        navigate('/dashboard');
       }
     }
   }, [session, role, authLoading, navigate]);
