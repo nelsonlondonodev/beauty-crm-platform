@@ -1,5 +1,5 @@
-import { ReactNode } from 'react';
-import { DataTableProps } from '../../types/table';
+import type { ReactNode } from 'react';
+import type { DataTableProps } from '../../types/table';
 import { Loader2 } from 'lucide-react';
 
 export function DataTable<T>({
