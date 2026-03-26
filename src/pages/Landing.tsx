@@ -1,7 +1,22 @@
 import { ArrowRight, CalendarCheck, CheckCircle2, ChevronRight, Scissors, Store, Users, LogIn, Sparkles, TrendingUp, ShieldCheck } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { useEffect } from 'react';
 
 const Landing = () => {
+  const navigate = useNavigate();
+  const { session, role, loading: authLoading } = useAuth();
+
+  useEffect(() => {
+    if (session && !authLoading) {
+      if (role === 'superadmin') {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
+    }
+  }, [session, role, authLoading, navigate]);
+
   return (
     <div className="min-h-screen bg-[#fafafa] selection:bg-purple-500/30 overflow-hidden font-sans">
       {/* ── Navbar ── */}
@@ -137,7 +152,7 @@ const Landing = () => {
                 color: 'text-emerald-500',
                 bg: 'bg-emerald-100',
               },
-            ].map((feature, index) => (
+            ].map((feature) => (
               <div 
                 key={feature.name} 
                 className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-gray-100 bg-white p-8 shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-gray-200/50"
