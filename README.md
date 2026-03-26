@@ -300,6 +300,7 @@ Este proyecto utiliza una separación estricta para garantizar la estabilidad de
 4. **Protección Anti-Doble Canje**: Lógica de base de datos Atómica implementada en modulo Bonos (`.eq('estado', 'Pendiente')`) imposibilitando canjes simultáneos accidentales en la caja.
 5. **Quality Assurance (Vitest)**: Instalación exitosa de Vitest y ejecución de pruebas de seguridad matemática (`rbac.test.ts`), confirmando con 100% de cobertura que los roles administrativos (`admin`, `staff`) no pueden filtrar ni acceder a vistas financieras (`owner`, `superadmin`).
 6. **Despliegue Exitoso en Vercel**: Compilación y Merge completado en la rama `main` disparando el proceso CI/CD hacia el ambiente de Producción en Vivo.
+7. **Actualización de Fidelización (n8n)**: Se actualizó el correo de bienvenida del club de fidelización incrementando el descuento al 15% y añadiendo aclaraciones legales (exclusión de servicios de depilación) directamente en el Template HTML (`n8n_workflows/registro_cliente.json`).
 
 ### ⚠️ Próximos Pasos en el Roadmap:
 1. **Monitoreo Real**: Integrar el custom Logger a un servicio como Sentry o LogRocket para observabilidad en Vivo.
