@@ -6,10 +6,11 @@ import {
 import { logger } from '../lib/logger';
 import { useCrmEvent } from './useCrmEvent';
 import { CRM_EVENTS } from '../lib/events';
+import type { AppRole } from '../contexts/AuthContext';
 
 export type { DashboardStats };
 
-export const useDashboardStats = () => {
+export const useDashboardStats = (role: AppRole | null) => {
   const [stats, setStats] = useState<DashboardStats>({
     totalClients: 0,
     newClientsThisMonth: 0,
@@ -31,7 +32,7 @@ export const useDashboardStats = () => {
   const fetchStats = async () => {
     try {
       setLoading(true);
-      const data = await getDashboardStats();
+      const data = await getDashboardStats(role);
       setStats(data);
     } catch (error) {
       logger.error('Error fetching dashboard stats', error, 'useDashboardStats');

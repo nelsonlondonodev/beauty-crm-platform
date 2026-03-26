@@ -4,6 +4,8 @@ import { startOfMonth, endOfMonth, addMonths, addDays } from 'date-fns';
 import { fetchWithTimeout } from '../lib/utils';
 import { logger } from '../lib/logger';
 import { isBirthdayInRange } from '../lib/dateUtils';
+import { canPerform } from '../lib/rbac';
+import type { AppRole } from '../contexts/AuthContext';
 
 // --- Interfaces ---
 
@@ -266,7 +268,9 @@ export async function fetchRecentActivity(): Promise<ActivityItem[]> {
 
 // --- Función Principal ---
 
-export const getDashboardStats = async (): Promise<DashboardStats> => {
+export const getDashboardStats = async (role: AppRole | null): Promise<DashboardStats> => {
+  const showRevenue = canPerform(role, 'VIEW_REVENUE');
+
   const [
     totalClients,
     newClientsThisMonth,
@@ -281,7 +285,7 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
     fetchActiveBonuses(),
     fetchUpcomingBirthdays(),
     fetchExpiringBonuses(),
-    fetchRevenueData(),
+    showRevenue ? fetchRevenueData() : Promise.resolve([]),
     fetchRecentActivity()
   ]);
 

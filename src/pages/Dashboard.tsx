@@ -8,8 +8,8 @@ import { APP_CONFIG } from '../config/brand';
 import { canPerform } from '../lib/rbac';
 
 const Dashboard = () => {
-  const { stats, loading } = useDashboardStats();
   const { user, role } = useAuth();
+  const { stats, loading } = useDashboardStats(role);
 
   const userName = user?.user_metadata?.full_name?.split(' ')[0] || APP_CONFIG.defaults.userName;
   const showRevenue = canPerform(role, 'VIEW_REVENUE');
@@ -67,12 +67,8 @@ const Dashboard = () => {
       </div>
 
       <div className="grid gap-6 lg:h-[400px] lg:grid-cols-7">
-        {showRevenue ? (
+        {showRevenue && (
           <RevenueChart data={stats.revenueData} />
-        ) : (
-          <div className="col-span-4 rounded-xl bg-white p-6 shadow-sm flex items-center justify-center border border-gray-100 italic text-gray-400">
-            Vista operativa de actividad reciente
-          </div>
         )}
         <div className={showRevenue ? "col-span-3" : "col-span-7"}>
           <RecentActivity data={stats.recentActivity} />
