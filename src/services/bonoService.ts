@@ -58,21 +58,30 @@ export const validateBonoCode = async (
 };
 
 /**
- * Canjea un bono: actualiza su estado a 'Canjeado' y registra la fecha.
- * @throws Error si la actualización falla.
+ * Canjea un bono de forma atómica: asegura que el estado sea 'Pendiente'
+ * antes de pasarlo a 'Canjeado', previniendo el Doble Canje (Double-Spend).
+ * @throws Error si la actualización falla o ya fue canjeado por otra vía.
  */
 export const redeemBono = async (bonoId: string): Promise<void> => {
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('bonos')
     .update({
       estado: 'Canjeado',
       fecha_canje: new Date().toISOString(),
     })
-    .eq('id', bonoId);
+    .eq('id', bonoId)
+    .eq('estado', 'Pendiente') // Condición Atómica
+    .select('id')
+    .maybeSingle();
 
   if (error) {
     logger.error('Error redeeming bono', error, 'BonoService');
     throw new Error(error.message);
+  }
+
+  if (!data) {
+    logger.warn(`Intento de doble canje bloqueado en bono ${bonoId}`, 'BonoService');
+    throw new Error('Lo sentimos, este bono ya fue canjeado previamente o no se encuentra Pendiente.');
   }
 };
 
