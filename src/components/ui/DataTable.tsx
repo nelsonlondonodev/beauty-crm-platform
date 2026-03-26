@@ -39,16 +39,16 @@ export function DataTable<T>({
               </td>
             </tr>
           ) : (
-            data.map((item) => (
+            data.map((item, index) => (
               <tr
-                key={keyExtractor(item)}
+                key={keyExtractor(item, index)}
                 onClick={() => onRowClick?.(item)}
                 className={`transition-colors hover:bg-gray-50/60 ${onRowClick ? 'cursor-pointer' : ''}`}
               >
                 {columns.map((col, colIdx) => (
                   <td key={colIdx} className={`px-6 py-4 ${col.className || ''}`}>
                     {col.cell
-                      ? col.cell(item)
+                      ? col.cell(item, index)
                       : col.accessorKey
                       ? (item[col.accessorKey] as ReactNode)
                       : null}

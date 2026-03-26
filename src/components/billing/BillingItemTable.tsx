@@ -1,5 +1,7 @@
 import { Receipt, Trash2, Plus } from 'lucide-react';
 import type { InvoiceItem, Empleado } from '../../types';
+import { DataTable } from '../ui/DataTable';
+import type { ColumnDef } from '../../types/table';
 
 interface BillingItemTableProps {
   items: InvoiceItem[];
@@ -28,6 +30,48 @@ const BillingItemTable = ({
   onAddItem,
   onRemoveItem,
 }: BillingItemTableProps) => {
+
+  const columns: ColumnDef<InvoiceItem>[] = [
+    {
+      header: 'Descripción',
+      className: 'font-medium text-gray-900',
+      cell: (item) => item.description,
+    },
+    {
+      header: 'Colaborador',
+      className: 'text-gray-500',
+      cell: (item) => empleados.find((e) => e.id === item.empleado_id)?.nombre || '-',
+    },
+    {
+      header: 'Cant.',
+      className: 'text-center text-gray-600',
+      cell: (item) => item.quantity,
+    },
+    {
+      header: 'Precio',
+      className: 'text-right text-gray-600',
+      cell: (item) => `$${Number(item.price).toLocaleString()}`,
+    },
+    {
+      header: 'Total',
+      className: 'text-right font-semibold text-gray-900',
+      cell: (item) => `$${(Number(item.price) * Number(item.quantity)).toLocaleString()}`,
+    },
+    {
+      header: '',
+      className: 'text-center w-10',
+      cell: (_, index) => (
+        <button
+          type="button"
+          onClick={() => onRemoveItem(index)}
+          className="text-gray-400 transition-colors hover:text-red-500"
+        >
+          <Trash2 className="h-4 w-4" />
+        </button>
+      ),
+    },
+  ];
+
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
       <h2 className="mb-4 flex items-center text-lg font-semibold text-gray-900">
@@ -119,61 +163,13 @@ const BillingItemTable = ({
         </div>
       </div>
 
-      {/* Items Table */}
-      <div className="overflow-x-auto">
-        <table className="w-full text-left text-sm">
-          <thead className="border-b border-gray-200 bg-gray-50 text-gray-600">
-            <tr>
-              <th className="px-4 py-3 font-medium">Descripción</th>
-              <th className="px-4 py-3 font-medium">Colaborador</th>
-              <th className="px-4 py-3 text-center font-medium">Cant.</th>
-              <th className="px-4 py-3 text-right font-medium">Precio</th>
-              <th className="px-4 py-3 text-right font-medium">Total</th>
-              <th className="w-10 px-4 py-3"></th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {items.length === 0 ? (
-              <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-gray-400">
-                  No hay servicios agregados. Busca un servicio o agrégalo
-                  arriba.
-                </td>
-              </tr>
-            ) : (
-              items.map((item, index) => (
-                <tr key={item.id} className="hover:bg-gray-50/50">
-                  <td className="px-4 py-3 font-medium text-gray-900">
-                    {item.description}
-                  </td>
-                  <td className="px-4 py-3 text-gray-500">
-                    {empleados.find((e) => e.id === item.empleado_id)?.nombre ||
-                      '-'}
-                  </td>
-                  <td className="px-4 py-3 text-center text-gray-600">
-                    {item.quantity}
-                  </td>
-                  <td className="px-4 py-3 text-right text-gray-600">
-                    ${Number(item.price).toLocaleString()}
-                  </td>
-                  <td className="px-4 py-3 text-right font-semibold text-gray-900">
-                    ${(Number(item.price) * Number(item.quantity)).toLocaleString()}
-                  </td>
-                  <td className="px-4 py-3 text-center">
-                    <button
-                      type="button"
-                      onClick={() => onRemoveItem(index)}
-                      className="text-gray-400 transition-colors hover:text-red-500"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+      <DataTable<InvoiceItem>
+        data={items}
+        columns={columns}
+        keyExtractor={(item, index) => item.id || `item-${index}`}
+        emptyMessage="No hay servicios agregados. Busca un servicio o agrégalo arriba."
+        className="rounded-none shadow-none border border-gray-200"
+      />
     </div>
   );
 };
