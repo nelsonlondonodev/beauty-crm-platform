@@ -289,14 +289,18 @@ Este proyecto utiliza una separación estricta para garantizar la estabilidad de
 
 ---
 
-## 🚀 Estado de la Sesión (2026-03-25)
+## 🚀 Estado de la Sesión (2026-03-26): Despliegue a Producción (MVP V1.0)
 
-### Logros (Sprint de UX, Calidad y Retención):
-1. **Tipado Estricto (Staff)**: Se refactorizó la lógica de Guardado de Personal (`handleSaveStaff`) para cumplir con `strict: true` en TypeScript (`Partial<EmpleadoConSaldo>`), elevando la seguridad del código.
-2. **Landing Page Externa (Wow Effect)**: Se desarrolló una pantalla de aterrizaje en la ruta raíz (`/`) con gradientes interactivos, bento boxes animados, diseño responsive y UX premium, moviendo el acceso privado al `/dashboard`.
-3. **Onboarding Wizard Autónomo**: Se diseñó e inyectó un componente de configuración inicial de tres pasos (Setup visual, Políticas de comisiones y Alta de primer empleado) que intercepta de forma segura a nuevos Salones "Vírgenes" antes de permitir su ingreso real al CRM.
-4. **Diseño a prueba de Fallos**: El Wizard respeta los Strict-Types de React y de la Base de Datos conectada.
+### Logros (Sprint de Seguridad, Refactor UI y Testing):
+1. **Componente `<DataTable />` Genérico**: Se erradicó la deuda técnica de *Spaghetti HTML*. Todas las tablas del sistema (`ClientTable`, `StaffTable`, `TenantTable`, `BillingItemTable`) ahora usan un componente nativo genérico y fuertemente tipado, logrando consistencia UI total.
+2. **Seguridad y Parche a Producción (Zero-Downtime)**: 
+   - Generación de script SQL Idempotente (`actualizacion_segura_produccion.sql`) para migrar la vieja base de datos de producción a la nueva arquitectura SaaS Multi-tenant sin pérdida de datos históricos.
+   - Solución a advertencias de Supabase (`Function Search Path Mutable`, `Leaked Passwords`).
+3. **Hardening de Frontend (Adiós Twilio)**: Se extirpó y revocó la vulnerabilidad de las llaves de Twilio (`VITE_TWILIO_AUTH_TOKEN`) del cliente React, delegando toda la mensajería SMS a nuestra bóveda segura en el backend automatizado de **n8n**.
+4. **Protección Anti-Doble Canje**: Lógica de base de datos Atómica implementada en modulo Bonos (`.eq('estado', 'Pendiente')`) imposibilitando canjes simultáneos accidentales en la caja.
+5. **Quality Assurance (Vitest)**: Instalación exitosa de Vitest y ejecución de pruebas de seguridad matemática (`rbac.test.ts`), confirmando con 100% de cobertura que los roles administrativos (`admin`, `staff`) no pueden filtrar ni acceder a vistas financieras (`owner`, `superadmin`).
+6. **Despliegue Exitoso en Vercel**: Compilación y Merge completado en la rama `main` disparando el proceso CI/CD hacia el ambiente de Producción en Vivo.
 
-### ⚠️ Próximos Pasos en la Retaguardia:
-1. **Dashboard y Tabla Genérica**: Proceder a evaluar arquitectónicamente el módulo `<DataTable />` genérico para unificar el sistema de tablas y ordenamiento de todo el proyecto.
-2. **Setup de Observabilidad Sentry/LogRocket**: Conectar el Logger personalizado a los servicios analíticos para cacería pasiva de bugs frente a la expansión del SaaS.
+### ⚠️ Próximos Pasos en el Roadmap:
+1. **Monitoreo Real**: Integrar el custom Logger a un servicio como Sentry o LogRocket para observabilidad en Vivo.
+2. **Onboarding Secundario**: Validar analíticas de adopción de la nueva Interfaz Landing y Wizard Configuration por los futuros salones inquilinos.
