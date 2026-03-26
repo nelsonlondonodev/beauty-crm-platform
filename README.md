@@ -303,5 +303,7 @@ Este proyecto utiliza una separación estricta para garantizar la estabilidad de
 7. **Actualización de Fidelización (n8n)**: Se actualizó el correo de bienvenida del club de fidelización incrementando el descuento al 15% y añadiendo aclaraciones legales (exclusión de servicios de depilación) directamente en el Template HTML (`n8n_workflows/registro_cliente.json`).
 
 ### ⚠️ Próximos Pasos en el Roadmap:
-1. **Monitoreo Real**: Integrar el custom Logger a un servicio como Sentry o LogRocket para observabilidad en Vivo.
-2. **Onboarding Secundario**: Validar analíticas de adopción de la nueva Interfaz Landing y Wizard Configuration por los futuros salones inquilinos.
+1. **Asignación de Propietario (Pendiente):** Ejecutar el script `database/scripts/assign_owner_narbos.sql` en Supabase una vez que `narbosspa@gmail.com` haya iniciado sesión, para otorgarle el rol de `owner` evadiendo los bloqueos geográficos de Google Passkeys.
+2. **Refactorización de Deuda Técnica:** Retomar evaluación y refactorización de hooks/servicios complejos (e.j., `src/hooks/useBilling.ts`) para fragmentarlos en funciones modulares bajo la tutela estricta de TypeScript.
+3. **Monitoreo Real**: Integrar el custom Logger a un servicio como Sentry o LogRocket para observabilidad en Vivo.
+4. **Onboarding Secundario**: Validar analíticas de adopción de la nueva Interfaz Landing y Wizard Configuration por los futuros salones inquilinos.
