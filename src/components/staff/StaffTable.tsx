@@ -1,6 +1,8 @@
-import { Scissors, Loader2, Edit2, History } from 'lucide-react';
+import { Scissors, Edit2, History } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { EmpleadoConSaldo } from '../../hooks/useStaff';
+import { DataTable } from '../ui/DataTable';
+import type { ColumnDef } from '../../types/table';
 
 interface StaffTableProps {
   staff: EmpleadoConSaldo[];
@@ -25,8 +27,77 @@ const StaffTable = ({
     0
   );
 
+  const columns: ColumnDef<EmpleadoConSaldo>[] = [
+    {
+      header: 'Colaborador',
+      cell: (employee) => (
+        <>
+          <div className="font-semibold text-gray-900">
+            {employee.nombre} {employee.activo === false && '(Inactivo)'}
+          </div>
+          <div className="text-xs text-gray-500">{employee.rol}</div>
+        </>
+      ),
+    },
+    {
+      header: 'Tasa (%)',
+      className: 'text-center font-medium',
+      cell: (employee) => `${employee.comision_porcentaje}%`,
+    },
+    {
+      header: 'Ventas Acum.',
+      className: 'text-right',
+      cell: (employee) => `$${employee.ventas_totales.toLocaleString()}`,
+    },
+    {
+      header: 'Comisión Hist.',
+      className: 'text-right font-medium text-gray-600',
+      cell: (employee) => `$${employee.comision_total.toLocaleString()}`,
+    },
+    {
+      header: 'Saldo Pendiente',
+      className: 'text-right text-base font-bold text-primary',
+      cell: (employee) => `$${employee.saldo_pendiente.toLocaleString()}`,
+    },
+    {
+      header: 'Acción',
+      className: 'w-40',
+      cell: (employee) => (
+        <div className="flex items-center justify-end gap-2">
+          <button
+            onClick={() => onEdit(employee)}
+            className="rounded-md p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+            title="Editar empleado"
+          >
+            <Edit2 className="h-4 w-4" />
+          </button>
+          <button
+            onClick={() => navigate(`/staff/${employee.id}/sales`)}
+            className="rounded-md p-1.5 text-gray-400 hover:bg-gray-100 hover:text-blue-600 transition-colors"
+            title="Ver historial de ventas"
+          >
+            <History className="h-4 w-4" />
+          </button>
+          <button
+            onClick={() =>
+              handlePaySingle(
+                employee.id,
+                employee.saldo_pendiente,
+                employee.nombre
+              )
+            }
+            disabled={employee.saldo_pendiente <= 0 || isProcessing}
+            className="rounded-md bg-gray-900 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400"
+          >
+            Pagar
+          </button>
+        </div>
+      ),
+    },
+  ];
+
   return (
-    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+    <div className="flex flex-col rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
       <div className="flex items-center justify-between border-b border-gray-200 bg-gray-50/50 p-6">
         <h3 className="flex items-center text-lg font-semibold text-gray-900">
           <Scissors className="mr-2 h-5 w-5 text-gray-500" />
@@ -41,97 +112,14 @@ const StaffTable = ({
         </button>
       </div>
 
-      {loading ? (
-        <div className="flex items-center justify-center p-12">
-          <Loader2 className="text-primary h-8 w-8 animate-spin" />
-        </div>
-      ) : staff.length === 0 ? (
-        <div className="p-12 text-center text-gray-500">
-          No hay empleados registrados. Añade uno para comenzar.
-        </div>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-gray-600">
-            <thead className="border-b border-gray-200 bg-white text-xs text-gray-500 uppercase">
-              <tr>
-                <th className="px-6 py-4 font-semibold">Colaborador</th>
-                <th className="px-6 py-4 text-center font-semibold">
-                  Tasa (%)
-                </th>
-                <th className="px-6 py-4 text-right font-semibold">
-                  Ventas Acum.
-                </th>
-                <th className="px-6 py-4 text-right font-semibold">
-                  Comisión Hist.
-                </th>
-                <th className="text-primary px-6 py-4 text-right font-semibold">
-                  Saldo Pendiente
-                </th>
-                <th className="px-6 py-4 text-center font-semibold">Acción</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {staff.map((employee) => (
-                <tr
-                  key={employee.id}
-                  className="transition-colors hover:bg-gray-50/50"
-                >
-                  <td className="px-6 py-4">
-                    <div className="font-semibold text-gray-900">
-                      {employee.nombre}{' '}
-                      {employee.activo === false && '(Inactivo)'}
-                    </div>
-                    <div className="text-xs text-gray-500">{employee.rol}</div>
-                  </td>
-                  <td className="px-6 py-4 text-center font-medium">
-                    {employee.comision_porcentaje}%
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    ${employee.ventas_totales.toLocaleString()}
-                  </td>
-                  <td className="px-6 py-4 text-right font-medium text-gray-600">
-                    ${employee.comision_total.toLocaleString()}
-                  </td>
-                  <td className="text-primary px-6 py-4 text-right text-base font-bold">
-                    ${employee.saldo_pendiente.toLocaleString()}
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    <div className="flex items-center justify-end gap-2">
-			<button
-			onClick={() => onEdit(employee)}
-			className="rounded-md p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-900 transition-colors"
-			title="Editar empleado"
-			>
-			<Edit2 className="h-4 w-4" />
-			</button>
-			<button
-			onClick={() => navigate(`/staff/${employee.id}/sales`)}
-			className="rounded-md p-1.5 text-gray-400 hover:bg-gray-100 hover:text-blue-600 transition-colors"
-			title="Ver historial de ventas"
-			>
-			<History className="h-4 w-4" />
-			</button>
-			<button
-			onClick={() =>
-				handlePaySingle(
-				employee.id,
-				employee.saldo_pendiente,
-				employee.nombre
-				)
-			}
-			disabled={employee.saldo_pendiente <= 0 || isProcessing}
-			className="rounded-md bg-gray-900 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400"
-			>
-			Pagar
-			</button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      <DataTable<EmpleadoConSaldo>
+        data={staff}
+        columns={columns}
+        keyExtractor={(employee) => employee.id}
+        loading={loading}
+        emptyMessage="No hay empleados registrados. Añade uno para comenzar."
+        className="rounded-none border-0 shadow-none"
+      />
     </div>
   );
 };
