@@ -26,8 +26,14 @@ export interface DashboardStats {
   totalClients: number;
   newClientsThisMonth: number;
   activeBonuses: number;
-  upcomingBirthdays: number;
-  expiringBonuses: number;
+  upcomingBirthdays: {
+    count: number;
+    names: string[];
+  };
+  expiringBonuses: {
+    count: number;
+    names: string[];
+  };
   revenueData: RevenueData[];
   recentActivity: ActivityItem[];
 }
@@ -91,33 +97,61 @@ async function fetchActiveBonuses(): Promise<number> {
   return fetchStatsHead('bonos', q => q.eq('estado', 'Pendiente'));
 }
 
-export async function fetchUpcomingBirthdays(): Promise<number> {
+export async function fetchUpcomingBirthdays(): Promise<{ count: number; names: string[] }> {
   try {
     const { data, error } = await fetchWithTimeout(
       supabase
         .from('clientes_fidelizacion')
-        .select('birthday')
-        .not('birthday', 'is', null) as unknown as Promise<{ data: { birthday: string | null }[] | null, error: PostgrestError | null }>
+        .select('nombre, birthday')
+        .not('birthday', 'is', null) as unknown as Promise<{ data: { nombre: string; birthday: string | null }[] | null, error: PostgrestError | null }>
     );
 
-    if (error || !data) return 0;
-    return data.filter(client => isBirthdayInRange(client.birthday)).length;
+    if (error || !data) return { count: 0, names: [] };
+    
+    const upcoming = data.filter(client => isBirthdayInRange(client.birthday));
+    return {
+      count: upcoming.length,
+      names: upcoming.slice(0, 5).map(c => c.nombre.trim())
+    };
   } catch (err) {
     logger.error('Error fetching birthdays', err, 'Dashboard');
-    return 0;
+    return { count: 0, names: [] };
   }
 }
 
-export async function fetchExpiringBonuses(): Promise<number> {
+export async function fetchExpiringBonuses(): Promise<{ count: number; names: string[] }> {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const nextWeek = addDays(today, 7);
 
-  return fetchStatsHead('bonos', q => 
+  const { data, error } = await fetchWithTimeout(
+    supabase
+      .from('bonos')
+      .select('tipo, client:clientes_fidelizacion(nombre)')
+      .eq('estado', 'Pendiente')
+      .gte('fecha_vencimiento', today.toISOString())
+      .lte('fecha_vencimiento', nextWeek.toISOString())
+      .limit(10) as unknown as Promise<{ data: { tipo: string; client: { nombre: string } | { nombre: string }[] | null }[] | null; error: PostgrestError | null }>
+  );
+
+  if (error || !data) return { count: 0, names: [] };
+
+  const names = data.map(b => {
+    const nombre = Array.isArray(b.client) ? b.client[0]?.nombre : b.client?.nombre;
+    return `${(nombre || 'Cliente').trim()} (${b.tipo})`;
+  });
+
+  // El conteo real lo sacamos con una consulta head para que sea exacto si hay muchos
+  const totalCount = await fetchStatsHead('bonos', q => 
     q.eq('estado', 'Pendiente')
      .gte('fecha_vencimiento', today.toISOString())
      .lte('fecha_vencimiento', nextWeek.toISOString())
   );
+
+  return { 
+    count: totalCount, 
+    names: names.slice(0, 5) 
+  };
 }
 
 // --- Funciones de Ingresos ---

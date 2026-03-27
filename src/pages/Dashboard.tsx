@@ -31,13 +31,13 @@ const Dashboard = () => {
     },
     {
       label: 'Cumpleaños (7 días)',
-      value: loading ? '...' : stats.upcomingBirthdays.toString(),
+      value: loading ? '...' : stats.upcomingBirthdays.count.toString(),
       color: 'text-orange-500',
       icon: Gift,
     },
     {
       label: 'Bonos por Vencer',
-      value: loading ? '...' : stats.expiringBonuses.toString(),
+      value: loading ? '...' : stats.expiringBonuses.count.toString(),
       color: 'text-red-500',
       icon: AlertTriangle,
     },
@@ -65,6 +65,46 @@ const Dashboard = () => {
           <StatCard key={stat.label} {...stat} />
         ))}
       </div>
+
+      {/* Radar de Fidelización (Acciones Rápidas) */}
+      {!loading && (
+        <div className="grid gap-6 md:grid-cols-2">
+          <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
+            <h3 className="mb-4 flex items-center text-sm font-semibold text-gray-900">
+              <Gift className="mr-2 h-4 w-4 text-orange-500" />
+              Próximos Cumpleaños
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {stats.upcomingBirthdays.names.length > 0 ? (
+                stats.upcomingBirthdays.names.map((name, i) => (
+                  <span key={i} className="bg-orange-50 text-orange-700 rounded-full px-3 py-1 text-xs font-medium border border-orange-100">
+                    {name}
+                  </span>
+                ))
+              ) : (
+                <p className="text-xs text-gray-400 italic">No hay cumpleaños esta semana.</p>
+              )}
+            </div>
+          </div>
+          <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
+            <h3 className="mb-4 flex items-center text-sm font-semibold text-gray-900">
+              <AlertTriangle className="mr-2 h-4 w-4 text-red-500" />
+              Bonos Críticos (Próximos a Vencer)
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {stats.expiringBonuses.names.length > 0 ? (
+                stats.expiringBonuses.names.map((name, i) => (
+                  <span key={i} className="bg-red-50 text-red-700 rounded-full px-3 py-1 text-xs font-medium border border-red-100">
+                    {name}
+                  </span>
+                ))
+              ) : (
+                <p className="text-xs text-gray-400 italic">Sin bonos urgentes por expirar.</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="grid gap-6 lg:h-[400px] lg:grid-cols-7">
         {showRevenue && (

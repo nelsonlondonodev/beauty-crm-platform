@@ -15,8 +15,8 @@ export const useDashboardStats = (role: AppRole | null) => {
     totalClients: 0,
     newClientsThisMonth: 0,
     activeBonuses: 0,
-    upcomingBirthdays: 0,
-    expiringBonuses: 0,
+    upcomingBirthdays: { count: 0, names: [] },
+    expiringBonuses: { count: 0, names: [] },
     revenueData: [],
     recentActivity: [],
   });
