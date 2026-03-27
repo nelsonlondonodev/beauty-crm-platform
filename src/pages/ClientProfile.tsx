@@ -13,6 +13,9 @@ const ClientProfile = () => {
   const [client, setClient] = useState<Client | null>(null);
   const [invoices, setInvoices] = useState<Factura[]>([]);
   const [loading, setLoading] = useState(true);
+  const [editingNotes, setEditingNotes] = useState(false);
+  const [notesValue, setNotesValue] = useState('');
+  const [isSavingNotes, setIsSavingNotes] = useState(false);
 
   useEffect(() => {
     const fetchClientData = async () => {
@@ -23,6 +26,7 @@ const ClientProfile = () => {
           getClientFinancialHistory(id)
         ]);
         setClient(clientData);
+        setNotesValue(clientData.notas || '');
         setInvoices(invoicesData);
       } catch (error) {
         toast.error('Error al cargar el perfil del cliente');
@@ -34,6 +38,22 @@ const ClientProfile = () => {
 
     fetchClientData();
   }, [id, navigate]);
+
+  const handleSaveNotes = async () => {
+    if (!client || !id) return;
+    setIsSavingNotes(true);
+    try {
+      const { updateClient } = await import('../services/clientService');
+      const updated = await updateClient(id, { notas: notesValue });
+      setClient(updated);
+      setEditingNotes(false);
+      toast.success('Ficha técnica actualizada');
+    } catch (error) {
+      toast.error('Error al guardar las notas');
+    } finally {
+      setIsSavingNotes(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -57,6 +77,18 @@ const ClientProfile = () => {
   const totalSpent = invoices.reduce((acc, inv) => acc + (inv.total || 0), 0);
   const totalVisits = invoices.length;
 
+  // Extraer servicios únicos del historial (La Huella)
+  const allServices = invoices.flatMap(inv => 
+    (inv as any).factura_items?.map((item: any) => item.descripcion) || []
+  );
+  const serviceCounts = allServices.reduce((acc: Record<string, number>, s: string) => {
+    acc[s] = (acc[s] || 0) + 1;
+    return acc;
+  }, {});
+  const topServices = Object.entries(serviceCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5);
+
   return (
     <div className="space-y-6 pb-20">
       {/* Header */}
@@ -72,13 +104,13 @@ const ClientProfile = () => {
             Perfil del Cliente
           </h1>
           <p className="text-sm text-gray-500">
-            Historial financiero y detalles de {client.nombre}
+            Historial de fidelización y detalles técnicos de {client.nombre}
           </p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* Left Column: Info & LTV */}
+        {/* Left Column: Info & Notes */}
         <div className="space-y-6 lg:col-span-1">
           {/* Client Info Card */}
           <div className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
@@ -88,9 +120,7 @@ const ClientProfile = () => {
               </div>
               <h2 className="text-xl font-bold text-gray-900">{client.nombre}</h2>
               <p className="text-sm text-gray-500">
-                Cliente desde {client.bonos_historial && client.bonos_historial.length > 0 
-                  ? 'hace tiempo' // We could use actual created_at if added to Client type
-                  : 'recientemente'}
+                Cliente Registrado
               </p>
             </div>
             
@@ -133,83 +163,155 @@ const ClientProfile = () => {
             </div>
           </div>
 
-          {/* Lifecycle & KPIs Card */}
-          <div className="rounded-xl border border-gray-100 bg-gradient-to-br from-gray-900 to-gray-800 p-6 text-white shadow-sm">
-            <h2 className="mb-2 text-sm font-medium text-gray-400">
-              Valor de Vida del Cliente (LTV)
-            </h2>
-            <div className="mb-6 flex items-baseline gap-2">
-              <span className="text-4xl font-bold">${totalSpent.toLocaleString()}</span>
-              <span className="text-sm text-gray-400">USD</span>
+          {/* Ficha Técnica / Notas */}
+          <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-gray-900">
+                Ficha Técnica (Huella)
+              </h3>
+              {!editingNotes ? (
+                <button 
+                  onClick={() => setEditingNotes(true)}
+                  className="text-primary text-xs font-medium hover:underline"
+                >
+                  Editar
+                </button>
+              ) : null}
             </div>
-
-            <div className="grid grid-cols-2 gap-4 border-t border-gray-700/50 pt-4">
-              <div>
-                <p className="text-xs text-gray-400">Visitas Totales</p>
-                <p className="mt-1 text-lg font-semibold text-white">{totalVisits}</p>
+            
+            {editingNotes ? (
+              <div className="space-y-3">
+                <textarea
+                  value={notesValue}
+                  onChange={(e) => setNotesValue(e.target.value)}
+                  className="focus:border-primary focus:ring-primary w-full rounded-lg border border-gray-200 p-3 text-sm focus:ring-1 focus:outline-none"
+                  rows={4}
+                  placeholder="Escribe preferencias, alergias, tintes..."
+                />
+                <div className="flex justify-end gap-2">
+                  <button 
+                    onClick={() => {
+                      setEditingNotes(false);
+                      setNotesValue(client.notas || '');
+                    }}
+                    className="rounded-lg px-3 py-1.5 text-xs font-medium text-gray-500 hover:bg-gray-50"
+                  >
+                    Cancelar
+                  </button>
+                  <button 
+                    onClick={handleSaveNotes}
+                    disabled={isSavingNotes}
+                    className="bg-primary rounded-lg px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-primary/90 disabled:opacity-50"
+                  >
+                    {isSavingNotes ? 'Guardando...' : 'Guardar Ficha'}
+                  </button>
+                </div>
               </div>
-              <div>
-                <p className="text-xs text-gray-400">Ticket Promedio</p>
-                <p className="mt-1 text-lg font-semibold text-white">
-                  ${totalVisits > 0 ? Math.round(totalSpent / totalVisits).toLocaleString() : '0'}
+            ) : (
+              <div className="rounded-lg bg-gray-50 p-4">
+                <p className={cn(
+                  "text-sm leading-relaxed",
+                  client.notas ? "text-gray-700" : "italic text-gray-400"
+                )}>
+                  {client.notas || "No hay información técnica registrada aún para este cliente."}
                 </p>
               </div>
-            </div>
+            )}
           </div>
         </div>
 
-        {/* Right Column: Invoices & Bonuses */}
+        {/* Right Column: KPIs, Services & Bonuses */}
         <div className="space-y-6 lg:col-span-2">
-          {/* Bonuses Section */}
+          {/* Metrics Row */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="rounded-xl border border-gray-100 bg-gradient-to-br from-gray-900 to-gray-800 p-6 text-white shadow-sm">
+              <h2 className="mb-2 text-xs font-medium text-gray-400 uppercase tracking-wider">
+                Consumo Total (LTV)
+              </h2>
+              <div className="flex items-baseline gap-2">
+                <span className="text-3xl font-bold">${totalSpent.toLocaleString()}</span>
+                <span className="text-xs text-gray-400">USD</span>
+              </div>
+            </div>
+            <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
+              <h2 className="mb-2 text-xs font-medium text-gray-400 uppercase tracking-wider">
+                Frecuencia de Visita
+              </h2>
+              <div className="flex items-baseline gap-2">
+                <span className="text-3xl font-bold text-gray-900">{totalVisits}</span>
+                <span className="text-xs text-gray-500">visitas</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Loyalty & Services Card */}
           <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
-            <h2 className="mb-4 flex items-center text-lg font-semibold text-gray-900">
+            <h2 className="mb-6 flex items-center text-lg font-semibold text-gray-900">
               <User className="text-primary mr-2 h-5 w-5" />
               Estado de Fidelización
             </h2>
-            
-            <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-              {client.bonos_historial && client.bonos_historial.length > 0 ? (
-                client.bonos_historial.map((bono) => (
-                  <div key={bono.id} className="rounded-lg border border-gray-100 bg-gray-50/50 p-4">
-                    <div className="mb-2 flex items-center justify-between">
-                      <span className="text-sm font-medium text-gray-900">{bono.tipo}</span>
-                      <span className={cn('text-xs font-medium', getStatusColor(bono.estado))}>
-                        {getStatusLabel(bono.estado)}
+
+            <div className="grid gap-8 md:grid-cols-2">
+              {/* Timeline de Servicios */}
+              <div className="space-y-4">
+                <h3 className="text-xs font-semibold tracking-wider text-gray-400 uppercase">
+                  Servicios más frecuentes
+                </h3>
+                {topServices.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {topServices.map(([name, count]) => (
+                      <span key={name} className="bg-primary/5 text-primary inline-flex items-center rounded-full px-3 py-1 text-xs font-medium border border-primary/10">
+                        {name} <span className="ml-1.5 opacity-60">x{count}</span>
                       </span>
-                    </div>
-                    {bono.codigo && (
-                      <div className="mt-2 text-xs text-gray-500">
-                        Código: <span className="font-mono font-medium text-gray-900">{bono.codigo}</span>
-                      </div>
-                    )}
-                    <div className="mt-1 text-xs text-gray-500">
-                      Vence: {formatDate(bono.fecha_vencimiento)}
-                    </div>
+                    ))}
                   </div>
-                ))
-              ) : (
-                <div className="col-span-full rounded-lg border border-dashed border-gray-200 p-6 text-center text-gray-500">
-                  <p className="text-sm">No tiene bonos asociados en su historial.</p>
+                ) : (
+                  <p className="text-xs text-gray-400 italic">Sin historial de servicios aún.</p>
+                )}
+              </div>
+              
+              {/* Bonos Activos */}
+              <div className="space-y-4">
+                <h3 className="text-xs font-semibold tracking-wider text-gray-400 uppercase">
+                  Bonos Activos
+                </h3>
+                <div className="grid gap-3">
+                  {client.bonos_historial && client.bonos_historial.length > 0 ? (
+                    client.bonos_historial.map((bono) => (
+                      <div key={bono.id} className="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50/50 p-3">
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-medium text-gray-900">{bono.tipo}</p>
+                          <p className="text-[10px] text-gray-500">Vence: {formatDate(bono.fecha_vencimiento)}</p>
+                        </div>
+                        <span className={cn('shrink-0 rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider', getStatusColor(bono.estado))}>
+                          {getStatusLabel(bono.estado)}
+                        </span>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-xs text-gray-400 italic">No registra cupones de fidelización.</p>
+                  )}
                 </div>
-              )}
+              </div>
             </div>
           </div>
 
           {/* Invoices History */}
           <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
-            <h2 className="mb-4 flex items-center text-lg font-semibold text-gray-900">
-              <Receipt className="text-primary mr-2 h-5 w-5" />
-              Historial Financiero
-            </h2>
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="flex items-center text-lg font-semibold text-gray-900">
+                <Receipt className="text-primary mr-2 h-5 w-5" />
+                Historial de Visitas
+              </h2>
+            </div>
             
             <div className="overflow-hidden rounded-lg border border-gray-100">
               <table className="w-full text-left text-sm">
                 <thead className="bg-gray-50 text-xs font-semibold text-gray-600">
                   <tr>
                     <th className="px-4 py-3">Fecha</th>
-                    <th className="px-4 py-3">ID Factura</th>
-                    <th className="px-4 py-3 text-center">Descuento</th>
-                    <th className="px-4 py-3 text-right">Monto Total</th>
+                    <th className="px-4 py-3">Servicios</th>
+                    <th className="px-4 py-3 text-right">Total</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -219,11 +321,14 @@ const ClientProfile = () => {
                         <td className="px-4 py-3 text-gray-600">
                           {inv.fecha_venta ? formatDate(inv.fecha_venta) : 'N/A'}
                         </td>
-                        <td className="px-4 py-3 font-mono text-xs text-gray-500">
-                          {inv.id.substring(0, 8).toUpperCase()}
-                        </td>
-                        <td className="px-4 py-3 text-center text-green-600">
-                          {inv.descuento > 0 ? `-$${inv.descuento.toLocaleString()}` : '-'}
+                        <td className="px-4 py-3">
+                          <div className="flex flex-wrap gap-1">
+                            {(inv as any).factura_items?.map((item: any, idx: number) => (
+                              <span key={idx} className="text-[11px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
+                                {item.descripcion}
+                              </span>
+                            ))}
+                          </div>
                         </td>
                         <td className="px-4 py-3 text-right font-medium text-gray-900">
                           ${inv.total.toLocaleString()}
@@ -232,7 +337,7 @@ const ClientProfile = () => {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={4} className="px-4 py-8 text-center text-gray-500">
+                      <td colSpan={3} className="px-4 py-8 text-center text-gray-500">
                         No hay registros de facturación para este cliente.
                       </td>
                     </tr>
@@ -241,7 +346,6 @@ const ClientProfile = () => {
               </table>
             </div>
           </div>
-
         </div>
       </div>
     </div>

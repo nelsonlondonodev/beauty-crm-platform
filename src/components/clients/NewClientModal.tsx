@@ -36,6 +36,7 @@ const NewClientModal = ({
     telefono: '',
     fecha_nacimiento: '',
     bono_fecha_vencimiento: '', // auto-calculado, no editable
+    notas: '',
   });
 
   useEffect(() => {
@@ -46,6 +47,7 @@ const NewClientModal = ({
         telefono: initialData.telefono,
         fecha_nacimiento: initialData.fecha_nacimiento,
         bono_fecha_vencimiento: '', // auto-calculado, no editable
+        notas: initialData.notas || '',
       });
     } else {
       setFormData({
@@ -54,12 +56,15 @@ const NewClientModal = ({
         telefono: '',
         fecha_nacimiento: '',
         bono_fecha_vencimiento: '', // auto-calculado, no editable
+        notas: '',
       });
     }
     setPhoneError('');
   }, [initialData, isOpen]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     if (name === 'telefono') {
       setFormData((prev) => ({ ...prev, telefono: sanitizePhone(value) }));
@@ -157,6 +162,20 @@ const NewClientModal = ({
               name="fecha_nacimiento"
               className="focus:border-primary focus:ring-primary mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-1 focus:outline-none sm:text-sm"
               value={formData.fecha_nacimiento}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Notas / Ficha Técnica
+            </label>
+            <textarea
+              name="notas"
+              rows={3}
+              placeholder="Preferencias, alergias, tintes habituales..."
+              className="focus:border-primary focus:ring-primary mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-1 focus:outline-none sm:text-sm"
+              value={formData.notas}
               onChange={handleChange}
             />
           </div>

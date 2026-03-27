@@ -25,6 +25,7 @@ export interface Client {
   bono_fecha_vencimiento: string; // Calculado en el frontend
   bono_tipo?: string; // Nombre del bono más reciente
   bonos_historial?: ClientBonusDisplay[]; // Para mostrar múltiples bonos si existen
+  notas?: string; // Ficha técnica o historial de notas generales
 }
 
 export interface BonoDbRow {
@@ -44,6 +45,7 @@ export interface ClientDbRow {
   email: string | null;
   whatsapp: string | null;
   birthday: string | null;
+  notas: string | null;
   created_at: string;
   bonos?: BonoDbRow[];
 }

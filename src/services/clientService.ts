@@ -91,6 +91,7 @@ const mapDbToClient = (row: ClientDbRow): Client => {
     bono_fecha_vencimiento: activeBonus ? activeBonus.expirationDate.toISOString().split('T')[0] : '',
     bono_tipo: activeBonus?.tipo,
     bonos_historial: displayBonuses,
+    notas: row.notas || '',
   };
 };
 
@@ -149,14 +150,18 @@ export const getClientFinancialHistory = async (clientId: string): Promise<Factu
 export const createClient = async (
   clientData: Omit<Client, 'id' | 'bono_estado' | 'bono_fecha_vencimiento'>
 ): Promise<Client> => {
+  const sanitizedName = clientData.nombre.trim();
+  const sanitizedPhone = clientData.telefono.replace(/\D/g, '');
+
   const { data, error } = await fetchWithTimeout(
     supabase
       .from('clientes_fidelizacion')
       .insert([{
-        nombre: clientData.nombre,
+        nombre: sanitizedName,
         email: clientData.email,
-        whatsapp: clientData.telefono,
+        whatsapp: sanitizedPhone,
         birthday: clientData.fecha_nacimiento,
+        notas: clientData.notas || '',
       }])
       .select('*, bonos(*)')
       .single() as unknown as Promise<{ data: ClientDbRow | null; error: PostgrestError | null }>
@@ -195,8 +200,9 @@ export const updateClient = async (id: string, updates: Partial<Client>): Promis
   const dbUpdates: Partial<ClientDbRow> = {};
   if (updates.nombre) dbUpdates.nombre = updates.nombre;
   if (updates.email) dbUpdates.email = updates.email;
-  if (updates.telefono) dbUpdates.whatsapp = updates.telefono;
+  if (updates.telefono) dbUpdates.whatsapp = updates.telefono.replace(/\D/g, '');
   if (updates.fecha_nacimiento) dbUpdates.birthday = updates.fecha_nacimiento;
+  if (updates.notas !== undefined) dbUpdates.notas = updates.notas;
 
   // 1. Actualizar perfil básico si hay cambios
   if (Object.keys(dbUpdates).length > 0) {
