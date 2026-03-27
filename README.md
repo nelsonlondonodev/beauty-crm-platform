@@ -307,3 +307,27 @@ Este proyecto utiliza una separación estricta para garantizar la estabilidad de
 2. **Refactorización de Deuda Técnica:** Retomar evaluación y refactorización de hooks/servicios complejos (e.j., `src/hooks/useBilling.ts`) para fragmentarlos en funciones modulares bajo la tutela estricta de TypeScript.
 3. **Monitoreo Real**: Integrar el custom Logger a un servicio como Sentry o LogRocket para observabilidad en Vivo.
 4. **Onboarding Secundario**: Validar analíticas de adopción de la nueva Interfaz Landing y Wizard Configuration por los futuros salones inquilinos.
+
+ ---
+ 
+ ## 🚀 Estado de la Sesión (2026-03-27): Fortalecimiento de la Huella y Radar de Fidelización (MVP 1.1)
+ 
+ ### Logros (Sprint de Fidelización y Experiencia del Cliente):
+ 1. **Huella Técnica del Cliente**:
+    - Implementación del campo `notas` (Ficha técnica) en la base de datos para registrar preferencias, alergias y detalles de colorimetría.
+    - **Sanitización de Datos**: Limpieza automática de nombres (trim) y teléfonos (solo dígitos) en el proceso de registro para evitar datos basura.
+    - **Perfil 360°**: El perfil del cliente ahora incluye un **Análisis de Servicios Frecuentes**, extrayendo automáticamente los consumos más habituales desde las facturas históricas.
+ 2. **Radar de Fidelización (Dashboard)**:
+    - Evolución de métricas estáticas a **Acciones Reales**. El dashboard ahora muestra el nombre de los clientes que cumplen años en los próximos 7 días o que tienen bonos a punto de expirar.
+    - Refactorización concurrente del servicio de estadísticas para mayor velocidad de carga.
+ 3. **POS de Bonos Premium**:
+    - Rediseño táctil y visual del módulo de canje de cupones (`Bonuses.tsx`) con estética Premium, feedback visual de éxito/error y tarjetas de confirmación de seguridad.
+ 4. **Hardening de Seguridad (Logs)**:
+    - Se eliminó la exposición accidental de UUIDs internos (`tenant_id`, `user_id`) en la consola del navegador a través del servicio de logging centralizado.
+ 
+ ### ⚠️ Instrucciones para el Próximo Despliegue (Producción):
+ 1. **Migración de Notas**: Antes de subir la nueva versión del frontend, se DEBE ejecutar el script:
+    `database/migrations/supabase_migration_notes.sql` 
+    en el SQL Editor de Supabase (Producción) para añadir el soporte de la ficha técnica.
+ 2. **Asignación de Propietario (Pendiente):** Ejecutar `database/scripts/assign_owner_narbos.sql` una vez que el usuario final haya realizado su primer login.
+ 3. **Refactorización de Deuda Técnica:** Fragmentar hooks complejos (e.j., `src/hooks/useBilling.ts`) siguiendo el patrón modular aplicado hoy en fidelización.
