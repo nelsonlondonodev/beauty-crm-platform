@@ -61,11 +61,11 @@ export const fetchRoleFromDB = async (
     }
 
     if (!data) {
-      logger.warn('Usuario sin rol asignado en DB', userId, 'Auth');
+      logger.warn('Usuario autenticado sin rol configurado en DB', undefined, 'Auth');
       return null;
     }
 
-    logger.info(`Rol detectado en DB: ${data.role} (Tenant: ${data.tenant_id}) para el usuario ${userId}`, 'Auth');
+    logger.info(`Rol de usuario cargado: ${data.role}`, 'Auth');
     return data;
   } catch (err) {
     logger.error('Excepción resolviendo rol', err, 'Auth');
