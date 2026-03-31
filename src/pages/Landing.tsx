@@ -1,11 +1,13 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useEffect } from 'react';
-import LandingNavbar from '../components/landing/LandingNavbar';
-import LandingHero from '../components/landing/LandingHero';
-import LandingFeatures from '../components/landing/LandingFeatures';
-import LandingValueProp from '../components/landing/LandingValueProp';
-import LandingFooter from '../components/landing/LandingFooter';
+import {
+  LandingNavbar,
+  LandingHero,
+  LandingFeatures,
+  LandingValueProp,
+  LandingFooter
+} from '../components/landing';
 
 const Landing = () => {
   const navigate = useNavigate();

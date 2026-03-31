@@ -59,13 +59,20 @@ describe('billingService', () => {
         }],
         p_bono_id: null
       });
-      expect(result?.success).toBe(true);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.success).toBe(true);
+      }
     });
 
     it('should handle RPC error', async () => {
       (supabase.rpc as any).mockResolvedValue({ data: null, error: { message: 'Database error' } });
       const payload = { items: [], subtotal: 0, descuento: 0, total: 0 } as any;
-      await expect(procesarFactura(payload)).rejects.toThrow('Error en el servidor: Database error');
+      const result = await procesarFactura(payload);
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error).toContain('Database error');
+      }
     });
   });
 
@@ -76,10 +83,13 @@ describe('billingService', () => {
       const mockSelect = vi.fn().mockReturnValue({ order: mockOrder });
       (supabase.from as any).mockReturnValue({ select: mockSelect });
 
-      const facturas = await getFacturas();
+      const result = await getFacturas();
       
-      expect(facturas).toHaveLength(1);
-      expect(facturas[0].total).toBe(100);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data).toHaveLength(1);
+        expect(result.data[0].total).toBe(100);
+      }
     });
   });
 });

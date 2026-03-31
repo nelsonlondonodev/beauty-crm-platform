@@ -1,11 +1,13 @@
 import { useDashboardStats } from '../hooks/useDashboardStats';
 import { useAuth } from '../contexts/AuthContext';
 import { canPerform } from '../lib/rbac';
-import DashboardHeader from '../components/dashboard/DashboardHeader';
-import DashboardStatsGrid from '../components/dashboard/DashboardStatsGrid';
-import DashboardRadar from '../components/dashboard/DashboardRadar';
-import RevenueChart from '../components/dashboard/RevenueChart';
-import RecentActivity from '../components/dashboard/RecentActivity';
+import {
+  DashboardHeader,
+  DashboardStatsGrid,
+  DashboardRadar,
+  RevenueChart,
+  RecentActivity
+} from '../components/dashboard';
 
 const Dashboard = () => {
   const { user, role } = useAuth();

@@ -1,11 +1,13 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useClientProfile } from '../hooks/useClientProfile';
-import ProfileHeader from '../components/clients/profile/ProfileHeader';
-import ClientInfoCard from '../components/clients/profile/ClientInfoCard';
-import ProfileNotes from '../components/clients/profile/ProfileNotes';
-import ProfileKPIs from '../components/clients/profile/ProfileKPIs';
-import ProfileLoyaltyStatus from '../components/clients/profile/ProfileLoyaltyStatus';
-import ProfileFinancialHistory from '../components/clients/profile/ProfileFinancialHistory';
+import {
+  ProfileHeader,
+  ClientInfoCard,
+  ProfileNotes,
+  ProfileKPIs,
+  ProfileLoyaltyStatus,
+  ProfileFinancialHistory
+} from '../components/clients/profile';
 
 const ClientProfile = () => {
   const { id } = useParams<{ id: string }>();
