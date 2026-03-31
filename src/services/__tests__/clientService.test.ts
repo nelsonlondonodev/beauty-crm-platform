@@ -49,21 +49,28 @@ describe('clientService', () => {
       const mockSelect = vi.fn().mockReturnValue({ eq: mockEq });
       (supabase.from as any).mockReturnValue({ select: mockSelect });
 
-      const client = await getClientById('123');
+      const result = await getClientById('123');
 
       expect(supabase.from).toHaveBeenCalledWith('clientes_fidelizacion');
-      expect(client.nombre).toBe('Nelson Test');
-      expect(client.id).toBe('123');
-      expect(client.bono_estado).toBe('pendiente');
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.nombre).toBe('Nelson Test');
+        expect(result.data.id).toBe('123');
+        expect(result.data.bono_estado).toBe('pendiente');
+      }
     });
 
-    it('should throw an error if client is not found', async () => {
+    it('should return success false if client is not found', async () => {
       const mockSingle = vi.fn().mockResolvedValue({ data: null, error: { message: 'Not found' } });
       const mockEq = vi.fn().mockReturnValue({ single: mockSingle });
       const mockSelect = vi.fn().mockReturnValue({ eq: mockEq });
       (supabase.from as any).mockReturnValue({ select: mockSelect });
 
-      await expect(getClientById('non-existent')).rejects.toThrow('Not found');
+      const result = await getClientById('non-existent');
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error).toBe('Not found');
+      }
     });
   });
 });

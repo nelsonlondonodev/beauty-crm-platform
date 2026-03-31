@@ -8,6 +8,7 @@ import type {
   ClientDbRow,
   BonoDbRow,
   FacturaWithItems,
+  Result,
 } from '../types';
 import { addMonths } from 'date-fns';
 import { logger } from '../lib/logger';
@@ -15,9 +16,6 @@ import { getStandardExpirationDate, getBirthdayExpirationDate, hasExpired } from
 
 // --- Utilidades de Dominio ---
 
-/**
- * Calcula el estado de un bono basándose en sus fechas y estado actual.
- */
 function calculateBonusStatus(bono: BonoDbRow): { status: BonusStatus; expirationDate: Date } {
   const isBirthday = bono.tipo === 'Cumpleaños';
   const expirationDate = isBirthday 
@@ -29,7 +27,6 @@ function calculateBonusStatus(bono: BonoDbRow): { status: BonusStatus; expiratio
     return { status: 'vencido', expirationDate };
   }
   
-  // Alerta de los 5 meses antes de vencer (solo para Bienvenida)
   if (!isBirthday) {
     const alertDate = addMonths(new Date(bono.created_at), 5);
     if (hasExpired(alertDate.toISOString())) {
@@ -40,15 +37,11 @@ function calculateBonusStatus(bono: BonoDbRow): { status: BonusStatus; expiratio
   return { status: 'pendiente', expirationDate };
 }
 
-/**
- * Procesa la lista de bonos de un cliente para extraer el activo y el historial.
- */
 const processClientBonuses = (bonosRow?: BonoDbRow[]) => {
   if (!bonosRow || bonosRow.length === 0) {
     return { activeBonus: null, displayBonuses: [] as ClientBonusDisplay[] };
   }
 
-  // Ordenar por fecha de creación (más reciente primero)
   const sortedBonos = [...bonosRow].sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   );
@@ -64,8 +57,6 @@ const processClientBonuses = (bonosRow?: BonoDbRow[]) => {
     };
   });
 
-  // El bono "activo" para mostrar en la tabla es el primero que esté Pendiente.
-  // Si no hay ninguno pendiente, tomamos el más reciente.
   const activeBonoRaw = sortedBonos.find((b) => b.estado === 'Pendiente') || sortedBonos[0];
   const { status, expirationDate } = calculateBonusStatus(activeBonoRaw);
 
@@ -75,9 +66,6 @@ const processClientBonuses = (bonosRow?: BonoDbRow[]) => {
   };
 };
 
-/**
- * Mapea la fila de la base de datos al modelo de dominio 'Client'.
- */
 const mapDbToClient = (row: ClientDbRow): Client => {
   const { activeBonus, displayBonuses } = processClientBonuses(row.bonos);
 
@@ -97,83 +85,87 @@ const mapDbToClient = (row: ClientDbRow): Client => {
 
 // --- Funciones de Servicio ---
 
-export const getClients = async (): Promise<Client[]> => {
-  const { data, error } = await fetchWithTimeout(
-    supabase
-      .from('clientes_fidelizacion')
-      .select('*, bonos(*)')
-      .order('created_at', { ascending: false }) as unknown as Promise<{ data: ClientDbRow[] | null; error: PostgrestError | null }>
-  );
+export const getClients = async (): Promise<Result<Client[]>> => {
+  try {
+    const { data, error } = await fetchWithTimeout(
+      supabase
+        .from('clientes_fidelizacion')
+        .select('*, bonos(*)')
+        .order('created_at', { ascending: false }) as unknown as Promise<{ data: ClientDbRow[] | null; error: PostgrestError | null }>
+    );
 
-  if (error) {
-    logger.error('Error fetching clients', error, 'ClientService');
-    throw new Error(error.message);
+    if (error) throw error;
+    return { success: true, data: (data || []).map(mapDbToClient) };
+  } catch (err: any) {
+    logger.error('Error fetching clients', err, 'ClientService');
+    return { success: false, error: err.message || 'Error al cargar clientes' };
   }
-
-  return (data || []).map(mapDbToClient);
 };
 
-export const getClientById = async (id: string): Promise<Client> => {
-  const { data, error } = await fetchWithTimeout(
-    supabase
-      .from('clientes_fidelizacion')
-      .select('*, bonos(*)')
-      .eq('id', id)
-      .single() as unknown as Promise<{ data: ClientDbRow | null; error: PostgrestError | null }>
-  );
+export const getClientById = async (id: string): Promise<Result<Client>> => {
+  try {
+    const { data, error } = await fetchWithTimeout(
+      supabase
+        .from('clientes_fidelizacion')
+        .select('*, bonos(*)')
+        .eq('id', id)
+        .single() as unknown as Promise<{ data: ClientDbRow | null; error: PostgrestError | null }>
+    );
 
-  if (error || !data) {
-    logger.error(`Error fetching client ${id}`, error, 'ClientService');
-    throw new Error(error?.message || 'Cliente no encontrado');
+    if (error || !data) throw error || new Error('Cliente no encontrado');
+    return { success: true, data: mapDbToClient(data) };
+  } catch (err: any) {
+    logger.error(`Error fetching client ${id}`, err, 'ClientService');
+    return { success: false, error: err.message };
   }
-
-  return mapDbToClient(data);
 };
 
-export const getClientFinancialHistory = async (clientId: string): Promise<FacturaWithItems[]> => {
-  const { data, error } = await fetchWithTimeout(
-    supabase
-      .from('facturas')
-      .select('*, factura_items(*)')
-      .eq('cliente_id', clientId)
-      .order('fecha_venta', { ascending: false }) as unknown as Promise<{ data: FacturaWithItems[] | null; error: PostgrestError | null }>
-  );
+export const getClientFinancialHistory = async (clientId: string): Promise<Result<FacturaWithItems[]>> => {
+  try {
+    const { data, error } = await fetchWithTimeout(
+      supabase
+        .from('facturas')
+        .select('*, factura_items(*)')
+        .eq('cliente_id', clientId)
+        .order('fecha_venta', { ascending: false }) as unknown as Promise<{ data: FacturaWithItems[] | null; error: PostgrestError | null }>
+    );
 
-  if (error) {
-    logger.error(`Error fetching financial history for client ${clientId}`, error, 'ClientService');
-    throw new Error(`No se pudo cargar el historial: ${error.message}`);
+    if (error) throw error;
+    return { success: true, data: data || [] };
+  } catch (err: any) {
+    logger.error(`Error fetching financial history for client ${clientId}`, err, 'ClientService');
+    return { success: false, error: `No se pudo cargar el historial: ${err.message}` };
   }
-
-  return data || [];
 };
 
 export const createClient = async (
   clientData: Omit<Client, 'id' | 'bono_estado' | 'bono_fecha_vencimiento'>
-): Promise<Client> => {
-  const sanitizedName = clientData.nombre.trim();
-  const sanitizedPhone = clientData.telefono.replace(/\D/g, '');
+): Promise<Result<Client>> => {
+  try {
+    const sanitizedName = clientData.nombre.trim();
+    const sanitizedPhone = clientData.telefono.replace(/\D/g, '');
 
-  const { data, error } = await fetchWithTimeout(
-    supabase
-      .from('clientes_fidelizacion')
-      .insert([{
-        nombre: sanitizedName,
-        email: clientData.email,
-        whatsapp: sanitizedPhone,
-        birthday: clientData.fecha_nacimiento,
-        notas: clientData.notas || '',
-      }])
-      .select('*, bonos(*)')
-      .single() as unknown as Promise<{ data: ClientDbRow | null; error: PostgrestError | null }>
-  );
+    const { data, error } = await fetchWithTimeout(
+      supabase
+        .from('clientes_fidelizacion')
+        .insert([{
+          nombre: sanitizedName,
+          email: clientData.email,
+          whatsapp: sanitizedPhone,
+          birthday: clientData.fecha_nacimiento,
+          notas: clientData.notas || '',
+        }])
+        .select('*, bonos(*)')
+        .single() as unknown as Promise<{ data: ClientDbRow | null; error: PostgrestError | null }>
+    );
 
-  if (error || !data) throw new Error(error?.message || 'Error al crear cliente');
-  return mapDbToClient(data);
+    if (error || !data) throw error || new Error('Error al crear cliente');
+    return { success: true, data: mapDbToClient(data) };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
 };
 
-/**
- * Redime el bono activo de un cliente si este solicita marcarlo como reclamado.
- */
 async function redeemActiveBonusForClient(clientId: string): Promise<void> {
   const { data: bonos } = await fetchWithTimeout(
     supabase
@@ -196,47 +188,53 @@ async function redeemActiveBonusForClient(clientId: string): Promise<void> {
   }
 }
 
-export const updateClient = async (id: string, updates: Partial<Client>): Promise<Client> => {
-  const dbUpdates: Partial<ClientDbRow> = {};
-  if (updates.nombre) dbUpdates.nombre = updates.nombre;
-  if (updates.email) dbUpdates.email = updates.email;
-  if (updates.telefono) dbUpdates.whatsapp = updates.telefono.replace(/\D/g, '');
-  if (updates.fecha_nacimiento) dbUpdates.birthday = updates.fecha_nacimiento;
-  if (updates.notas !== undefined) dbUpdates.notas = updates.notas;
+export const updateClient = async (id: string, updates: Partial<Client>): Promise<Result<Client>> => {
+  try {
+    const dbUpdates: Partial<ClientDbRow> = {};
+    if (updates.nombre) dbUpdates.nombre = updates.nombre;
+    if (updates.email) dbUpdates.email = updates.email;
+    if (updates.telefono) dbUpdates.whatsapp = updates.telefono.replace(/\D/g, '');
+    if (updates.fecha_nacimiento) dbUpdates.birthday = updates.fecha_nacimiento;
+    if (updates.notas !== undefined) dbUpdates.notas = updates.notas;
 
-  // 1. Actualizar perfil básico si hay cambios
-  if (Object.keys(dbUpdates).length > 0) {
-    const { error } = await supabase
-      .from('clientes_fidelizacion')
-      .update(dbUpdates)
-      .eq('id', id);
-    
-    if (error) throw new Error(error.message);
+    if (Object.keys(dbUpdates).length > 0) {
+      const { error } = await supabase
+        .from('clientes_fidelizacion')
+        .update(dbUpdates)
+        .eq('id', id);
+      
+      if (error) throw error;
+    }
+
+    if (updates.bono_estado === 'reclamado') {
+      await redeemActiveBonusForClient(id);
+    }
+
+    const { data, error } = await fetchWithTimeout(
+      supabase
+        .from('clientes_fidelizacion')
+        .select('*, bonos(*)')
+        .eq('id', id)
+        .single() as unknown as Promise<{ data: ClientDbRow | null; error: PostgrestError | null }>
+    );
+
+    if (error || !data) throw error || new Error('No se pudo recuperar el registro actualizado');
+    return { success: true, data: mapDbToClient(data) };
+  } catch (err: any) {
+    return { success: false, error: err.message };
   }
-
-  // 2. Gestionar redención de bonos de forma aislada
-  if (updates.bono_estado === 'reclamado') {
-    await redeemActiveBonusForClient(id);
-  }
-
-  // 3. Recuperar y mapear el registro actualizado final
-  const { data, error } = await fetchWithTimeout(
-    supabase
-      .from('clientes_fidelizacion')
-      .select('*, bonos(*)')
-      .eq('id', id)
-      .single() as unknown as Promise<{ data: ClientDbRow | null; error: PostgrestError | null }>
-  );
-
-  if (error || !data) throw new Error(error?.message || 'No se pudo recuperar el registro actualizado');
-  return mapDbToClient(data);
 };
 
-export const deleteClient = async (id: string): Promise<void> => {
-  const { error } = await supabase
-    .from('clientes_fidelizacion')
-    .delete()
-    .eq('id', id);
+export const deleteClient = async (id: string): Promise<Result<void>> => {
+  try {
+    const { error } = await supabase
+      .from('clientes_fidelizacion')
+      .delete()
+      .eq('id', id);
 
-  if (error) throw new Error(error.message);
+    if (error) throw error;
+    return { success: true, data: undefined };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
 };

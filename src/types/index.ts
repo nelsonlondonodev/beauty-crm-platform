@@ -1,3 +1,5 @@
+export type Role = 'superadmin' | 'tenant_admin' | 'staff';
+
 // ── Bonos ──────────────────────────────────────────────────────────────────
 
 export type BonusStatus =
@@ -151,3 +153,10 @@ export interface FacturaWithClient extends Factura {
 export interface FacturaItemWithRelations extends FacturaItem {
   facturas: (Factura & { clientes_fidelizacion: { nombre: string } | null }) | null;
 }
+
+// ── Arquitectura: Manejo de Errores ──────────────────────────────────────────
+
+/** Patrón Result para manejo de errores tipados sin excepciones implícitas. */
+export type Result<T, E = string> = 
+  | { success: true; data: T } 
+  | { success: false; error: E };
