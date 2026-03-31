@@ -1,12 +1,13 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, Sparkles, TrendingUp, ShieldCheck } from 'lucide-react';
+import { ArrowRight, Sparkles } from 'lucide-react';
+import HeroBackground from './HeroBackground';
+import HeroVisuals from './HeroVisuals';
+import HeroStatItem from './HeroStatItem';
 
 const LandingHero = () => {
   return (
     <section className="relative overflow-hidden pt-32 pb-20 lg:pt-40 lg:pb-56">
-      {/* ── Background Ambient FX ── */}
-      <div className="absolute top-0 right-0 -z-10 h-[800px] w-[800px] translate-x-1/3 -translate-y-1/3 rounded-full bg-purple-500/10 blur-[120px] mix-blend-multiply opacity-70 animate-pulse" style={{ animationDuration: '8s' }} />
-      <div className="absolute top-1/2 left-0 -z-10 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-indigo-500/10 blur-[100px] mix-blend-multiply opacity-50 animate-pulse" style={{ animationDuration: '12s' }} />
+      <HeroBackground />
 
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="grid grid-cols-1 items-center gap-20 lg:grid-cols-2">
@@ -18,7 +19,7 @@ const LandingHero = () => {
               <div className="mb-8 flex justify-center lg:justify-start">
                 <div className="relative inline-flex items-center gap-2 rounded-full border border-purple-200/50 bg-white/40 px-4 py-1.5 text-sm font-bold text-purple-800 shadow-[0_0_20px_rgba(168,85,247,0.1)] backdrop-blur-xl">
                   <Sparkles className="h-4 w-4 text-purple-600" />
-                  <span className="tracking-wide uppercase text-[10px]">Nueva Era V0.4</span>
+                  <span className="tracking-wide uppercase text-[10px]">Nueva Era V1.0</span>
                   <div className="absolute -inset-0.5 -z-10 animate-pulse rounded-full bg-gradient-to-r from-purple-400/20 to-indigo-400/20 blur-sm" />
                 </div>
               </div>
@@ -56,64 +57,15 @@ const LandingHero = () => {
               
               {/* Rapid Stats Summary */}
               <div className="mt-12 flex flex-wrap justify-center gap-8 lg:justify-start border-t border-gray-100 pt-8 opacity-70">
-                 <div>
-                   <p className="text-2xl font-bold text-gray-900">+45%</p>
-                   <p className="text-[10px] uppercase font-black tracking-widest text-gray-500">Rentabilidad</p>
-                 </div>
-                 <div className="h-10 w-px bg-gray-200" />
-                 <div>
-                   <p className="text-2xl font-bold text-gray-900">100%</p>
-                   <p className="text-[10px] uppercase font-black tracking-widest text-gray-500">Fidelización</p>
-                 </div>
-                 <div className="h-10 w-px bg-gray-200" />
-                 <div>
-                   <p className="text-2xl font-bold text-gray-900">-5h</p>
-                   <p className="text-[10px] uppercase font-black tracking-widest text-gray-500">Admin Semanal</p>
-                 </div>
+                 <HeroStatItem value="+45%" label="Rentabilidad" />
+                 <HeroStatItem value="100%" label="Fidelización" />
+                 <HeroStatItem value="-5h" label="Admin Semanal" showDivider={false} />
               </div>
             </div>
           </article>
 
           {/* ── Visual Column ── */}
-          <div className="relative animate-in fade-in zoom-in-95 duration-1000 delay-300">
-            {/* Main Mockup Image */}
-            <div className="relative z-20 overflow-hidden rounded-[2.5rem] border-[8px] border-white/20 bg-gray-100 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] backdrop-blur-2xl">
-              <img 
-                src="/assets/hero-mockup.png" 
-                alt="Londy CRM Dashboard Preview" 
-                className="w-full object-cover transition-transform duration-700 hover:scale-[1.02]"
-              />
-              <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/5 to-transparent pointer-events-none" />
-            </div>
-
-            {/* Floating Glossy Stats Cards */}
-            <div className="absolute -top-10 -right-8 z-30 hidden xl:block animate-bounce" style={{ animationDuration: '4s' }}>
-              <div className="flex items-center gap-4 rounded-3xl border border-white/40 bg-white/70 p-5 shadow-2xl backdrop-blur-2xl">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100">
-                  <TrendingUp className="h-6 w-6 text-emerald-600" />
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-gray-500 uppercase tracking-tighter">Ingresos hoy</p>
-                  <p className="text-lg font-black text-gray-900">$1.250.000</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="absolute -bottom-12 -left-12 z-30 hidden xl:block animate-bounce" style={{ animationDuration: '5s' }}>
-              <div className="flex items-center gap-4 rounded-3xl border border-white/40 bg-white/70 p-5 shadow-2xl backdrop-blur-2xl">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-purple-100">
-                  <ShieldCheck className="h-6 w-6 text-purple-600" />
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-gray-500 uppercase tracking-tighter">Seguridad</p>
-                  <p className="text-lg font-black text-gray-900">Multi-Sede OK</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Decorative Orbs inside Visual Column */}
-            <div className="absolute -inset-10 -z-10 rounded-full bg-gradient-to-r from-purple-400/20 to-indigo-400/20 blur-3xl opacity-50" />
-          </div>
+          <HeroVisuals />
           
         </div>
       </div>
