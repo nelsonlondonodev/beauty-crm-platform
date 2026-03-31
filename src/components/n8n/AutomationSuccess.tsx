@@ -9,8 +9,8 @@ const AutomationSuccess = ({ onRetry }: AutomationSuccessProps) => (
     <div className="animate-in fade-in zoom-in duration-700">
       <div className="mb-8 flex justify-center">
         <div className="relative">
-          <div className="absolute inset-0 animate-ping rounded-full bg-emerald-500/20" />
-          <div className="relative flex h-20 w-20 items-center justify-center rounded-full bg-emerald-500 shadow-[0_0_40px_rgba(16,185,129,0.4)]">
+          <div className="absolute inset-0 animate-ping rounded-full bg-purple-500/20" />
+          <div className="relative flex h-20 w-20 items-center justify-center rounded-full bg-primary shadow-[0_0_40px_rgba(168,85,247,0.4)]">
             <CheckCircle className="h-10 w-10 text-white" />
           </div>
         </div>

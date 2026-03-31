@@ -85,27 +85,27 @@ const N8nTestLanding = () => {
                   { name: 'telefono', icon: Phone, type: 'tel', placeholder: 'WhatsApp' }
                 ].map((input) => (
                   <div key={input.name} className="relative group">
-                    <input.icon className="absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 text-gray-500 transition-colors group-focus-within:text-emerald-400" />
+                    <input.icon className="absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 text-gray-500 transition-colors group-focus-within:text-purple-400" />
                     <input 
                       type={input.type} name={input.name} required placeholder={input.placeholder}
                       value={(formData as any)[input.name]} onChange={handleChange}
-                      className="w-full rounded-2xl border border-white/5 bg-white/5 py-4 pl-12 pr-4 text-sm font-medium outline-none transition-all focus:border-emerald-500/50 focus:bg-white/10"
+                      className="w-full rounded-2xl border border-white/5 bg-white/5 py-4 pl-12 pr-4 text-sm font-medium outline-none transition-all focus:border-purple-500/50 focus:bg-white/10"
                     />
                   </div>
                 ))}
 
                 <div className="relative group">
-                  <Calendar className="absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 text-gray-500 transition-colors group-focus-within:text-emerald-400" />
+                  <Calendar className="absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 text-gray-500 transition-colors group-focus-within:text-purple-400" />
                   <input 
                     type="date" name="cumpleaños" required value={formData.cumpleaños} onChange={handleChange}
-                    className="w-full rounded-2xl border border-white/5 bg-white/5 py-4 pl-12 pr-4 text-sm font-medium outline-none transition-all focus:border-emerald-500/50 focus:bg-white/10 [color-scheme:dark]"
+                    className="w-full rounded-2xl border border-white/5 bg-white/5 py-4 pl-12 pr-4 text-sm font-medium outline-none transition-all focus:border-purple-500/50 focus:bg-white/10 [color-scheme:dark]"
                   />
                 </div>
 
                 <div className="flex items-start gap-3 px-2 pt-2 text-xs leading-5 text-gray-400">
                   <input 
                     type="checkbox" name="aceptaPoliticas" checked={formData.aceptaPoliticas} onChange={handleChange}
-                    className="h-5 w-5 cursor-pointer rounded-md border-white/10 bg-white/5 text-emerald-500 outline-none focus:ring-emerald-500"
+                    className="h-5 w-5 cursor-pointer rounded-md border-white/10 bg-white/5 text-purple-500 outline-none focus:ring-purple-500"
                   />
                   <span>Acepto que mis datos sean tratados según la **Ley 1581 de 2012** (Colombia).</span>
                 </div>
@@ -113,7 +113,7 @@ const N8nTestLanding = () => {
 
               <button 
                 type="submit" disabled={loading}
-                className="group relative mt-10 flex w-full items-center justify-center gap-2 overflow-hidden rounded-2xl bg-emerald-500 py-5 text-base font-black text-white shadow-[0_0_40px_rgba(16,185,129,0.3)] transition-all hover:scale-[1.02]"
+                className="group relative mt-10 flex w-full items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 py-5 text-base font-black text-white shadow-[0_0_40px_rgba(168,85,247,0.3)] transition-all hover:scale-[1.02] hover:shadow-purple-500/50"
               >
                 {loading ? <Loader2 className="h-6 w-6 animate-spin" /> : <span>Activar mi Bono 15%</span>}
               </button>
