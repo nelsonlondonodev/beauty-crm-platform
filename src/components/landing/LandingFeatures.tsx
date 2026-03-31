@@ -53,7 +53,7 @@ const FEATURES = [
 
 const LandingFeatures = () => {
   return (
-    <section id="caracteristicas" className="relative z-20 overflow-hidden py-24 sm:py-32">
+    <section id="caracteristicas" className="relative z-20 overflow-hidden py-16 sm:py-24">
       {/* Background Decorative FX */}
       <div className="absolute top-1/2 left-1/2 -z-10 h-[1000px] w-[1000px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gray-50/50 blur-[120px]" />
 

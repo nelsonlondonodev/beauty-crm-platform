@@ -13,7 +13,7 @@ const LandingValueProp = () => {
   const gananciaExtra = ltvConLondy - ltvActual;
 
   return (
-    <section id="beneficios" className="relative isolate overflow-hidden bg-slate-950 py-24 sm:py-32">
+    <section id="beneficios" className="relative isolate overflow-hidden bg-slate-950 py-16 sm:py-24">
       {/* Dark Ambient FX */}
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_0%,#4c1d95_0%,transparent_60%)]" />
       <div className="absolute top-0 w-full h-px bg-gradient-to-r from-transparent via-purple-500/50 to-transparent" />

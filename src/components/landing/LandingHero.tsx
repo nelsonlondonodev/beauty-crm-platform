@@ -6,7 +6,7 @@ import HeroStatItem from './HeroStatItem';
 
 const LandingHero = () => {
   return (
-    <section className="relative overflow-hidden pt-32 pb-20 lg:pt-40 lg:pb-56">
+    <section className="relative overflow-hidden pt-32 pb-12 lg:pt-40 lg:pb-32">
       <HeroBackground />
 
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
