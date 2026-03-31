@@ -1,29 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import DashboardHeader from '../components/layout/DashboardHeader';
-import { getFacturas } from '../services/billingService';
-import type { FacturaWithClient } from '../types';
+import { useInvoices } from '../hooks/useInvoices';
 import { formatDate } from '../lib/formatters';
 import { Loader2, Search } from 'lucide-react';
-import { toast } from 'sonner';
 
 const Invoices = () => {
-  const [invoices, setInvoices] = useState<FacturaWithClient[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { invoices, loading } = useInvoices();
   const [searchTerm, setSearchTerm] = useState('');
-
-  useEffect(() => {
-    const fetchInvoices = async () => {
-      setLoading(true);
-      const res = await getFacturas();
-      if (res.success) {
-        setInvoices(res.data);
-      } else {
-        toast.error(res.error || 'Error al cargar el historial de facturas');
-      }
-      setLoading(false);
-    };
-    fetchInvoices();
-  }, []);
 
   const filteredInvoices = invoices.filter(inv => 
     inv.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
