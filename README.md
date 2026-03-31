@@ -14,8 +14,33 @@ CRM B2B moderno para el sector de la belleza (Peluquerías, Barberías, Spas).
 ```
 .
 ├── n8n_workflows/    # Flujos de automatización JSON (Marca Blanca)
-└── src/
-    ├── components/   # Componentes reutilizables
+└── 🚀 Evolución y Modernización (Marzo 2026)
+
+Esta fase ha transformado Londy de un MVP a una plataforma de nivel enterprise, priorizando la robustez técnica y una experiencia de usuario de lujo.
+
+### 🏗️ Arquitectura de Servicios (Patrón Result)
+Hemos implementado un sistema de manejo de errores explícito y tipado en toda la capa de datos (`clientService`, `billingService`).
+- **Formato**: `{ success: boolean, data?: T, error?: string }`
+- **Beneficio**: Eliminación de excepciones silenciosas y crashes inesperados. El UI ahora reacciona de forma segura a cualquier fallo de red o permisos.
+- **Hooks Modernos**: Refactorización de `useClients` e `useInvoices` para orquestar este patrón.
+
+### 🎨 Landing Page "Wow Effect" (Hardselling UI)
+Rediseño completo de la carta de presentación del CRM:
+- **Hero Premium**: Layout de dos columnas con mockup de MacBook en alta fidelidad y tarjetas flotantes con **Glassmorphism**.
+- **Calculadora de LTV Interactiva**: Herramienta comercial que permite a los dueños de salones calcular el valor de vida de sus clientes y el ROI de usar Londy.
+- **Grid de Funcionalidades**: Sistema de iconos con gradientes vibrantes y animaciones de entrada escalonadas (staggered).
+- **Ritmo Visual**: Optimización de márgenes y paddings para un flujo de lectura profesional.
+
+### 🧩 Refactorización Atómica
+Migración de páginas monolíticas a componentes modulares:
+- **Directorio `landing/`**: `HeroBackground`, `HeroVisuals`, `HeroStatItem`, `LTVSlider`, `ValuePropContent`.
+- **Barrel Exports**: Uso de `index.ts` en componentes para simplificar las importaciones y mantener el código limpio.
+
+### 🛠️ Correcciones Críticas
+- Solución definitiva al error `TypeError: .filter is not a function` causado por el cambio de estructura en la carga de datos.
+- Restauración de iconos y formateadores optimizados para React 19.
+    ├── src/
+    │   ├── components/   # Componentes reutilizables
     │   ├── dashboard/# Componentes específicos del dashboard
     │   └── layout/   # Componentes de estructura (Sidebar, Topbar)
     ├── hooks/        # Custom React Hooks
