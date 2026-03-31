@@ -1,0 +1,52 @@
+{
+  "name": "Londy Dev - Registro y Bienvenida",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "a1f5c9e2-93cb-4f3b-b2f5-8d998d87a70e/londy-dev",
+        "options": {
+          "allowedOrigins": "*",
+          "responseCode": 200
+        }
+      },
+      "id": "b92c20d9-8ed8-43c1-b95c-0bc6d692b106",
+      "name": "Webhook (Captación)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        160,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "/* CÓDIGO UPDATE: Generador de Cupón Único */\nconst items = $input.all();\nconst item = items[0].json;\n\n// IMPORTANTE: Extraemos los datos del BODY\nconst userData = item.body || item; \n\nconst couponPrefix = 'DEV-';\nconst timePart = Date.now().toString(36).slice(-4).toUpperCase();\nconst rawName = userData.nombre ? String(userData.nombre).trim() : '';\nconst cleanName = rawName.normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/[^a-zA-Z0-9]/g, '');\nconst nameSuffix = cleanName.length >= 2 ? cleanName.slice(-2).toUpperCase() : 'XX';\n\nconst fullCoupon = couponPrefix + timePart + nameSuffix;\n\nreturn [{\n  json: {\n    name: userData.nombre,       \n    email: userData.email,     \n    whatsapp: userData.telefono,\n    birthday: userData.cumpleaños, \n    coupon_code: fullCoupon\n  }\n}];\n"
+      },
+      "id": "18fea22d-11c7-48c8-92e7-c83f1cf1d0be",
+      "name": "Generador de Cupón",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        368,
+        208
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook (Captación)": {
+      "main": [
+        [
+          {
+            "node": "Generador de Cupón",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

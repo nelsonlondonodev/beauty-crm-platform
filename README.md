@@ -36,8 +36,18 @@ Migración de páginas monolíticas a componentes modulares:
 - **Directorio `landing/`**: `HeroBackground`, `HeroVisuals`, `HeroStatItem`, `LTVSlider`, `ValuePropContent`.
 - **Barrel Exports**: Uso de `index.ts` en componentes para simplificar las importaciones y mantener el código limpio.
 
+### 🧪 Laboratorio de Automatización (n8n)
+Hemos establecido un entorno de experimentación seguro para flujos de fidelización.
+- **Landing de Pruebas**: Acceso privado en `/automation-test` (no indexada).
+- **Integración Segura**: Webhooks diferenciados para Desarrollo (`VITE_N8N_DEV_WEBHOOK`).
+- **Estrategia CORS Bypass**: Implementación de envíos mediante `text/plain` para evitar bloqueos de preflight desde localhost.
+- **Estado Técnico**:
+  - [x] Conexión UI ➔ n8n funcional.
+  - [x] Generación de cupones dinámica.
+  - [ ] **Pendiente**: Debuggear el nodo de Supabase en n8n (el flujo se frena actualmente al intentar guardar el registro).
+
 ### 🛠️ Correcciones Críticas
-- Solución definitiva al error `TypeError: .filter is not a function` causado por el cambio de estructura en la carga de datos.
+- Solución definitiva al error `TypeError: .filter is not a function`.
 - Restauración de iconos y formateadores optimizados para React 19.
     ├── src/
     │   ├── components/   # Componentes reutilizables

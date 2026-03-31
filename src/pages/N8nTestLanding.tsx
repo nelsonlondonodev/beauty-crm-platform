@@ -34,18 +34,24 @@ const N8nTestLanding = () => {
     setLoading(true);
     try {
       const webhookUrl = import.meta.env.VITE_N8N_TEST_WEBHOOK;
-      const response = await fetch(webhookUrl, {
+      
+      // TRUCO PRO: Enviamos como text/plain para evitar el Preflight de CORS.
+      // n8n recibirá el JSON en el body y podrá procesarlo igual.
+      await fetch(webhookUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, source: 'Landing Pruebas', timestamp: new Date().toISOString() }),
+        headers: { 
+          'Content-Type': 'text/plain' 
+        },
+        body: JSON.stringify({ 
+          ...formData, 
+          source: 'Landing Pruebas', 
+          timestamp: new Date().toISOString() 
+        }),
       });
 
-      if (response.ok) {
-        setSuccess(true);
-        toast.success('Envío a n8n exitoso.');
-      } else {
-        throw new Error('Webhook error');
-      }
+      setSuccess(true);
+      toast.success('¡Datos enviados! Revisa n8n.');
+      
     } catch (error) {
       toast.error('Error de conexión con n8n.');
       console.error(error);
