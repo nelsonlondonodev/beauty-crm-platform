@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { LogOut, User, Settings, Shield, Mail } from 'lucide-react';
 import type { AppRole } from '../../../contexts/AuthContext';
 
@@ -22,10 +22,12 @@ const UserMenuDropdown = ({
   onLogout 
 }: UserMenuDropdownProps) => {
   const [imgError, setImgError] = useState(false);
+  const [prevAvatarUrl, setPrevAvatarUrl] = useState(avatarUrl);
 
-  useEffect(() => {
+  if (avatarUrl !== prevAvatarUrl) {
+    setPrevAvatarUrl(avatarUrl);
     setImgError(false);
-  }, [avatarUrl]);
+  }
 
   return (
     <div className="absolute right-0 mt-3 w-64 origin-top-right overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-2xl ring-1 ring-black ring-opacity-5 animate-in fade-in zoom-in duration-200 z-50">

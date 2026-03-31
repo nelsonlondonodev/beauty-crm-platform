@@ -134,3 +134,20 @@ export interface PagoComision {
   fecha_pago?: string;
   notas?: string;
 }
+
+// ── Relaciones JOIN de Supabase ───────────────────────────────────────────
+
+/** Factura con sus items embebidos (select: '*, factura_items(*)') */
+export interface FacturaWithItems extends Factura {
+  factura_items: FacturaItem[];
+}
+
+/** Factura con el nombre del cliente (select: '*, clientes_fidelizacion(nombre)') */
+export interface FacturaWithClient extends Factura {
+  clientes_fidelizacion: { nombre: string } | null;
+}
+
+/** FacturaItem con relaciones de factura y cliente (select: '*, facturas(*, clientes_fidelizacion(nombre))') */
+export interface FacturaItemWithRelations extends FacturaItem {
+  facturas: (Factura & { clientes_fidelizacion: { nombre: string } | null }) | null;
+}

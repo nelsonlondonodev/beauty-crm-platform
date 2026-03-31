@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import DashboardHeader from '../components/layout/DashboardHeader';
 import { getFacturasByEmpleado } from '../services/billingService';
+import type { FacturaItemWithRelations } from '../types';
 import { formatDate } from '../lib/formatters';
 import { Loader2, ArrowLeft, TrendingUp } from 'lucide-react';
 import { toast } from 'sonner';
@@ -9,7 +10,7 @@ import { toast } from 'sonner';
 const StaffSales = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [sales, setSales] = useState<any[]>([]);
+  const [sales, setSales] = useState<FacturaItemWithRelations[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -18,7 +19,7 @@ const StaffSales = () => {
       try {
         const data = await getFacturasByEmpleado(id);
         setSales(data);
-      } catch (error) {
+      } catch {
         toast.error('Error al cargar el historial del colaborador');
       } finally {
         setLoading(false);
@@ -87,7 +88,7 @@ const StaffSales = () => {
                 {sales.map((sale) => (
                   <tr key={sale.id} className="transition-colors hover:bg-gray-50/50">
                     <td className="px-6 py-4 text-gray-900 font-medium">
-                      {formatDate(sale.created_at)}
+                      {formatDate(sale.created_at ?? '')}
                     </td>
                     <td className="px-6 py-4">
                       {sale.facturas?.clientes_fidelizacion?.nombre || 'Consumidor Final'}

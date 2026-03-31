@@ -42,7 +42,6 @@ export const useBilling = () => {
   });
 
   // Watch form values for calculations
-  const watchedItems = form.watch('items') || [];
   const discount = form.watch('descuento_manual') || 0;
 
   // New Item Draft State (before adding to the actual array)
@@ -70,8 +69,10 @@ export const useBilling = () => {
   }, [clients, searchTerm]);
 
   const subtotal = useMemo(() => {
-    return watchedItems.reduce((acc, item) => acc + (Number(item.price) || 0) * (Number(item.quantity) || 0), 0);
-  }, [watchedItems]);
+    const currentItems = form.getValues('items') ?? [];
+    return currentItems.reduce((acc, item) => acc + (Number(item.price) || 0) * (Number(item.quantity) || 0), 0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items]);
 
   const total = useMemo(() => {
     return Math.max(0, subtotal - discount);

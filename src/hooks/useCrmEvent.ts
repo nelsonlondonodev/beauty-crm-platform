@@ -7,7 +7,10 @@ import { useEffect, useRef } from 'react';
  */
 export const useCrmEvent = (eventName: string, callback: () => void): void => {
   const savedCallback = useRef(callback);
-  savedCallback.current = callback;
+
+  useEffect(() => {
+    savedCallback.current = callback;
+  }, [callback]);
 
   useEffect(() => {
     const handler = () => savedCallback.current();

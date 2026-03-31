@@ -42,6 +42,7 @@ interface RoleData {
 /**
  * Función pura para obtener el rol desde Supabase.
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export const fetchRoleFromDB = async (
   userId: string
 ): Promise<RoleData | null> => {
@@ -190,6 +191,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => {
   return useContext(AuthContext);
 };

@@ -26,14 +26,16 @@ const GlobalSearch = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Open dropdown when typing
-  useEffect(() => {
-    if (searchTerm.trim().length > 0) {
+  // Open dropdown when typing — use derived state with manual close
+  const shouldBeOpen = searchTerm.trim().length > 0;
+  const isDropdownOpen = isOpen && shouldBeOpen;
+
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
+    if (value.trim().length > 0) {
       setIsOpen(true);
-    } else {
-      setIsOpen(false);
     }
-  }, [searchTerm]);
+  };
 
   const filteredClients = React.useMemo(() => {
     if (!searchTerm.trim()) return [];
@@ -96,7 +98,7 @@ const GlobalSearch = () => {
         type="search"
         placeholder="Buscar cliente, tel, email..."
         value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
+        onChange={(e) => handleSearchChange(e.target.value)}
         onFocus={() => {
           if (searchTerm.trim()) setIsOpen(true);
         }}
@@ -104,7 +106,7 @@ const GlobalSearch = () => {
       />
 
       {/* Dropdown Results */}
-      {isOpen && (
+      {isDropdownOpen && (
         <div className="animate-in fade-in slide-in-from-top-2 absolute top-full left-0 z-50 mt-2 w-full max-w-md overflow-hidden rounded-xl border border-gray-100 bg-white shadow-xl duration-200">
           <div className="p-2">
             {loading ? (

@@ -128,7 +128,9 @@ const NotificationMenu = () => {
                         if (activity.timestamp) {
                           relativeTime = formatDistanceToNow(new Date(activity.timestamp), { addSuffix: true, locale: es });
                         }
-                      } catch (e) {}
+                      } catch {
+                        // Invalid timestamp — graceful fallback to empty
+                      }
 
                       return (
                         <div key={activity.id} className="flex w-full items-start gap-3 rounded-xl px-3 py-2.5 transition-all outline-none hover:bg-gray-50 text-left cursor-default">

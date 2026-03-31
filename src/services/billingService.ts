@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase';
-import type { InvoiceItem, Factura, FacturaItem } from '../types';
+import type { InvoiceItem, Factura, FacturaItem, FacturaWithClient, FacturaItemWithRelations } from '../types';
 import { logger } from '../lib/logger';
 import { fetchWithTimeout } from '../lib/utils';
 import type { PostgrestError } from '@supabase/supabase-js';
@@ -51,12 +51,12 @@ export const procesarFactura = async (payload: FacturaPayload) => {
   return data;
 };
 
-export const getFacturas = async (): Promise<Factura[]> => {
+export const getFacturas = async (): Promise<FacturaWithClient[]> => {
   const { data, error } = await fetchWithTimeout(
     supabase
       .from('facturas')
       .select('*, clientes_fidelizacion(nombre)')
-      .order('fecha_venta', { ascending: false }) as unknown as Promise<{ data: Factura[] | null; error: PostgrestError | null }>
+      .order('fecha_venta', { ascending: false }) as unknown as Promise<{ data: FacturaWithClient[] | null; error: PostgrestError | null }>
   );
 
   if (error) {
@@ -83,13 +83,13 @@ export const getFacturaById = async (id: string): Promise<Factura & { factura_it
   return data;
 };
 
-export const getFacturasByEmpleado = async (empleadoId: string): Promise<FacturaItem[]> => {
+export const getFacturasByEmpleado = async (empleadoId: string): Promise<FacturaItemWithRelations[]> => {
   const { data, error } = await fetchWithTimeout(
     supabase
       .from('factura_items')
       .select('*, facturas(*, clientes_fidelizacion(nombre))')
       .eq('empleado_id', empleadoId)
-      .order('created_at', { ascending: false }) as unknown as Promise<{ data: FacturaItem[] | null; error: PostgrestError | null }>
+      .order('created_at', { ascending: false }) as unknown as Promise<{ data: FacturaItemWithRelations[] | null; error: PostgrestError | null }>
   );
 
   if (error) {

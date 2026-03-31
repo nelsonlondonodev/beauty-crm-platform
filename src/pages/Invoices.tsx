@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import DashboardHeader from '../components/layout/DashboardHeader';
 import { getFacturas } from '../services/billingService';
+import type { FacturaWithClient } from '../types';
 import { formatDate } from '../lib/formatters';
 import { Loader2, Search } from 'lucide-react';
 import { toast } from 'sonner';
 
 const Invoices = () => {
-  const [invoices, setInvoices] = useState<any[]>([]);
+  const [invoices, setInvoices] = useState<FacturaWithClient[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -15,7 +16,7 @@ const Invoices = () => {
       try {
         const data = await getFacturas();
         setInvoices(data);
-      } catch (error) {
+      } catch {
         toast.error('Error al cargar el historial de facturas');
       } finally {
         setLoading(false);
@@ -72,7 +73,7 @@ const Invoices = () => {
                   <tr key={inv.id} className="transition-colors hover:bg-gray-50/50">
                     <td className="px-6 py-4 text-center">
                       <div className="flex flex-col">
-                        <span className="font-medium text-gray-900">{formatDate(inv.fecha_venta)}</span>
+                        <span className="font-medium text-gray-900">{formatDate(inv.fecha_venta ?? '')}</span>
                         <span className="text-[10px] text-gray-400 font-mono">#{inv.id.substring(0,8).toUpperCase()}</span>
                       </div>
                     </td>

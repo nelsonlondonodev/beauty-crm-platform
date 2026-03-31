@@ -65,13 +65,16 @@ interface BonoWithClient {
 }
 
 // --- Funciones Atómicas de Métricas ---
+type StatsQuery = ReturnType<typeof supabase.from> extends { select: infer S } 
+  ? S extends (...args: never[]) => infer R ? R : never 
+  : never;
 
 async function fetchStatsHead(
   table: string, 
-  filter?: (query: any) => any
+  filter?: (query: StatsQuery) => StatsQuery
 ): Promise<number> {
   let query = supabase.from(table).select('*', { count: 'exact', head: true });
-  if (filter) query = filter(query);
+  if (filter) query = filter(query as unknown as StatsQuery) as typeof query;
   
   const { count, error } = await fetchWithTimeout(
     query as unknown as Promise<{ count: number | null; error: PostgrestError | null }>

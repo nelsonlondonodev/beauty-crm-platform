@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { useAuth } from './AuthContext';
 import { APP_CONFIG } from '../config/brand';
 import { fetchTenantConfig } from '../services/tenantService';
@@ -36,7 +36,7 @@ export const TenantProvider = ({ children }: { children: React.ReactNode }) => {
   const [config, setConfig] = useState<TenantConfig>(defaultConfig);
   const [loading, setLoading] = useState(true);
 
-  const loadTenantData = async () => {
+  const loadTenantData = useCallback(async () => {
     if (!user) {
       setConfig(defaultConfig);
       setLoading(false);
@@ -44,7 +44,6 @@ export const TenantProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     setLoading(true);
-    // Usar el tenantId del contexto de autenticación si existe, si no fallback al user.id (para owners antiguos)
     const targetId = tenantId || user.id;
     const tenantData = await fetchTenantConfig(targetId);
     
@@ -54,11 +53,15 @@ export const TenantProvider = ({ children }: { children: React.ReactNode }) => {
       setConfig(defaultConfig);
     }
     setLoading(false);
-  };
+  }, [user, tenantId]);
 
+  // Load tenant data on mount and when user changes
   useEffect(() => {
-    loadTenantData();
-  }, [user]);
+    const init = async () => {
+      await loadTenantData();
+    };
+    init();
+  }, [loadTenantData]);
 
   return (
     <TenantContext.Provider value={{ config, loading, refreshConfig: loadTenantData }}>
@@ -67,4 +70,6 @@ export const TenantProvider = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useTenant = () => useContext(TenantContext);
+

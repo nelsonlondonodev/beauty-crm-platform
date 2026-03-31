@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import DashboardHeader from '../components/layout/DashboardHeader';
 import ClientTable from '../components/clients/ClientTable';
 import NewClientModal from '../components/clients/NewClientModal';
@@ -25,12 +25,14 @@ const Clients = () => {
   const [deletingClient, setDeletingClient] = useState<Client | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  useEffect(() => {
-    const search = searchParams.get('search');
-    if (search !== null) {
-      setSearchTerm(search);
-    }
-  }, [searchParams]);
+  // Sincronizar searchTerm desde URL (sólo ocurrió cambio externo)
+  const currentSearchUrl = searchParams.get('search') || '';
+  const [prevSearchUrl, setPrevSearchUrl] = useState(currentSearchUrl);
+
+  if (currentSearchUrl !== prevSearchUrl) {
+    setPrevSearchUrl(currentSearchUrl);
+    setSearchTerm(currentSearchUrl);
+  }
 
   // Filter Logic
   const filteredClients = clients.filter((client) => {

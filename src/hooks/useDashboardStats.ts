@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   getDashboardStats,
   type DashboardStats,
@@ -22,14 +22,7 @@ export const useDashboardStats = (role: AppRole | null) => {
   });
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchStats();
-  }, []);
-
-  // Refrescar stats cuando un bono es canjeado desde otro módulo
-  useCrmEvent(CRM_EVENTS.BONO_REDEEMED, () => fetchStats());
-
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     try {
       setLoading(true);
       const data = await getDashboardStats(role);
@@ -39,7 +32,14 @@ export const useDashboardStats = (role: AppRole | null) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [role]);
+
+  useEffect(() => {
+    fetchStats();
+  }, [fetchStats]);
+
+  // Refrescar stats cuando un bono es canjeado desde otro módulo
+  useCrmEvent(CRM_EVENTS.BONO_REDEEMED, () => fetchStats());
 
   return { stats, loading, refetch: fetchStats };
 };

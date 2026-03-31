@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { X, Save } from 'lucide-react';
 import type { Client } from '../../types';
 
@@ -15,6 +15,15 @@ const isPhoneValid = (phone: string): boolean => {
   return digitCount >= MIN_PHONE_DIGITS;
 };
 
+const buildFormData = (data?: Client | null): Omit<Client, 'id' | 'bono_estado'> => ({
+  nombre: data?.nombre ?? '',
+  email: data?.email ?? '',
+  telefono: data?.telefono ?? '',
+  fecha_nacimiento: data?.fecha_nacimiento ?? '',
+  bono_fecha_vencimiento: '', // auto-calculado, no editable
+  notas: data?.notas ?? '',
+});
+
 interface NewClientModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -30,37 +39,17 @@ const NewClientModal = ({
 }: NewClientModalProps) => {
   const [loading, setLoading] = useState(false);
   const [phoneError, setPhoneError] = useState('');
-  const [formData, setFormData] = useState<Omit<Client, 'id' | 'bono_estado'>>({
-    nombre: '',
-    email: '',
-    telefono: '',
-    fecha_nacimiento: '',
-    bono_fecha_vencimiento: '', // auto-calculado, no editable
-    notas: '',
-  });
+  const [formData, setFormData] = useState(buildFormData(initialData));
+  
+  // Sincronización de props a estado (Patrón React 19)
+  const currentKey = `${isOpen}-${initialData?.id ?? 'new'}`;
+  const [prevKey, setPrevKey] = useState(currentKey);
 
-  useEffect(() => {
-    if (initialData) {
-      setFormData({
-        nombre: initialData.nombre,
-        email: initialData.email,
-        telefono: initialData.telefono,
-        fecha_nacimiento: initialData.fecha_nacimiento,
-        bono_fecha_vencimiento: '', // auto-calculado, no editable
-        notas: initialData.notas || '',
-      });
-    } else {
-      setFormData({
-        nombre: '',
-        email: '',
-        telefono: '',
-        fecha_nacimiento: '',
-        bono_fecha_vencimiento: '', // auto-calculado, no editable
-        notas: '',
-      });
-    }
+  if (currentKey !== prevKey) {
+    setPrevKey(currentKey);
+    setFormData(buildFormData(initialData));
     setPhoneError('');
-  }, [initialData, isOpen]);
+  }
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>

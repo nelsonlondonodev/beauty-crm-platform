@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 interface UserMenuTriggerProps {
   initials: string;
@@ -9,10 +9,12 @@ interface UserMenuTriggerProps {
 
 const UserMenuTrigger = ({ initials, avatarUrl, onClick }: UserMenuTriggerProps) => {
   const [imgError, setImgError] = useState(false);
+  const [prevAvatarUrl, setPrevAvatarUrl] = useState(avatarUrl);
 
-  useEffect(() => {
+  if (avatarUrl !== prevAvatarUrl) {
+    setPrevAvatarUrl(avatarUrl);
     setImgError(false);
-  }, [avatarUrl]);
+  }
 
   return (
     <button

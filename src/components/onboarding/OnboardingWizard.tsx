@@ -74,7 +74,7 @@ const OnboardingWizard = ({ onComplete }: OnboardingWizardProps) => {
       // Close Wizard
       onComplete();
 
-    } catch (error) {
+    } catch {
       toast.error('Ocurrió un error al guardar tu configuración. Intenta nuevamente.');
     } finally {
       setLoading(false);

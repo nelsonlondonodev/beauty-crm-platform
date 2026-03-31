@@ -7,7 +7,7 @@ import type {
   ClientBonusDisplay,
   ClientDbRow,
   BonoDbRow,
-  Factura,
+  FacturaWithItems,
 } from '../types';
 import { addMonths } from 'date-fns';
 import { logger } from '../lib/logger';
@@ -130,13 +130,13 @@ export const getClientById = async (id: string): Promise<Client> => {
   return mapDbToClient(data);
 };
 
-export const getClientFinancialHistory = async (clientId: string): Promise<Factura[]> => {
+export const getClientFinancialHistory = async (clientId: string): Promise<FacturaWithItems[]> => {
   const { data, error } = await fetchWithTimeout(
     supabase
       .from('facturas')
       .select('*, factura_items(*)')
       .eq('cliente_id', clientId)
-      .order('fecha_venta', { ascending: false }) as unknown as Promise<{ data: Factura[] | null; error: PostgrestError | null }>
+      .order('fecha_venta', { ascending: false }) as unknown as Promise<{ data: FacturaWithItems[] | null; error: PostgrestError | null }>
   );
 
   if (error) {

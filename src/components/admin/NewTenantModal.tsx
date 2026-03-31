@@ -51,7 +51,7 @@ const NewTenantModal = ({ isOpen, onClose, onSuccess }: NewTenantModalProps) => 
         setError(errorMsg);
         toast.error(errorMsg);
       }
-    } catch (err) {
+    } catch {
       setError('Error de conexión con el servidor.');
       toast.error('Error de conexión.');
     } finally {

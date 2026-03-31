@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -108,10 +108,12 @@ const Sidebar = () => {
   const { role } = useAuth();
   const { config } = useTenant();
   const [imgError, setImgError] = useState(false);
+  const [prevLogoUrl, setPrevLogoUrl] = useState(config.logoUrl);
 
-  useEffect(() => {
+  if (config.logoUrl !== prevLogoUrl) {
+    setPrevLogoUrl(config.logoUrl);
     setImgError(false);
-  }, [config.logoUrl]);
+  }
 
   const filteredNavItems = NAV_ITEMS.filter((item) =>
     hasRequiredRole(role, item.allowedRoles)

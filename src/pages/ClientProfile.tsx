@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, User, Mail, Phone, Calendar, Receipt } from 'lucide-react';
 import { getClientById, getClientFinancialHistory } from '../services/clientService';
-import type { Client, Factura } from '../types';
+import type { Client, FacturaWithItems } from '../types';
 import { formatDate, getStatusColor, getStatusLabel } from '../lib/formatters';
 import { cn } from '../lib/utils';
 import { toast } from 'sonner';
@@ -11,7 +11,7 @@ const ClientProfile = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [client, setClient] = useState<Client | null>(null);
-  const [invoices, setInvoices] = useState<Factura[]>([]);
+  const [invoices, setInvoices] = useState<FacturaWithItems[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingNotes, setEditingNotes] = useState(false);
   const [notesValue, setNotesValue] = useState('');
@@ -28,7 +28,7 @@ const ClientProfile = () => {
         setClient(clientData);
         setNotesValue(clientData.notas || '');
         setInvoices(invoicesData);
-      } catch (error) {
+      } catch {
         toast.error('Error al cargar el perfil del cliente');
         navigate('/clients');
       } finally {
@@ -48,7 +48,7 @@ const ClientProfile = () => {
       setClient(updated);
       setEditingNotes(false);
       toast.success('Ficha técnica actualizada');
-    } catch (error) {
+    } catch {
       toast.error('Error al guardar las notas');
     } finally {
       setIsSavingNotes(false);
@@ -78,8 +78,8 @@ const ClientProfile = () => {
   const totalVisits = invoices.length;
 
   // Extraer servicios únicos del historial (La Huella)
-  const allServices = invoices.flatMap(inv => 
-    (inv as any).factura_items?.map((item: any) => item.descripcion) || []
+  const allServices: string[] = invoices.flatMap(inv => 
+    inv.factura_items?.map(item => item.descripcion) ?? []
   );
   const serviceCounts = allServices.reduce((acc: Record<string, number>, s: string) => {
     acc[s] = (acc[s] || 0) + 1;
@@ -323,7 +323,7 @@ const ClientProfile = () => {
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex flex-wrap gap-1">
-                            {(inv as any).factura_items?.map((item: any, idx: number) => (
+                            {inv.factura_items?.map((item, idx) => (
                               <span key={idx} className="text-[11px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
                                 {item.descripcion}
                               </span>

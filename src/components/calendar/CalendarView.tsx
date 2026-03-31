@@ -6,7 +6,7 @@ import interactionPlugin from '@fullcalendar/interaction';
 import resourceTimeGridPlugin from '@fullcalendar/resource-timegrid';
 import type { EventClickArg, DateSelectArg, DatesSetArg } from '@fullcalendar/core';
 import type { CalendarEvent, Empleado } from '../../types';
-import { getStaffHexColor } from './StaffFilter';
+import { getStaffHexColor } from './staffColors';
 import './calendarStyles.css';
 
 // ── Types ───────────────────────────────────────────────────────────────────
