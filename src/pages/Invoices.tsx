@@ -13,14 +13,14 @@ const Invoices = () => {
 
   useEffect(() => {
     const fetchInvoices = async () => {
-      try {
-        const data = await getFacturas();
-        setInvoices(data);
-      } catch {
-        toast.error('Error al cargar el historial de facturas');
-      } finally {
-        setLoading(false);
+      setLoading(true);
+      const res = await getFacturas();
+      if (res.success) {
+        setInvoices(res.data);
+      } else {
+        toast.error(res.error || 'Error al cargar el historial de facturas');
       }
+      setLoading(false);
     };
     fetchInvoices();
   }, []);
