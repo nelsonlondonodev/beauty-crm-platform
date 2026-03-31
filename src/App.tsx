@@ -21,6 +21,7 @@ const Login = lazy(() => import('./pages/Login'));
 const Invoices = lazy(() => import('./pages/Invoices'));
 const StaffSales = lazy(() => import('./pages/StaffSales'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+const N8nTestLanding = lazy(() => import('./pages/N8nTestLanding'));
 
 // ── Shared Loading Component ────────────────────────────────────────────────
 const PageLoader = () => (
@@ -35,6 +36,14 @@ function App() {
       <AuthProvider>
         <TenantProvider>
           <Routes>
+            <Route
+              path="/automation-test"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <N8nTestLanding />
+                </Suspense>
+              }
+            />
             <Route
               path="/login"
               element={
