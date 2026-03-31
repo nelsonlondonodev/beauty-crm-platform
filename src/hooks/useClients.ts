@@ -23,72 +23,46 @@ export const useClients = () => {
   useCrmEvent(CRM_EVENTS.BONO_REDEEMED, () => fetchClients());
 
   const fetchClients = async () => {
-    try {
-      setLoading(true);
-      const data = await getClients();
-      setClients(data);
+    setLoading(true);
+    const res = await getClients();
+    if (res.success) {
+      setClients(res.data);
       setError(null);
-    } catch (err) {
-      logger.error('Error fetching clients', err, 'useClients');
-      setError(
-        err instanceof Error
-          ? err.message
-          : 'Error desconocido al cargar clientes'
-      );
-    } finally {
-      setLoading(false);
+    } else {
+      logger.error('Error fetching clients', res.error, 'useClients');
+      setError(res.error);
     }
+    setLoading(false);
   };
 
   const addClient = async (newClient: Omit<Client, 'id' | 'bono_estado'>) => {
-    try {
-      const data = await createClient(newClient);
-      setClients((prev) => [data, ...prev]);
-      return { success: true, data };
-    } catch (err) {
-      logger.error('Error adding client', err, 'useClients');
-      return {
-        success: false,
-        error:
-          err instanceof Error
-            ? err.message
-            : 'Error desconocido al crear cliente',
-      };
+    const res = await createClient(newClient);
+    if (res.success) {
+      setClients((prev) => [res.data, ...prev]);
+    } else {
+      logger.error('Error adding client', res.error, 'useClients');
     }
+    return res;
   };
 
   const updateClient = async (id: string, updates: Partial<Client>) => {
-    try {
-      const data = await updateClientService(id, updates);
-      setClients((prev) => prev.map((c) => (c.id === id ? data : c)));
-      return { success: true, data };
-    } catch (err) {
-      logger.error('Error updating client', err, 'useClients');
-      return {
-        success: false,
-        error:
-          err instanceof Error
-            ? err.message
-            : 'Error desconocido al actualizar cliente',
-      };
+    const res = await updateClientService(id, updates);
+    if (res.success) {
+      setClients((prev) => prev.map((c) => (c.id === id ? res.data : c)));
+    } else {
+      logger.error('Error updating client', res.error, 'useClients');
     }
+    return res;
   };
 
   const deleteClient = async (id: string) => {
-    try {
-      await deleteClientService(id);
+    const res = await deleteClientService(id);
+    if (res.success) {
       setClients((prev) => prev.filter((c) => c.id !== id));
-      return { success: true };
-    } catch (err) {
-      logger.error('Error deleting client', err, 'useClients');
-      return {
-        success: false,
-        error:
-          err instanceof Error
-            ? err.message
-            : 'Error desconocido al eliminar cliente',
-      };
+    } else {
+      logger.error('Error deleting client', res.error, 'useClients');
     }
+    return res;
   };
 
   return {
