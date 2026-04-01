@@ -304,6 +304,27 @@ Hemos establecido un entorno de experimentación seguro para flujos de fidelizac
 - **Refactorización de Servicios**: Estandarización de `clientService`, `billingService`, `appointmentService` y `dashboardService` bajo TypeScript estricto, eliminando tipos `any` y aplicando `fetchWithTimeout` para máxima resiliencia.
 - **Auditoría n8n**: Repositorio de flujos (`n8n_workflows/`) actualizado con la lógica de segregación masiva para escalar a múltiples salones.
 
+## 🏗️ Entorno de Desarrollo Local (Supabase CLI)
+
+A partir de abril de 2026, el proyecto soporta desarrollo 100% local mediante Docker y Supabase CLI. Esto permite trabajar sin conexión a internet y sin riesgo de afectar los datos de producción.
+
+### Requisitos:
+- **Docker Desktop**: Debe estar instalado y corriendo.
+- **Supabase CLI**: Instalado en el sistema (`brew install supabase/tap/supabase`).
+
+### Comandos Principales:
+- `supabase start`: Arranca todos los contenedores locales (DB, Auth, API, Studio).
+- `supabase stop`: Detiene el entorno local.
+- `supabase db reset`: Reinicia la base de datos local y aplica todas las migraciones.
+- `supabase db pull`: Sincroniza la estructura de la base de datos remota con el entorno local.
+
+### URLs Locales:
+- **Studio (Panel de Control)**: [http://127.0.0.1:54323](http://127.0.0.1:54323)
+- **API URL**: [http://127.0.0.1:54321](http://127.0.0.1:54321)
+- **Mailpit (Emails de prueba)**: [http://127.0.0.1:54324](http://127.0.0.1:54324)
+
+---
+
 ## Comandos
 
 -   `npm install`: Instalar dependencias
@@ -366,3 +387,27 @@ Este proyecto utiliza una separación estricta para garantizar la estabilidad de
     en el SQL Editor de Supabase (Producción) para añadir el soporte de la ficha técnica.
  2. **Asignación de Propietario (Pendiente):** Ejecutar `database/scripts/assign_owner_narbos.sql` una vez que el usuario final haya realizado su primer login.
  3. **Refactorización de Deuda Técnica:** Fragmentar hooks complejos (e.j., `src/hooks/useBilling.ts`) siguiendo el patrón modular aplicado hoy en fidelización.
+
+ ---
+
+ ## 🚀 Estado de la Sesión (2026-04-01): Desacople de Entornos y Backend Local (MVP 1.2)
+
+ ### Logros (Sprint de Productividad y DevOps):
+ 1. **Backend Local (Dockerized)**: 
+    - Implementación exitosa de **Supabase CLI** en el flujo de trabajo.
+    - Configuración de contenedores locales para base de datos PostgreSQL, Auth, y Storage.
+ 2. **Sincronización de Esquema (Schema Pull)**:
+    - Clonación de la arquitectura de producción (`Fidelizacion Narbo's Pro`) al entorno local mediante migraciones automáticas.
+    - Generación de la migración `remote_schema` que garantiza paridad total entre entornos.
+ 3. **Aislamiento de Configuración**:
+    - Actualización de `.env.development` para apuntar al proxy local (`127.0.0.1:54321`).
+    - Protección de datos de producción durante el ciclo de desarrollo activo.
+ 4. **Onboarding Local**:
+    - Creación de usuario administrativo de prueba (`admin@test.com`) y asignación manual de roles vía SQL Editor local.
+    - Documentación completa del flujo en el README para futuros contribuidores.
+
+ ### ⚠️ Procedimiento de Inicio/Cierre:
+ 1. **Para empezar**: Abrir Docker Desktop y ejecutar `supabase start`.
+ 2. **Para terminar**: Ejecutar `supabase stop` para liberar recursos del Mac.
+ 3. **Importante**: No subir archivos `.env` modificados al repositorio remoto.
+
